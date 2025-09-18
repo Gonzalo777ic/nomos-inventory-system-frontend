@@ -1,13 +1,14 @@
+// client/pages/Login.tsx
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useAuthStore } from "../store/auth";
-import { cn } from "../lib/utils";
 
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
-  const [email, setEmail] = useState("");
+  const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +18,8 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      await login({ email, password });
+      // Envía la credencial (ya sea username o email) y la contraseña al backend
+      await login({ username: credential, password });
       navigate("/app", { replace: true });
     } catch (err: any) {
       setError(err?.message || "Error de autenticación");
@@ -63,16 +65,16 @@ export default function Login() {
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
+              <label className="block text-sm font-medium mb-1">Usuario o correo electrónico</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={credential}
+                onChange={(e) => setCredential(e.target.value)}
                 className={cn(
                   "w-full rounded-md border bg-background px-3 py-2 outline-none",
                   "focus:ring-2 focus:ring-emerald-600/40 focus:border-emerald-600/60"
                 )}
-                placeholder="tu@correo.com"
+                placeholder="usuario@dominio.com o nombre_de_usuario"
                 required
               />
             </div>
