@@ -1,32 +1,48 @@
-import { create } from "zustand";
 import axios from "axios";
+import { create } from "zustand";
 
-type User = { id: string; email: string };
-
-type AuthState = {
-  user: User | null;
+// Define la interfaz de tu estado de autenticación
+interface AuthState {
   token: string | null;
+  user: any; // O el tipo de dato de tu usuario
   isAuthenticated: boolean;
-  login: (input: { email: string; password: string }) => Promise<void>;
+  login: (credentials: { username: string; password: string }) => Promise<void>;
   logout: () => void;
-};
+}
 
 export const useAuthStore = create<AuthState>((set) => ({
+  token: localStorage.getItem("nomos_token") || null,
   user: null,
-  token: localStorage.getItem("nomos_token"),
   isAuthenticated: !!localStorage.getItem("nomos_token"),
-  async login({ email, password }) {
-    // Try hitting a ping endpoint just to exercise axios, ignore errors
+  login: async (credentials) => {
     try {
-      await axios.get("/api/ping");
-    } catch {}
-    // Mock success
-    const token = "demo-token";
-    localStorage.setItem("nomos_token", token);
-    set({ user: { id: "u1", email }, token, isAuthenticated: true });
+      // Usamos la URL completa para asegurar que la petición se envíe al puerto y ruta correctos.
+      const response = await axios.post("http://localhost:8080/api/auth/login", credentials);
+      const token = response.data; // La respuesta es directamente el token, no un objeto con una propiedad 'token'
+
+      // Agregamos un console.log para mostrar el usuario y el token
+      console.log("Usuario autenticado:", credentials.username);
+      console.log("Token JWT:", token);
+
+      // Guarda el token en localStorage
+      localStorage.setItem("nomos_token", token);
+
+      // Actualiza el estado de la aplicación
+      set({
+        token,
+        isAuthenticated: true,
+      });
+
+    } catch (error) {
+      console.error("Error en el login:", error);
+      // Re-lanza el error original para que el componente Login.tsx lo capture.
+      // Esto nos dará un mensaje de error más específico en la consola.
+      throw error;
+    }
   },
-  logout() {
+  logout: () => {
+    // Limpia el token al cerrar sesión
     localStorage.removeItem("nomos_token");
-    set({ user: null, token: null, isAuthenticated: false });
+    set({ token: null, user: null, isAuthenticated: false });
   },
 }));

@@ -1,4 +1,5 @@
-import axios from "axios";
+// http.ts
+import axios, { AxiosRequestHeaders } from "axios";
 
 export const http = axios.create({
   baseURL: "/api",
@@ -7,8 +8,10 @@ export const http = axios.create({
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem("nomos_token");
   if (token) {
-    config.headers = config.headers || {};
-    (config.headers as any)["Authorization"] = `Bearer ${token}`;
+    if (!config.headers) {
+      config.headers = {} as AxiosRequestHeaders;
+    }
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
