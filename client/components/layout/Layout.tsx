@@ -1,3 +1,4 @@
+// layout/Layout.tsx
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { ThemeToggle } from "./ThemeToggle";
