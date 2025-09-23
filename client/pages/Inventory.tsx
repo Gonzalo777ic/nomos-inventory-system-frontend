@@ -1,3 +1,4 @@
+// inventory page with product listing and filtering
 import { useEffect, useState } from "react";
 import { listProducts } from "../api/services/products";
 import { Product } from "../types";

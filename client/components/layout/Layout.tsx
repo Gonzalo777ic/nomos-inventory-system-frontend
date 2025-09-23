@@ -51,7 +51,6 @@ function NavItem({ to, label }: { to: string; label: string }) {
     </NavLink>
   );
 }
-
 function Header() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
