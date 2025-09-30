@@ -31,6 +31,14 @@ export default defineConfig(({ mode }) => ({
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
+  test: { // <-- AÑADE ESTE BLOQUE DE CONFIGURACIÓN
+    globals: true,
+    environment: 'jsdom', // <-- ESTO ES LO CRUCIAL
+    setupFiles: './setupTests.ts', // Opcional, si quieres configurar @testing-library/jest-dom
+    css: false, // Ignorar CSS para pruebas más rápidas
+  }
+
+
 }));
 
 function expressPlugin(): Plugin {

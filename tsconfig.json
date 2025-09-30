@@ -30,7 +30,13 @@
     "paths": {
       "@/*": ["./client/*"],
       "@shared/*": ["./shared/*"]
-    }
+    },
+
+    /* TIPADO PARA PRUEBAS (Añadido) */
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
     "client/**/*",
