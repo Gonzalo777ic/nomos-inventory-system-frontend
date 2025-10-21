@@ -1,20 +1,13 @@
-// http.ts
 import axios, { AxiosRequestHeaders } from "axios";
 
+// ⚠️ Usaremos el puerto completo en el baseURL para mayor claridad.
+// Ahora apuntando al puerto 8082, según la ruta de Postman confirmada.
 export const http = axios.create({
-  baseURL: "/api",
+  baseURL: 'http://localhost:8082/api', // Corregido: usando el puerto 8082
 });
 
-http.interceptors.request.use((config) => {
-  const token = localStorage.getItem("nomos_token");
-  if (token) {
-    if (!config.headers) {
-      config.headers = {} as AxiosRequestHeaders;
-    }
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ❌ Eliminamos el interceptor de token aquí. 
+// La lógica de Token (Auth0/Zustand) ahora solo reside en AuthAxiosProvider.tsx.
 
 export async function tryRequest<T>(fn: () => Promise<{ data: T }>, fallback: () => Promise<T>): Promise<T> {
   try {

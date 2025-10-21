@@ -1,7 +1,7 @@
-import { listProducts } from "./products";
+import { getProducts, Product } from "./products"; // <-- CORRECCIÓN: Usar getProducts
 
 export async function getDashboardData() {
-  const products = await listProducts();
+  const products = await getProducts(); // <-- CORRECCIÓN: Usar getProducts()
   const salesToday = Math.floor(10 + Math.random() * 20);
   const revenueToday = Math.round(salesToday * 15.75 * 100) / 100;
   const salesTrend = Array.from({ length: 14 }).map((_, i) => ({
@@ -12,6 +12,7 @@ export async function getDashboardData() {
 }
 
 export async function getLowStockProducts() {
-  const products = await listProducts();
-  return products.filter((p) => p.stock <= 5).slice(0, 5);
+  const products = await getProducts(); // <-- CORRECCIÓN: Usar getProducts()
+  // Asumiendo que `Product` ahora tiene `stock` y `id`
+  return products.filter((p: Product) => (p.stock || 0) <= 5).slice(0, 5);
 }
