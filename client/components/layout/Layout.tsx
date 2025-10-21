@@ -1,26 +1,31 @@
 // layout/Layout.tsx
+
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { ThemeToggle } from "./ThemeToggle";
+import React from "react"; 
 
+// 🛑 Layout ahora NO acepta children. Usa <Outlet />
 export default function Layout() {
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr] lg:grid-cols-[280px_1fr]">
-      <aside className="hidden lg:block border-r bg-sidebar p-4">
+      <aside className="hidden lg:block border-r bg-gray-100 p-4 dark:bg-gray-900">
         <Brand />
         <nav className="mt-6 space-y-1 text-sm">
-          <NavItem to="/app/dashboard" label="Dashboard" />
-          <NavItem to="/app/inventory" label="Inventario" />
-          <NavItem to="/app/sales" label="Ventas" />
-          <NavItem to="/app/reports" label="Reportes" />
-          <NavItem to="/app/alerts" label="Alertas" />
-          <NavItem to="/app/suppliers" label="Proveedores" />
+          {/* Usar rutas relativas si no estás en un layout anidado */}
+          <NavItem to="/dashboard" label="Dashboard" /> 
+          <NavItem to="/inventory" label="Inventario" />
+          <NavItem to="/sales" label="Ventas" />
+          <NavItem to="/reports" label="Reportes" />
+          <NavItem to="/alerts" label="Alertas" />
+          <NavItem to="/suppliers" label="Proveedores" />
         </nav>
       </aside>
       <div className="flex flex-col">
         <Header />
-        <main className="p-4 md:p-6">
-          <Outlet />
+        <main className="flex-1 p-4 md:p-6 bg-gray-50 dark:bg-gray-800">
+          {/* 🎯 CORRECCIÓN: Usar <Outlet /> para renderizar la ruta hija (Dashboard, Inventory, etc.) */}
+          <Outlet /> 
         </main>
       </div>
     </div>
@@ -29,7 +34,7 @@ export default function Layout() {
 
 function Brand() {
   return (
-    <div className="flex items-center gap-3 text-lg font-semibold">
+    <div className="flex items-center gap-3 text-lg font-semibold text-gray-900 dark:text-white">
       <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white">
         N
       </span>
@@ -43,7 +48,11 @@ function NavItem({ to, label }: { to: string; label: string }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-2 rounded-md px-3 py-2 hover:bg-accent ${isActive ? "bg-accent text-accent-foreground" : "text-foreground/90"}`
+        `flex items-center gap-2 rounded-md px-3 py-2 transition-colors ${
+            isActive 
+                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" 
+                : "text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
+        }`
       }
       end
     >
@@ -51,12 +60,13 @@ function NavItem({ to, label }: { to: string; label: string }) {
     </NavLink>
   );
 }
+
 function Header() {
   const navigate = useNavigate();
-  const user = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user); 
   const logout = useAuthStore((s) => s.logout);
   return (
-    <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-900/80 dark:border-gray-700">
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <div className="lg:hidden">
           <Brand />
@@ -64,13 +74,13 @@ function Header() {
         <div className="flex items-center gap-2 ml-auto">
           <ThemeToggle />
           <div className="hidden sm:flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">{user?.email}</span>
+            <span className="text-gray-600 dark:text-gray-400 font-medium">{user?.email || "Usuario Desconocido"}</span>
             <button
               onClick={() => {
-                logout();
+                logout(); 
                 navigate("/login", { replace: true });
               }}
-              className="rounded-md border px-3 py-1"
+              className="rounded-md border border-gray-300 px-3 py-1 bg-white text-gray-800 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 transition-colors"
             >
               Salir
             </button>

@@ -1,48 +1,94 @@
-import axios from "axios";
-import { create } from "zustand";
+import { create } from 'zustand';
 
-// Define la interfaz de tu estado de autenticación
+// Definición del tipo de la función de logout real (de Auth0)
+type Auth0LogoutFunction = (options?: { logoutParams?: { returnTo?: string } }) => void;
+
 interface AuthState {
-  token: string | null;
-  user: any; // O el tipo de dato de tu usuario
-  isAuthenticated: boolean;
-  login: (credentials: { username: string; password: string }) => Promise<void>;
+  // El token de acceso
+  token: string | null; 
+  // El objeto user de Auth0
+  user: any | null; 
+  // Indica si el estado de autenticación (isAuthenticated) fue determinado
+  isAuthReady: boolean; 
+  // Sincronizado con useAuth0
+  isAuthenticated: boolean; 
+  
+  // 🛑 NUEVO: Almacena la función de logout de Auth0 inyectada desde useAuth.tsx
+  auth0LogoutFn: Auth0LogoutFunction | null;
+
+  // Funciones (Acciones)
+  
+  // 🛑 EXISTENTE: Función para sincronizar con los resultados básicos de useAuth0
+  syncAuth: (isAuthenticated: boolean, user: any | undefined) => void; 
+  // 🛑 EXISTENTE: Función para guardar el token
+  setToken: (token: string) => void;
+  
+  // 🛑 NUEVO: Función para establecer el estado de listo (usado en useAuth)
+  setIsAuthReady: (isReady: boolean) => void;
+  // 🛑 NUEVO: Función para establecer el objeto user (usado en useAuth.tsx para limpiar o sincronizar)
+  setUser: (user: any | null) => void;
+  // 🛑 NUEVO: Función para inyectar el logout de Auth0
+  setLogoutFunction: (fn: Auth0LogoutFunction) => void;
+
+  // 🛑 IMPLEMENTADO: Función wrapper de logout, usada por componentes (e.g., Layout.tsx)
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  token: localStorage.getItem("nomos_token") || null,
+export const useAuthStore = create<AuthState>((set, get) => ({
+  isAuthenticated: false,
   user: null,
-  isAuthenticated: !!localStorage.getItem("nomos_token"),
-  login: async (credentials) => {
-    try {
-      // Usamos la URL completa para asegurar que la petición se envíe al puerto y ruta correctos.
-      const response = await axios.post("http://localhost:8080/api/auth/login", credentials);
-      const token = response.data; // La respuesta es directamente el token, no un objeto con una propiedad 'token'
+  token: null,
+  isAuthReady: false,
+  auth0LogoutFn: null, // Inicialmente nulo
 
-      // Agregamos un console.log para mostrar el usuario y el token
-      console.log("Usuario autenticado:", credentials.username);
-      console.log("Token JWT:", token);
+  // Sincroniza el estado de Auth0 con Zustand
+  syncAuth: (isAuthenticated, user) => {
+    set({ 
+      isAuthenticated, 
+      user: user || null, 
+      isAuthReady: true 
+    });
+  },
 
-      // Guarda el token en localStorage
-      localStorage.setItem("nomos_token", token);
+  setToken: (token) => {
+    set({ token });
+  },
 
-      // Actualiza el estado de la aplicación
-      set({
-        token,
-        isAuthenticated: true,
+  // 🛑 NUEVO: Implementación de setIsAuthReady
+  setIsAuthReady: (isReady) => {
+    set({ isAuthReady: isReady });
+  },
+
+  // 🛑 NUEVO: Implementación de setUser
+  setUser: (user) => {
+    set({ user: user });
+  },
+  
+  // 🛑 NUEVO: Implementación de setLogoutFunction
+  setLogoutFunction: (fn) => {
+    set({ auth0LogoutFn: fn });
+  },
+
+  // 🛑 NUEVO: Implementación de logout (llama a la función inyectada)
+  logout: () => {
+    // Llama a la función de Auth0 que fue inyectada
+    const auth0Logout = get().auth0LogoutFn;
+    if (auth0Logout) {
+      auth0Logout({
+        logoutParams: {
+          returnTo: window.location.origin
+        }
       });
-
-    } catch (error) {
-      console.error("Error en el login:", error);
-      // Re-lanza el error original para que el componente Login.tsx lo capture.
-      // Esto nos dará un mensaje de error más específico en la consola.
-      throw error;
+      // Limpia el estado localmente
+      set({ 
+        isAuthenticated: false, 
+        user: null, 
+        token: null,
+        isAuthReady: true // Mantiene el ready state para evitar saltos
+      });
+    } else {
+      console.error("Auth0 logout function not initialized in store.");
     }
   },
-  logout: () => {
-    // Limpia el token al cerrar sesión
-    localStorage.removeItem("nomos_token");
-    set({ token: null, user: null, isAuthenticated: false });
-  },
+
 }));
