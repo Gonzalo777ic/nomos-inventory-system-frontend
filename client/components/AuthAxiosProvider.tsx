@@ -1,37 +1,53 @@
-// client/components/AuthAxiosProvider.tsx (Crear/Copiar este archivo)
-
 import React, { useEffect } from 'react';
-import axios from 'axios'; // Asumo que usas axios, si usas fetch, adapta http.ts
-import { useAuth } from '../hooks/useAuth'; 
-import { useAuthStore } from '../store/auth'; // Asegúrate de que esta ruta sea correcta
+import { useAuthStore } from '../store/auth';
+import { http } from '../api/http'; // Asegúrate que esta es tu instancia de Axios
 
-const AuthAxiosProvider = ({ children }: { children: React.ReactNode }) => {
-    // Obtener la función para renovar el token y el estado de la tienda
-    const { getAuthToken } = useAuth();
-    const { isAuthReady } = useAuthStore(); 
-
+/**
+ * Componente que intercepta todas las peticiones de Axios y adjunta 
+ * el token JWT del usuario, necesario para acceder a la API de Spring Boot.
+ */
+const AuthAxiosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    // Obtenemos el token del store de Zustand (sincronizado desde Auth0)
+    const token = useAuthStore(state => state.token);
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+    
     useEffect(() => {
-        if (!isAuthReady) return;
+        console.log("[AXIOS] Configurando Interceptor. Token actual:", token ? "Presente" : "Ausente");
 
-        // 1. Crear el interceptor de peticiones
-        const requestInterceptor = axios.interceptors.request.use(async (config) => {
-            // ✅ Solo añade el token a las llamadas a tu propio backend
-            if (config.url?.startsWith('http://localhost:8082') || config.url?.startsWith('/api')) {
-                const result = await getAuthToken(); // Obtener el token actualizado
-                if (result?.token) {
-                    config.headers.Authorization = `Bearer ${result.token}`;
+        // 1. Elimina cualquier interceptor existente antes de añadir uno nuevo
+        // Esto evita múltiples interceptores si el componente se renderiza dos veces.
+        http.interceptors.request.clear();
+
+        if (isAuthenticated && token) {
+            // 2. Añade el interceptor SÓLO si hay un usuario autenticado y un token.
+            const interceptor = http.interceptors.request.use(
+                (config) => {
+                    // Si la cabecera 'Authorization' no está definida, la establecemos.
+                    if (!config.headers.Authorization) {
+                        config.headers.Authorization = `Bearer ${token}`;
+                        console.log(`[AXIOS] 🔑 Adjuntando Token JWT a: ${config.url}`);
+                    }
+                    return config;
+                },
+                (error) => {
+                    // Manejo de errores de petición (ej. antes de ser enviada)
+                    return Promise.reject(error);
                 }
-            }
-            return config;
-        }, (error) => {
-            return Promise.reject(error);
-        });
+            );
 
-        // 2. Limpiar el interceptor al desmontar el componente
-        return () => {
-            axios.interceptors.request.eject(requestInterceptor);
-        };
-    }, [isAuthReady, getAuthToken]);
+            // 3. Función de limpieza para remover el interceptor cuando el componente se desmonte
+            return () => {
+                http.interceptors.request.eject(interceptor);
+                console.log("[AXIOS] 🧹 Interceptor removido.");
+            };
+        }
+        
+        // Si no hay token o no está autenticado, no añadimos el interceptor.
+        // Esto permite que peticiones a rutas públicas sigan funcionando, aunque aquí todas
+        // las rutas de la API están protegidas.
+        return () => {};
+
+    }, [token, isAuthenticated]); // Se ejecuta cada vez que el token o el estado de autenticación cambia
 
     return <>{children}</>;
 };

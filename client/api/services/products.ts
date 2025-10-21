@@ -1,86 +1,32 @@
-import type { Product } from "../../types";
-import { tryRequest } from "../http";
-
-const LS_KEY = "nomos_products";
-
-function seed(): Product[] {
-  //const exist = localStorage.getItem(LS_KEY);
-  //if (exist) return JSON.parse(exist);
-  const data: Product[] = [
-    { id: "p1", title: "1", author: "1", isbn: "9780156013987", price: 39.9, stock: 8, category: "Infantil" },
-    { id: "p2", title: "2", author: "2", isbn: "9780307474728", price: 59.9, stock: 3, category: "Novela" },
-    { id: "p3", title: "3", author: "3", isbn: "9780062316110", price: 72.5, stock: 15, category: "Ensayo" },
-  ];
-  localStorage.setItem(LS_KEY, JSON.stringify(data));
-  return data;
+import { http } from '../http';
+// 🎯 Definición de la Interfaz del Producto (Asegúrate de que esta interfaz coincida con la del modelo Java)
+export interface Product {
+    id?: number; // Opcional para creación
+    sku: string;
+    name: string;
+    author: string;
+    price: number;
+    stock: number;
+    imageUrl: string; // Coincide con el backend
+    supplier: string;
 }
 
-function read(): Product[] {
-  return JSON.parse(localStorage.getItem(LS_KEY) || "[]");
-}
+const API_BASE_URL = '/inventory/products';
 
-function write(data: Product[]) {
-  localStorage.setItem(LS_KEY, JSON.stringify(data));
-}
+// 1. Obtener lista de productos (GET)
+export const getProducts = async (): Promise<Product[]> => {
+    // Si la tabla no usa paginación todavía, puedes hacer un GET simple
+    const response = await http.get<Product[]>(API_BASE_URL);
+    return response.data;
+};
 
-export async function listProducts(): Promise<Product[]> {
-  return tryRequest(
-    async () => {
-      // Example real endpoint
-      throw new Error("no-backend");
-    },
-    async () => seed(),
-  );
-}
+// 2. Crear un nuevo producto (POST)
+export const createProduct = async (productData: Omit<Product, 'id'>): Promise<Product> => {
+    // En el futuro, la subida de imagen se manejaría aquí antes de enviar el JSON,
+    // o el backend esperaría un DTO con la imagen codificada o un multipart/form-data.
+    // Por ahora, asumimos que imageUrl es una URL simple o se gestiona automáticamente.
+    const response = await http.post<Product>(API_BASE_URL, productData);
+    return response.data;
+};
 
-export async function getProduct(id: string): Promise<Product | undefined> {
-  return tryRequest(
-    async () => {
-      throw new Error("no-backend");
-    },
-    async () => read().find((p) => p.id === id),
-  );
-}
-
-export async function createProduct(input: Omit<Product, "id">): Promise<Product> {
-  return tryRequest(
-    async () => {
-      throw new Error("no-backend");
-    },
-    async () => {
-      const data = read();
-      const item: Product = { id: crypto.randomUUID(), ...input };
-      data.push(item);
-      write(data);
-      return item;
-    },
-  );
-}
-
-export async function updateProduct(id: string, input: Partial<Product>): Promise<Product> {
-  return tryRequest(
-    async () => {
-      throw new Error("no-backend");
-    },
-    async () => {
-      const data = read();
-      const idx = data.findIndex((p) => p.id === id);
-      if (idx === -1) throw new Error("Producto no encontrado");
-      data[idx] = { ...data[idx], ...input };
-      write(data);
-      return data[idx];
-    },
-  );
-}
-
-export async function deleteProduct(id: string): Promise<void> {
-  return tryRequest(
-    async () => {
-      throw new Error("no-backend");
-    },
-    async () => {
-      const data = read().filter((p) => p.id !== id);
-      write(data);
-    },
-  );
-}
+// Otras funciones CRUD (UPDATE, DELETE) irán aquí...

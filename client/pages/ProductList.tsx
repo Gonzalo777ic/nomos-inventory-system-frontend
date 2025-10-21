@@ -1,21 +1,17 @@
-// Usaremos la lógica moderna de ProductList.tsx, renombrando temporalmente
-// para que el componente exportado sea `Inventory` si así lo usa tu router.
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Pencil, Trash2, Loader2 } from 'lucide-react';
+import ProductForm from './ProductForm'; // Importar el formulario
+import { Product, getProducts } from '../api/services/products'; // Importar la función de obtener productos
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // Usaremos React Query para manejo de datos
 
-import React, { useState } from 'react';
-import { Plus, Search, Pencil, Trash2, Loader2, BookOpen } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query'; 
+// 🎯 Definición de la Interfaz del Producto (copiada del servicio)
+// Asumo que tienes una definición global en client/types/index.ts, pero la mantenemos aquí por ahora
+// Deberías mover esta interfaz a client/types/index.ts
+// interface Product { ... } // Reutilizar la interfaz del ProductForm
 
-// Importamos el Formulario que creamos antes
-import ProductForm from './ProductForm'; 
-
-// Importamos la interfaz y la función del servicio
-import { Product, getProducts } from '../api/services/products'; 
-
-// 🎯 Componente principal para la gestión del inventario
-const Inventory: React.FC = () => {
+const ProductList: React.FC = () => {
     const queryClient = useQueryClient();
     const [isFormOpen, setIsFormOpen] = useState(false); // Controlar visibilidad del formulario/modal
-    const [query, setQuery] = useState(""); // Estado para la búsqueda local
 
     // Obtener productos usando React Query
     const { data: products, isLoading, isError, error } = useQuery<Product[]>({
@@ -29,23 +25,14 @@ const Inventory: React.FC = () => {
         queryClient.invalidateQueries({ queryKey: ['products'] });
     };
 
-    // Función de filtrado local
-    const filteredProducts = products?.filter(p =>
-        [p.name, p.author, p.sku].some(f => f?.toLowerCase().includes(query.toLowerCase()))
-    ) || [];
-
 
     if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-full min-h-[500px]">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" /> 
-                <span className="ml-3 text-lg dark:text-gray-300">Cargando inventario...</span>
-            </div>
-        );
+        return <div className="flex justify-center items-center h-64"><Loader2 className="w-8 h-8 animate-spin text-emerald-600" /> <span className="ml-3 text-lg">Cargando productos...</span></div>;
     }
 
     if (isError) {
-        return <div className="p-6 bg-red-100 text-red-800 rounded-lg border border-red-400 dark:bg-red-900 dark:text-red-300">Error al cargar productos: {error.message}</div>;
+        // Muestra un error si la llamada al backend falla
+        return <div className="p-6 bg-red-100 text-red-800 rounded-lg border border-red-400">Error al cargar productos: {error.message}</div>;
     }
 
 
@@ -53,8 +40,8 @@ const Inventory: React.FC = () => {
         <div className="space-y-6">
             {/* Modal/Sheet de Creación de Producto (Simulación) */}
             {isFormOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-lg w-full transition-all duration-300 transform scale-100 opacity-100">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-lg w-full">
                         <ProductForm 
                             onProductCreated={handleProductCreated}
                             onClose={() => setIsFormOpen(false)}
@@ -64,33 +51,20 @@ const Inventory: React.FC = () => {
             )}
             
             {/* Encabezado y Acciones */}
-            <div className="flex justify-between items-end gap-4 flex-wrap">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Inventario de Productos</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Gestión completa de existencias, precios y proveedores.</p>
-                </div>
-                <div className="flex gap-3">
-                    <div className="relative">
-                        <input
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Buscar por SKU, nombre o autor"
-                            className="w-64 rounded-xl border bg-background pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-emerald-600/40 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition"
-                        />
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    </div>
-                    <button 
-                        onClick={() => setIsFormOpen(true)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-xl shadow-md hover:bg-emerald-700 transition transform hover:scale-[1.02]"
-                    >
-                        <Plus className="w-5 h-5" />
-                        <span>Añadir Producto</span>
-                    </button>
-                </div>
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Inventario de Productos</h1>
+                <button 
+                    onClick={() => setIsFormOpen(true)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 transition"
+                >
+                    <Plus className="w-5 h-5" />
+                    <span>Añadir Producto</span>
+                </button>
             </div>
+
+            {/* ... (Resto de la UI de búsqueda y tabla) ... */}
             
-            {/* Tabla de Productos */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden border dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
@@ -103,9 +77,10 @@ const Inventory: React.FC = () => {
                             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
+                    {/* Reemplazamos dummyProducts con la data real de React Query */}
                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        {filteredProducts.length > 0 ? (
-                            filteredProducts.map((product) => (
+                        {products && products.length > 0 ? (
+                            products.map((product) => (
                                 <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <img 
@@ -127,7 +102,7 @@ const Inventory: React.FC = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${product.price.toFixed(2)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            (product.stock || 0) < 10 
+                                            product.stock < 10 
                                                 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' 
                                                 : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                                         }`}>
@@ -156,8 +131,7 @@ const Inventory: React.FC = () => {
                         ) : (
                             <tr>
                                 <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
-                                    <BookOpen className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                                    No se encontraron productos que coincidan con la búsqueda.
+                                    No hay productos en el inventario. ¡Crea uno para empezar!
                                 </td>
                             </tr>
                         )}
@@ -168,4 +142,4 @@ const Inventory: React.FC = () => {
     );
 };
 
-export default Inventory;
+export default ProductList;
