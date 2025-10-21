@@ -97,7 +97,7 @@ export default function Login() {
               {loading ? "Accediendo..." : "Iniciar sesión"}
             </Button>
           </form>
-          <p className="mt-6 text-xs text-muted-foreground text-center">Demo: usa cualquier email y contraseña</p>
+          <p className="mt-6 text-xs text-muted-foreground text-center">Texto</p>
         </div>
       </div>
     </div>

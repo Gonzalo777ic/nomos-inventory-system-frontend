@@ -5,7 +5,7 @@
  */
 
 /**
- * Example response type for /api/demo
+ * Example response type for /api/demo endpoint (see server/src/routes/demo.ts) 
  */
 export interface DemoResponse {
   message: string;
