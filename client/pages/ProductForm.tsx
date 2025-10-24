@@ -1,40 +1,56 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../store/auth';
-import { createProduct, Product } from '../api/services/products';
-import { Package, DollarSign, Book, Image, Truck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Product, createProduct, updateProduct } from '../api/services/products';
+import { Loader2, X } from 'lucide-react'; 
+import { toast } from 'sonner';
 
-// Interfaz para los datos del formulario (coincide con Omit<Product, 'id'>)
-interface ProductFormData {
+// Define las propiedades que espera el formulario
+interface ProductFormProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (product: Product) => void;
+    initialData: Product | null;
+}
+
+// Interfaz para el estado local del formulario
+interface FormData {
     sku: string;
     name: string;
-    author: string;
-    price: string; // Usamos string para el input
-    stock: string; // Usamos string para el input
+    brand: string; // Corregido: usa 'brand'
+    price: string; // Usamos string para manejar la entrada de usuario (decimales)
+    // 🛑 ELIMINADO: Ya no se captura el stock aquí.
     imageUrl: string;
     supplier: string;
 }
 
-// Valores iniciales
-const initialFormData: ProductFormData = {
-    sku: '',
-    name: '',
-    author: '',
-    price: '',
-    stock: '',
-    imageUrl: 'https://placehold.co/100x150/000000/FFFFFF?text=Product',
-    supplier: '',
-};
-
-interface ProductFormProps {
-    onProductCreated: (newProduct: Product) => void;
-    onClose: () => void;
-}
-
-
-const ProductForm: React.FC<ProductFormProps> = ({ onProductCreated, onClose }) => {
-    const [formData, setFormData] = useState<ProductFormData>(initialFormData);
+const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+    const isEditMode = initialData !== null && initialData.id !== undefined;
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+
+    // Estado inicial del formulario
+    const [formData, setFormData] = useState<FormData>({
+        sku: initialData?.sku || '',
+        name: initialData?.name || '',
+        brand: initialData?.brand || '', // Usa 'brand'
+        price: initialData?.price ? initialData.price.toString() : '',
+        // 🛑 ELIMINADO: Stock inicializado.
+        imageUrl: initialData?.imageUrl || '',
+        supplier: initialData?.supplier || '',
+    });
+
+    // Sincroniza el estado del formulario si cambian los datos iniciales (ej. para edición)
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                sku: initialData.sku || '',
+                name: initialData.name || '',
+                brand: initialData.brand || '',
+                price: initialData.price ? initialData.price.toString() : '',
+                // stock: initialData.stock ? initialData.stock.toString() : '', // ELIMINADO
+                imageUrl: initialData.imageUrl || '',
+                supplier: initialData.supplier || '',
+            });
+        }
+    }, [initialData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -43,104 +59,167 @@ const ProductForm: React.FC<ProductFormProps> = ({ onProductCreated, onClose }) 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
         setIsLoading(true);
 
-        // Validación y conversión a tipos numéricos
-        const price = parseFloat(formData.price);
-        const stock = parseInt(formData.stock, 10);
+        // 1. Validar y Parsear datos
+        const priceValue = parseFloat(formData.price);
+        // const stockValue = parseInt(formData.stock, 10); // ELIMINADO
 
-        if (isNaN(price) || price <= 0 || isNaN(stock) || stock < 0 || !formData.name || !formData.sku) {
-            setError("Por favor, rellena todos los campos obligatorios y verifica que el precio/stock sean válidos.");
+        if (isNaN(priceValue) || priceValue <= 0 || !formData.sku || !formData.name || !formData.supplier) {
+            toast.error('Por favor, completa los campos requeridos (SKU, Nombre, Marca, Precio > 0).');
             setIsLoading(false);
             return;
         }
 
         try {
-            const productToCreate: Omit<Product, 'id'> = {
+            // 2. Crear el objeto Product para la API
+            const productData: Omit<Product, 'id'> = {
                 sku: formData.sku,
                 name: formData.name,
-                author: formData.author,
-                price: price,
-                stock: stock,
-                imageUrl: formData.imageUrl,
+                brand: formData.brand,
+                price: priceValue,
+                // 🛑 ELIMINADO: Ya no enviamos el stock
+                // stock: isEditMode ? (initialData.stock || 0) : 0, 
+                imageUrl: formData.imageUrl || "https://placehold.co/40x60/ccc/333?text=N/A",
                 supplier: formData.supplier,
             };
-            
-            const newProduct = await createProduct(productToCreate);
-            
-            onProductCreated(newProduct);
-            onClose(); // Cerrar el formulario/modal
-            // Aquí se usaría un toast para mostrar éxito (si tienes use-toast.ts implementado)
-            console.log("Producto creado con éxito:", newProduct);
-            
-        } catch (err) {
-            console.error("Error al crear el producto:", err);
-            setError("Error al crear el producto. Revisa la consola o intenta de nuevo.");
+
+            let resultProduct: Product;
+
+            if (isEditMode) {
+                // Modo Edición (PUT)
+                if (!initialData.id) throw new Error("ID de producto no definido para edición.");
+                resultProduct = await updateProduct(initialData.id, productData);
+                toast.success(`Producto "${resultProduct.name}" actualizado con éxito.`);
+            } else {
+                // Modo Creación (POST)
+                resultProduct = await createProduct(productData);
+                toast.success(`Producto "${resultProduct.name}" creado con éxito.`);
+                // 🎯 Aquí se podría disparar la acción para ir al formulario de Stock
+                // Pero por ahora, solo llamamos a onSubmit para cerrar y refrescar la lista.
+            }
+
+            onSubmit(resultProduct);
+
+        } catch (error) {
+            console.error('Error al guardar el producto:', error);
+            toast.error('Error al guardar el producto. Revisa la conexión con el backend y las rutas.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const InputField: React.FC<{ name: keyof ProductFormData, label: string, type: string, icon: React.ElementType, required?: boolean }> = ({ name, label, type, icon: Icon, required = false }) => (
-        <div className="space-y-1">
-            <label htmlFor={name} className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Icon className="w-4 h-4 mr-2 text-emerald-600" />
-                {label} {required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <input
-                id={name}
-                name={name}
-                type={type}
-                value={formData[name]}
-                onChange={handleChange}
-                required={required}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-800 dark:text-white"
-                step={type === 'number' && name === 'price' ? "0.01" : undefined}
-            />
-        </div>
-    );
+    if (!isOpen) return null;
 
     return (
-        <form onSubmit={handleSubmit} className="p-6 bg-white dark:bg-gray-900 rounded-lg space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Añadir Nuevo Producto</h2>
+        <div className="p-6">
+            <div className="flex justify-between items-center border-b pb-4 mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {isEditMode ? 'Editar Producto' : 'Crear Nuevo Producto'}
+                </h3>
+                <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <X className="w-6 h-6" />
+                </button>
+            </div>
             
-            {error && (
-                <div className="p-3 bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-300 rounded-md text-sm">
-                    {error}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Fila 1: SKU y Nombre */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300">SKU (Código)</label>
+                        <input
+                            type="text"
+                            name="sku"
+                            id="sku"
+                            value={formData.sku}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre del Producto</label>
+                        <input
+                            type="text"
+                            name="name"
+                            id="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                        />
+                    </div>
                 </div>
-            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField name="name" label="Nombre del Producto" type="text" icon={Book} required />
-                <InputField name="sku" label="SKU (Código)" type="text" icon={Package} required />
-                <InputField name="author" label="Autor/Marca" type="text" icon={Book} />
-                <InputField name="supplier" label="Proveedor" type="text" icon={Truck} />
-                <InputField name="price" label="Precio de Venta (USD)" type="number" icon={DollarSign} required />
-                <InputField name="stock" label="Stock Inicial" type="number" icon={Package} required />
-            </div>
+                {/* Fila 2: Marca y Precio */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
+                        <input
+                            type="text"
+                            name="brand"
+                            id="brand"
+                            value={formData.brand}
+                            onChange={handleChange}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio ($)</label>
+                        <input
+                            type="number"
+                            name="price"
+                            id="price"
+                            value={formData.price}
+                            onChange={handleChange}
+                            required
+                            step="0.01"
+                            min="0.01"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                        />
+                    </div>
+                </div>
 
-            {/* URL de Imagen (Simulación de Subida) */}
-            <InputField name="imageUrl" label="URL de Imagen (Simulación)" type="url" icon={Image} />
-            <img src={formData.imageUrl} alt="Preview" className="h-24 w-auto object-cover rounded-lg shadow-md border dark:border-gray-700" />
-            
-            <div className="flex justify-end space-x-3 pt-4">
-                <button 
-                    type="button" 
-                    onClick={onClose}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                    Cancelar
-                </button>
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                    {isLoading ? 'Guardando...' : 'Crear Producto'}
-                </button>
-            </div>
-        </form>
+                {/* Fila 3: Proveedor */}
+                <div>
+                    <label htmlFor="supplier" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Proveedor</label>
+                    <input
+                        type="text"
+                        name="supplier"
+                        id="supplier"
+                        value={formData.supplier}
+                        onChange={handleChange}
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                    />
+                </div>
+
+                {/* Fila 4: URL de Imagen */}
+                <div>
+                    <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300">URL de Imagen (Opcional)</label>
+                    <input
+                        type="url"
+                        name="imageUrl"
+                        id="imageUrl"
+                        value={formData.imageUrl}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                    />
+                </div>
+
+                {/* Botón de Submit */}
+                <div className="flex justify-end pt-4">
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="flex items-center space-x-2 px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        <span>{isEditMode ? 'Guardar Cambios' : 'Crear Producto'}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 };
 

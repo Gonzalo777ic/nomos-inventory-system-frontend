@@ -3,10 +3,11 @@ import { create } from 'zustand';
 // Definición del tipo de la función de logout real (de Auth0)
 type Auth0LogoutFunction = (options?: { logoutParams?: { returnTo?: string } }) => void;
 
+// 🛑 MODIFICACIÓN: Usamos `any` o un Index Signature para permitir los claims dinámicos (roles)
 interface AuthState {
   // El token de acceso
   token: string | null; 
-  // El objeto user de Auth0
+  // El objeto user de Auth0 (ahora puede contener claims)
   user: any | null; 
   // Indica si el estado de autenticación (isAuthenticated) fue determinado
   isAuthReady: boolean; 
@@ -59,7 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isAuthReady: isReady });
   },
 
-  // 🛑 NUEVO: Implementación de setUser
+  // 🛑 Implementación de setUser (usa el tipo `any` para los claims)
   setUser: (user) => {
     set({ user: user });
   },

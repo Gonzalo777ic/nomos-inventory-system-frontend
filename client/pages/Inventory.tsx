@@ -1,171 +1,220 @@
-// Usaremos la lógica moderna de ProductList.tsx, renombrando temporalmente
-// para que el componente exportado sea `Inventory` si así lo usa tu router.
-
-import React, { useState } from 'react';
-import { Plus, Search, Pencil, Trash2, Loader2, BookOpen } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
+import { Package, PlusCircle, Search, Loader2 } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 import { useQuery, useQueryClient } from '@tanstack/react-query'; 
+import { getProducts, Product } from '../api/services/products'; 
+import { getProductTotalStock } from '../api/services/inventory-items';
+import LotManagementModal from '../components/LotManagementModal'; 
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { useAuth } from '../hooks/useAuth'; // Importación del hook de autenticación
 
-// Importamos el Formulario que creamos antes
-import ProductForm from './ProductForm'; 
+type ProductWithStock = Product & { totalStock: number; };
 
-// Importamos la interfaz y la función del servicio
-import { Product, getProducts } from '../api/services/products'; 
+/**
+ * Inventory: Componente principal que permite al usuario seleccionar un producto
+ * para luego gestionar sus lotes (InventoryItem CRUD).
+ */
+function Inventory() {
+  const queryClient = useQueryClient(); 
+  
+  // CORRECCIÓN: Renombramos 'isLoading' a 'isAuthLoading' y eliminamos 'error: authError'
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth(); 
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedProductName, setSelectedProductName] = useState<string | null>(null);
+  const [productsWithStock, setProductsWithStock] = useState<ProductWithStock[]>([]);
+  const [isStockLoading, setIsStockLoading] = useState(false);
+  
+  // 1. Obtener la lista de productos
+  const { 
+    data: products, 
+    isLoading: isLoadingProducts, 
+    error: queryError // Usaremos este error para mostrar fallas de API
+  } = useQuery<Product[]>({
+    queryKey: ['products'],
+    queryFn: getProducts,
+    // La consulta solo se ejecuta si la autenticación está lista
+    enabled: isAuthenticated && !isAuthLoading, 
+  });
 
-// 🎯 Componente principal para la gestión del inventario
-const Inventory: React.FC = () => {
-    const queryClient = useQueryClient();
-    const [isFormOpen, setIsFormOpen] = useState(false); // Controlar visibilidad del formulario/modal
-    const [query, setQuery] = useState(""); // Estado para la búsqueda local
+  // 2. Obtener el stock total por producto
+  useEffect(() => {
+    const productsArray = products || []; 
 
-    // Obtener productos usando React Query
-    const { data: products, isLoading, isError, error } = useQuery<Product[]>({
-        queryKey: ['products'],
-        queryFn: getProducts,
-    });
-    
-    // Función de callback para cuando un producto es creado exitosamente
-    const handleProductCreated = (newProduct: Product) => {
-        // Invalida la caché de 'products' para que React Query recargue la lista
-        queryClient.invalidateQueries({ queryKey: ['products'] });
+    const fetchStocks = async () => {
+      if (productsArray.length > 0) {
+        setIsStockLoading(true);
+        try {
+          const productPromises = productsArray.map(async (p) => {
+            const productId = Number(p.id); 
+            if (isNaN(productId)) return null; 
+            const totalStock = await getProductTotalStock(productId);
+            return { ...p, totalStock } as ProductWithStock;
+          });
+          const results = (await Promise.all(productPromises)).filter(p => p !== null) as ProductWithStock[];
+          setProductsWithStock(results); 
+        } catch (err) {
+          console.error("Error fetching product stocks:", err);
+        } finally {
+          setIsStockLoading(false);
+        }
+      } else {
+        setProductsWithStock([]);
+        setIsStockLoading(false);
+      }
     };
 
-    // Función de filtrado local
-    const filteredProducts = products?.filter(p =>
-        [p.name, p.author, p.sku].some(f => f?.toLowerCase().includes(query.toLowerCase()))
-    ) || [];
-
-
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-full min-h-[500px]">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" /> 
-                <span className="ml-3 text-lg dark:text-gray-300">Cargando inventario...</span>
-            </div>
-        );
+    if (!isLoadingProducts && isAuthenticated) {
+        fetchStocks();
     }
+  }, [products, isLoadingProducts, isAuthenticated]); 
 
-    if (isError) {
-        return <div className="p-6 bg-red-100 text-red-800 rounded-lg border border-red-400 dark:bg-red-900 dark:text-red-300">Error al cargar productos: {error.message}</div>;
-    }
+  
+  // Filtro de búsqueda
+  const filteredProducts = productsWithStock.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
+  const handleOpenLotManagement = (productId: number) => {
+    setSelectedProductId(productId);
+    // Capturar el nombre del producto para el encabezado del modal
+    const product = productsWithStock.find(p => Number(p.id) === productId);
+    setSelectedProductName(product ? product.name : null);
+  };
 
+  const handleCloseLotManagement = () => {
+    setSelectedProductId(null);
+    setSelectedProductName(null);
+  };
+  
+  // Handler para forzar la actualización de la tabla principal
+  const handleLotUpdate = () => {
+      // Invalida la query principal 'products', forzando el re-fetch de productos y el re-cálculo de stock
+      queryClient.invalidateQueries({ queryKey: ['products'] }); 
+  };
+
+  // Usamos solo queryError como fuente de error para la vista.
+  const currentError = queryError; 
+
+  if (isAuthLoading) {
     return (
-        <div className="space-y-6">
-            {/* Modal/Sheet de Creación de Producto (Simulación) */}
-            {isFormOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-lg w-full transition-all duration-300 transform scale-100 opacity-100">
-                        <ProductForm 
-                            onProductCreated={handleProductCreated}
-                            onClose={() => setIsFormOpen(false)}
-                        />
-                    </div>
-                </div>
-            )}
-            
-            {/* Encabezado y Acciones */}
-            <div className="flex justify-between items-end gap-4 flex-wrap">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Inventario de Productos</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Gestión completa de existencias, precios y proveedores.</p>
-                </div>
-                <div className="flex gap-3">
-                    <div className="relative">
-                        <input
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Buscar por SKU, nombre o autor"
-                            className="w-64 rounded-xl border bg-background pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-emerald-600/40 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition"
-                        />
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    </div>
-                    <button 
-                        onClick={() => setIsFormOpen(true)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-xl shadow-md hover:bg-emerald-700 transition transform hover:scale-[1.02]"
-                    >
-                        <Plus className="w-5 h-5" />
-                        <span>Añadir Producto</span>
-                    </button>
-                </div>
-            </div>
-            
-            {/* Tabla de Productos */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden border dark:border-gray-700">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Imagen</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">SKU</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nombre / Autor</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Precio</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stock</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Proveedor</th>
-                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        {filteredProducts.length > 0 ? (
-                            filteredProducts.map((product) => (
-                                <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <img 
-                                            src={product.imageUrl} 
-                                            alt={product.name} 
-                                            className="h-10 w-auto rounded object-cover shadow"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.onerror = null; 
-                                                target.src = "https://placehold.co/40x60/ccc/333?text=N/A";
-                                            }}
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{product.sku}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{product.name}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">Por: {product.author}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${product.price.toFixed(2)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            (product.stock || 0) < 10 
-                                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' 
-                                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                        }`}>
-                                            {product.stock}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{product.supplier}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex justify-center space-x-2">
-                                            <button 
-                                                onClick={() => console.log('Editar producto:', product.id)}
-                                                className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button 
-                                                onClick={() => console.log('Eliminar producto:', product.id)}
-                                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
-                                    <BookOpen className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                                    No se encontraron productos que coincidan con la búsqueda.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+        <div className="flex items-center justify-center p-12 text-lg text-gray-500">
+            <Loader2 className="mr-3 h-6 w-6 animate-spin" /> Verificando autenticación...
         </div>
     );
-};
+  }
+
+  if (currentError) {
+    const message = currentError instanceof Error ? currentError.message : "Un error desconocido ha ocurrido.";
+    let errorMessage = `Error al cargar la lista de productos: ${message}`;
+    if (message.includes('403') || message.includes('Forbidden')) {
+        errorMessage = "Acceso Denegado (403): Tu cuenta no tiene permiso para ver el inventario.";
+    } else if (message.includes('401') || message.includes('Unauthorized')) {
+        errorMessage = "No Autorizado (401): Por favor, inicia sesión de nuevo.";
+    }
+
+    return (
+      <Card className="p-6">
+        <p className="text-red-500 font-semibold">{errorMessage}</p>
+        <p className="text-sm text-gray-500 mt-2">Asegúrate de que la API está disponible y que tu cuenta tiene los permisos correctos.</p>
+      </Card>
+    );
+  }
+
+  if (products && products.length === 0 && !isLoadingProducts) {
+      return (
+          <div className="text-center p-12 space-y-4">
+              <Package className="w-16 h-16 mx-auto text-gray-400" />
+              <h2 className="text-2xl font-semibold">No hay productos registrados en el catálogo.</h2>
+              <p className="text-muted-foreground">Debes añadir productos antes de gestionar el inventario.</p>
+          </div>
+      );
+  }
+
+  return (
+    <div className="space-y-6 p-4">
+        <Card className="shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xl font-semibold">Productos para Inventariar</CardTitle>
+                <div className="relative flex items-center w-full max-w-sm">
+                    <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Buscar por nombre o SKU..."
+                        className="pl-9"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </CardHeader>
+            <CardContent className="p-0">
+            {isLoadingProducts || isStockLoading ? (
+                <div className="flex items-center justify-center p-8 text-sm text-gray-500">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando lista y calculando existencias...
+                </div>
+            ) : (
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Producto</TableHead>
+                    <TableHead className="text-right">Stock Total</TableHead>
+                    <TableHead className="text-center">Acciones</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
+                        <TableCell className="font-medium">{product.sku}</TableCell> 
+                        <TableCell>{product.name}</TableCell>
+                        <TableCell className="text-right">
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                product.totalStock <= 5 ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' : 
+                                product.totalStock <= 20 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' :
+                                'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                            }`}>
+                            {product.totalStock} unidades
+                            </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                        <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleOpenLotManagement(Number(product.id))}
+                        >
+                            <PlusCircle className="w-4 h-4 mr-2" /> Gestionar Lotes
+                        </Button>
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            )}
+            </CardContent>
+        </Card>
+
+        {/* DIALOGO DE GESTIÓN DE LOTES (LotManagementModal) */}
+        <Dialog open={selectedProductId !== null} onOpenChange={handleCloseLotManagement}>
+            <DialogContent className="sm:max-w-[800px]">
+                <DialogHeader>
+                    <DialogTitle>Gestión de Lotes de Inventario: {selectedProductName || 'Cargando...'}</DialogTitle>
+                </DialogHeader>
+                {selectedProductId !== null && (
+                    <LotManagementModal 
+                        productId={selectedProductId}
+                        productName={selectedProductName}
+                        onLotUpdate={handleLotUpdate}
+                        onClose={handleCloseLotManagement}
+                    />
+                )}
+            </DialogContent>
+        </Dialog>
+    </div>
+  );
+}
 
 export default Inventory;

@@ -36,3 +36,16 @@ export type User = {
   name?: string;
   role?: "admin" | "seller";
 };
+
+export type InventoryItem = {
+    id: number;
+    // Nota: Cuando enviamos un item al backend, solo necesitamos el ID del producto
+    product: { id: number }; 
+    currentStock: number;
+    unitCost: number;
+    lotNumber: string;
+    // Usamos string para el input de fecha (YYYY-MM-DD)
+    expirationDate: string; 
+    location: string;
+    entryDate: string; // Fecha de creación (sólo lectura, opcional al crear)
+}
