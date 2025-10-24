@@ -1,30 +1,32 @@
-// layout/Layout.tsx
+// client/components/layout/Layout.tsx
 
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import { ThemeToggle } from "./ThemeToggle";
 import React from "react"; 
 
-// 🛑 Layout ahora NO acepta children. Usa <Outlet />
+// 🎯 CORRECCIÓN: Layout NO recibe props, usa <Outlet /> para renderizar rutas hijas.
+// Eliminamos la interfaz LayoutProps y la desestructuración de children
 export default function Layout() {
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr] lg:grid-cols-[280px_1fr]">
       <aside className="hidden lg:block border-r bg-gray-100 p-4 dark:bg-gray-900">
         <Brand />
         <nav className="mt-6 space-y-1 text-sm">
-          {/* Usar rutas relativas si no estás en un layout anidado */}
           <NavItem to="/dashboard" label="Dashboard" /> 
+          <NavItem to="/products" label="Productos" />  
           <NavItem to="/inventory" label="Inventario" />
           <NavItem to="/sales" label="Ventas" />
           <NavItem to="/reports" label="Reportes" />
           <NavItem to="/alerts" label="Alertas" />
           <NavItem to="/suppliers" label="Proveedores" />
+
         </nav>
       </aside>
       <div className="flex flex-col">
         <Header />
         <main className="flex-1 p-4 md:p-6 bg-gray-50 dark:bg-gray-800">
-          {/* 🎯 CORRECCIÓN: Usar <Outlet /> para renderizar la ruta hija (Dashboard, Inventory, etc.) */}
+          {/* 🎯 Usamos <Outlet /> para renderizar la ruta hija (Dashboard, Inventory, etc.) */}
           <Outlet /> 
         </main>
       </div>

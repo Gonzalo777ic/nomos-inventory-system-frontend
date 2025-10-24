@@ -8,6 +8,8 @@ interface AuthTokenResult {
     token: string;
     roles: string[];
     // Otros claims si los necesitas
+    // 🛑 NUEVO: Devolver los claims completos para guardarlos en el store
+    claims: any; 
 }
 
 /**
@@ -94,8 +96,8 @@ const getAuthToken = useCallback(async (): Promise<AuthTokenResult | undefined> 
       }
       console.log("---------------------------------------");
 
-      // 🛑 Devolvemos el token Y los roles.
-      return { token, roles }; 
+      // 🛑 Devolvemos el token, los roles Y los claims (donde están los roles)
+      return { token, roles, claims }; 
     } catch (error) {
       console.error("Error al obtener el token de Auth0:", error);
       return undefined;
@@ -113,8 +115,7 @@ const getAuthToken = useCallback(async (): Promise<AuthTokenResult | undefined> 
                 name: user.name,
                 nickname: user.nickname,
             };
-            setUser(authStoreUser);
-
+            // 🛑 NOTA: setUser se moverá dentro del .then para añadir los claims.
             // Si ya se sincronizó, no lo hagas de nuevo.
             if (isSyncedRef.current) return;
 
@@ -159,8 +160,18 @@ const getAuthToken = useCallback(async (): Promise<AuthTokenResult | undefined> 
             // 🛑 1. Ejecutar getAuthToken y obtener el resultado.
             getAuthToken().then((result) => {
                 if(result && result.roles) {
+                    // 🛑 MODIFICACIÓN CLAVE: Actualizar el usuario en Zustand AHORA, incluyendo los claims
+                    const userWithClaims = {
+                        ...authStoreUser, // sub, email, name, nickname
+                        ...result.claims // Añade todos los claims, incluyendo el rol
+                    };
+                    setUser(userWithClaims); // Guarda el usuario COMPLETO en el store
+
                     // 🛑 2. Llamar a syncUserToBackend con los roles obtenidos.
                     syncUserToBackend(result.roles);
+                } else if (user) {
+                    // Si no hay roles (o falla), al menos guarda el usuario base
+                    setUser(authStoreUser);
                 }
             });
         }
@@ -185,12 +196,14 @@ const getAuthToken = useCallback(async (): Promise<AuthTokenResult | undefined> 
   }, [isLoading, setIsAuthReady]);
 
   // 2. Ejecución forzada de getAuthToken para logging inmediato y refresh
+  // El logging ahora se hace en el useEffect anterior (sincronización)
+  /*
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      // Llama a la función estable getAuthToken
       getAuthToken();
     }
   }, [isAuthenticated, isLoading, getAuthToken]);
+  */
 
   return {
     isAuthenticated,
