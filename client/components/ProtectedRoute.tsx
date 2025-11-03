@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 
@@ -6,61 +6,66 @@ interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
-// Roles permitidos para este sistema de Inventario (solo ADMIN)
 const REQUIRED_ROLE = 'ROLE_ADMIN'; 
-// La clave del custom claim donde Auth0 inyecta los roles
 const ROLE_CLAIM_KEY = 'https://nomosstore.com/roles';
-
+const UNAUTHORIZED_FLAG = 'unauthorized_access'; // Bandera de persistencia para el mensaje
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-    // Seleccionar propiedades individualmente para evitar el bucle infinito de Zustand
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
     const user = useAuthStore(state => state.user);
     const isAuthReady = useAuthStore(state => state.isAuthReady);
+    const auth0LogoutFn = useAuthStore(state => state.auth0LogoutFn); 
     
-    // 🎯 NUEVO: Importar la función logout
-    const logout = useAuthStore(state => state.logout);
-    
+    // Eliminamos isRedirecting. Ahora usamos el chequeo síncrono.
+
+    // 1. Estado de carga inicial (para evitar flicker)
     if (!isAuthReady) {
-        console.log("[DEBUG] ProtectedRoute: Esperando a que AuthStore esté listo...");
-        return null;
-    }
-
-    // 1. Verificar Autenticación
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
-
-    // 2. Verificar Rol
-    const userRoles = (user as any)?.[ROLE_CLAIM_KEY] || [];
-    const hasRequiredRole = userRoles.includes(REQUIRED_ROLE);
-
-
-    if (!hasRequiredRole) {
-        // [DEBUG] Bloqueo de Acceso
-        console.error(`[AUTH BLOCKED] Usuario ${user?.email} intentó acceder. Roles obtenidos: [${userRoles.join(', ')}]. Se requiere rol: ${REQUIRED_ROLE}`);
-        
-        // Mostrar un mensaje de acceso denegado en lugar de un redirect brusco
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-8">
-                <h1 className="text-3xl font-bold text-red-600 mb-4">Acceso Denegado</h1>
-                <p className="text-gray-700 dark:text-gray-300">Tu cuenta ({user?.email}) no tiene el rol necesario (<span className="font-mono bg-red-100 text-red-700 px-1 rounded">{REQUIRED_ROLE}</span>) para acceder a este sistema de inventario.</p>
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Por favor, contacta al administrador del sistema.</p>
-                <button 
-                    // 🎯 CORRECCIÓN: Llamar a logout() antes de redirigir para cerrar la sesión de Auth0
-                    onClick={() => {
-                        logout(); // Cierra la sesión en Auth0 y limpia el estado local
-                        window.location.href = "/login"; // Fuerza la redirección a la página de login
-                    }} 
-                    className="mt-6 px-4 py-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 transition"
-                >
-                    Volver a Iniciar Sesión
-                </button>
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="text-xl font-medium text-emerald-600">Verificando permisos...</div>
             </div>
         );
     }
+
+    // 2. Redirección por No Autenticado (Estado Limpio)
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
     
-    // Acceso permitido
+    // 3. 🛑 LÓGICA CLAVE DE VERIFICACIÓN DE ROL SÍNCRONA
+    // Esto se ejecuta en cada renderizado ANTES de que se intente renderizar el children.
+    const userRoles = (user as any)?.[ROLE_CLAIM_KEY] || [];
+    const hasRequiredRole = userRoles.includes(REQUIRED_ROLE);
+    
+    
+    // 4. LÓGICA ASÍNCRONA DE LOGOUT (Solo como Side Effect)
+    // Este useEffect dispara el logout y la redirección de página COMPLETA.
+    useEffect(() => {
+        if (!hasRequiredRole && isAuthenticated && auth0LogoutFn) {
+            console.error(`[AUTH BLOCKED] Usuario ${user.email} intentó acceder. Se requiere: ${REQUIRED_ROLE}`);
+            
+            // PASO 1: Persistir el mensaje de error.
+            localStorage.setItem(UNAUTHORIZED_FLAG, 'true');
+            
+            // PASO 2: Disparar el logout y la redirección de página completa.
+            // Esto detendrá la aplicación React y redirigirá al Login, donde se mostrará el toast.
+            auth0LogoutFn();
+        }
+    // Añadimos las dependencias
+    }, [hasRequiredRole, isAuthenticated, auth0LogoutFn, user]);
+
+    
+    // 5. 🛑 FIX DEL FLICKER: RENDERIZADO CONDICIONAL INMEDIATO
+    if (!hasRequiredRole) {
+        // Al denegar el acceso aquí, el Dashboard NUNCA se renderiza.
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="text-xl font-medium text-red-600">Acceso no autorizado. Redirigiendo...</div>
+            </div>
+        );
+    }
+
+    // 6. Acceso Permitido
     return <>{children}</>;
 };
 
