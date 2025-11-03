@@ -13,7 +13,7 @@ import {
     Archive, // Inventario Físico (Lotes)
     Users, // Proveedores / Clientes / Usuarios
     ClipboardList, // Órdenes de Abastecimiento / Reportes / Registros
-    Tag, // Promociones, Precios
+    Tag, // Promociones, Precios, Categorías
     CreditCard, // Cobranzas, Métodos de pago
     RefreshCw, // Devoluciones
     Map, // Guías de Remisión / Ubicación
@@ -25,6 +25,7 @@ import {
     Megaphone, // Anuncios
     Clock, // Horarios
     AlertTriangle, // Alertas
+    Briefcase, // 🎯 NUEVO ÍCONO PARA MARCAS
 } from 'lucide-react'; 
 
 // Definimos el tipo para las props de NavItem
@@ -106,6 +107,8 @@ export const SidebarNavigation: React.FC = () => {
                 {[
                     { to: "/users", label: "Usuarios y Roles", icon: <Users className="h-4 w-4" /> },
                     { to: "/clients", label: "Clientes", icon: <Users className="h-4 w-4" /> },
+                    // 🎯 NUEVO: Marcas (Brand)
+                    { to: "/brands", label: "Marcas (Fabricantes)", icon: <Briefcase className="h-4 w-4" /> },
                     { to: "/categories", label: "Clasificación (Categorías)", icon: <Tag className="h-4 w-4" /> },
                     { to: "/uom", label: "Unidades de Medida", icon: <Scale className="h-4 w-4" /> },
                     { to: "/attributes", label: "Atributos de Producto", icon: <Ruler className="h-4 w-4" /> },
