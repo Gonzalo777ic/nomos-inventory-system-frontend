@@ -1,39 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus, Search, Pencil, Trash2, Loader2, X } from 'lucide-react'; 
-import ProductForm from './ProductForm';
-import { Product, getProducts, deleteProduct } from '../api/services/products'; 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import ProductForm from './ProductForm'; 
+import { Product, ProductListItem } from '../types/index'; 
+import { getProducts, deleteProduct } from '../api/services/products'; 
+// Importamos la función para obtener el stock total
+import { getProductTotalStock } from '../api/services/inventory-items'; 
+// Usaremos useQueries para cargar el stock de manera eficiente
+import { useQuery, useMutation, useQueryClient, useQueries } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
+// Importamos los componentes de UI (asumiendo Shadcn/UI o similar)
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+
+// Tipo extendido para la lista con el stock agregado
+type ProductListWithStock = ProductListItem & { currentStock: number; };
 
 
 const ProductList: React.FC = () => {
     const queryClient = useQueryClient();
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [productToDeleteId, setProductToDeleteId] = useState<number | null>(null);
     const [productToDeleteName, setProductToDeleteName] = useState<string>(''); 
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // Obtener productos usando React Query
-    // Nota: Aunque el producto ya no tiene 'stock' directo, la lista lo asume.
-    // En un sistema real, aquí necesitarías obtener el stock actual del StockEntryController.
-    const { data: products, isLoading, isError, error } = useQuery<Product[]>({
+    // 1. Obtener la lista base de productos (sin stock agregado)
+    const { 
+        data: products = [], 
+        isLoading: isLoadingProducts, 
+        isError, 
+        error 
+    } = useQuery<ProductListItem[]>({
         queryKey: ['products'],
-        queryFn: getProducts,
+        queryFn: getProducts as () => Promise<ProductListItem[]>,
     });
     
+    // 2. Obtener el stock total por producto usando useQueries (como en Inventory.tsx)
+    const stockQueries = useQueries({
+        queries: products.map(product => ({
+            queryKey: ['productStock', product.id],
+            queryFn: () => getProductTotalStock(Number(product.id)),
+            // Aseguramos que solo se ejecute si hay un ID válido
+            enabled: product.id !== undefined, 
+            staleTime: 1000 * 60 * 5, 
+        })),
+    });
+
+    // 3. Combinar los datos de productos y stock en una sola lista (Memoizada)
+    const productListWithStock: ProductListWithStock[] = useMemo(() => {
+        return products.map((product, index) => {
+            const stockQueryResult = stockQueries[index];
+            // Usamos 0 si la query está pendiente o no tiene datos (mejor que 'N/A' si el backend no lo provee)
+            const currentStock = stockQueryResult?.data !== undefined ? stockQueryResult.data : 0;
+            
+            return { 
+                ...product, 
+                currentStock: currentStock as number, 
+            } as ProductListWithStock;
+        });
+    }, [products, stockQueries]);
+
+    // Chequeamos si alguna de las queries de stock está aún en proceso
+    const isStockLoading = stockQueries.some(query => query.isLoading);
+
+    // Filtrado (adaptado del Inventory)
+    const filteredProducts = productListWithStock.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.brandName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     // Función de mutación para eliminación
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteProduct(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            // Forzamos la actualización del stock después de una eliminación (si afecta)
+            queryClient.invalidateQueries({ queryKey: ['productStock'] }); 
             toast.success('Producto eliminado con éxito.');
             setIsDeleteConfirmOpen(false);
             setProductToDeleteId(null);
             setProductToDeleteName('');
         },
         onError: () => {
-            // Nota: Aquí el error 404 (Not Found) se capturaría si el backend falla.
             toast.error('Error al eliminar el producto. Verifica la consola.');
         }
     });
@@ -41,15 +93,18 @@ const ProductList: React.FC = () => {
     const handleFormSubmit = async () => {
         setIsFormOpen(false);
         setSelectedProduct(null);
+        // Al añadir/editar, actualizamos la lista base y el stock
         await queryClient.invalidateQueries({ queryKey: ['products'] });
+        await queryClient.invalidateQueries({ queryKey: ['productStock'] });
     };
 
-    const handleOpenForm = (product: Product | null = null) => {
-        setSelectedProduct(product);
+    const handleOpenForm = (product: ProductListItem | null = null) => {
+        // Asegúrate de que el producto seleccionado (con FKs) se pase al formulario
+        setSelectedProduct(product as Product | null); 
         setIsFormOpen(true);
     };
 
-    const handleConfirmDelete = (product: Product) => {
+    const handleConfirmDelete = (product: ProductListItem) => {
         if (product.id) {
             setProductToDeleteId(product.id);
             setProductToDeleteName(product.name);
@@ -69,28 +124,22 @@ const ProductList: React.FC = () => {
         setProductToDeleteName('');
     };
 
-    if (isLoading) {
-        return <div className="p-6 flex justify-center items-center h-64"><Loader2 className="w-8 h-8 animate-spin text-emerald-600" /> <span className="ml-3 text-lg">Cargando productos...</span></div>;
+    if (isLoadingProducts) {
+        return <div className="p-6 flex justify-center items-center h-64"><Loader2 className="w-8 h-8 animate-spin text-emerald-600" /> <span className="ml-3 text-lg">Cargando catálogo...</span></div>;
     }
 
     if (isError) {
         return <div className="p-6 bg-red-100 text-red-800 rounded-lg border border-red-400">Error al cargar productos: {error instanceof Error ? error.message : 'Error desconocido'}</div>;
     }
 
-    // 🎯 Función para redirigir/mostrar mensaje para el stock
-    const handleAddInitialStock = (product: Product) => {
-        // Aquí iría la lógica para abrir el modal o redirigir al formulario de StockEntry.
-        // Por ahora, solo mostramos un mensaje para fines de desarrollo.
-        toast.info(`¡Producto creado! Ahora debes ir al módulo de Inventario para asignar stock inicial a: ${product.name}`);
-        // En un caso real: router.push('/inventory/add-stock/' + product.id);
-    };
-
     return (
-        <div className="p-6 space-y-6"> 
-            {/* Modal/Sheet de Creación/Edición de Producto */}
+        <div className="p-6 space-y-6 bg-gray-50 min-h-screen"> 
+            
+            {/* Modal/Sheet de Creación/Edición de Producto (RESTAURADO) */}
             {isFormOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-lg w-full">
+                        {/* El formulario recibe un 'Product' (entidad base con FKs) */}
                         <ProductForm 
                             isOpen={isFormOpen}
                             onClose={() => setIsFormOpen(false)}
@@ -101,7 +150,7 @@ const ProductList: React.FC = () => {
                 </div>
             )}
 
-            {/* Modal de Confirmación de Eliminación */}
+            {/* Modal de Confirmación de Eliminación (RESTAURADO) */}
             {isDeleteConfirmOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
@@ -113,57 +162,79 @@ const ProductList: React.FC = () => {
                             ¿Estás seguro de que deseas eliminar el producto **{productToDeleteName}** (ID: {productToDeleteId})? Esta acción es irreversible.
                         </p>
                         <div className="flex justify-end space-x-3">
-                            <button 
+                            <Button 
+                                variant="outline"
                                 onClick={handleDeleteCancel}
-                                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                                 disabled={deleteMutation.isPending}
                             >
                                 Cancelar
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={handleDeleteExecute}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center space-x-2"
+                                variant="destructive" // Asumo que existe esta variante en tu librería de UI
+                                className="bg-red-600 hover:bg-red-700"
                                 disabled={deleteMutation.isPending}
                             >
-                                {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
                                 <span>{deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}</span>
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
             )}
             
             {/* Encabezado y Acciones */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Catálogo de Productos</h1>
-                <button 
-                    onClick={() => handleOpenForm(null)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 transition"
-                >
-                    <Plus className="w-5 h-5" />
-                    <span>Añadir Producto</span>
-                </button>
+            <div className="flex justify-between items-center pb-4">
+                <h1 className="text-3xl font-bold text-gray-900">Catálogo de Productos</h1>
+                <div className="flex space-x-4">
+                    {/* Barra de búsqueda adoptada del Inventory */}
+                    <div className="relative flex items-center w-full max-w-xs">
+                        <Search className="absolute left-3 h-4 w-4 text-gray-400" />
+                        <Input
+                            placeholder="Buscar producto, SKU o marca..."
+                            className="pl-9 bg-white border-gray-300 focus:border-emerald-500"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <Button 
+                        onClick={() => handleOpenForm(null)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white shadow-md hover:bg-emerald-700 transition"
+                    >
+                        <Plus className="w-5 h-5" />
+                        <span>Añadir Producto</span>
+                    </Button>
+                </div>
             </div>
 
-            {/* Tabla de Productos */}
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Imagen</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">SKU</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nombre / Marca</th> 
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Precio</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stock (Ver Inventario)</th> {/* 🎯 ETIQUETA ACTUALIZADA */}
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Proveedor</th>
-                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        {products && products.length > 0 ? (
-                            products.map((product) => (
-                                <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150">
-                                    <td className="px-6 py-4 whitespace-nowrap">
+            {/* Tabla de Productos (Estilo Unificado) */}
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+                <Table>
+                    <TableHeader>
+                        <TableRow className="bg-gray-100 hover:bg-gray-100/80">
+                            <TableHead className="w-10">Imagen</TableHead>
+                            <TableHead className="w-[100px]">SKU</TableHead>
+                            <TableHead>Nombre</TableHead>
+                            <TableHead>Marca</TableHead>
+                            <TableHead>Categoría</TableHead>
+                            <TableHead className="w-[100px]">U. Medida</TableHead>
+                            <TableHead className="text-right">Precio</TableHead>
+                            <TableHead className="text-center w-[120px]">Stock</TableHead>
+                            <TableHead>Proveedor</TableHead>
+                            <TableHead className="text-center w-[100px]">Acciones</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isStockLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={10} className="text-center py-10 text-base text-indigo-500">
+                                    <Loader2 className="h-5 w-5 mr-3 inline-block animate-spin" /> Calculando existencias...
+                                </TableCell>
+                            </TableRow>
+                        ) : filteredProducts.length > 0 ? (
+                            filteredProducts.map((product) => (
+                                <TableRow key={product.id} className="hover:bg-emerald-50/20 transition-colors duration-150">
+                                    <TableCell>
                                         <img 
                                             src={product.imageUrl} 
                                             alt={product.name} 
@@ -174,47 +245,55 @@ const ProductList: React.FC = () => {
                                                 target.src = "https://placehold.co/40x60/ccc/333?text=N/A";
                                             }}
                                         />
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{product.sku}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{product.name}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">Marca: {product.brand}</div> 
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${product.price.toFixed(2)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300`}>
-                                            N/A
+                                    </TableCell>
+                                    <TableCell className="font-medium text-gray-900">{product.sku}</TableCell>
+                                    <TableCell className="font-semibold text-gray-900">{product.name}</TableCell>
+                                    <TableCell className="text-gray-700">{product.brandName}</TableCell>
+                                    <TableCell className="text-gray-600">{product.categoryName}</TableCell>
+                                    <TableCell className="text-gray-600">{product.unitOfMeasureName}</TableCell>
+                                    <TableCell className="text-right font-mono">${product.price.toFixed(2)}</TableCell>
+                                    <TableCell className="text-center">
+                                        <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-sm ${
+                                            product.currentStock === 0 ? 'bg-red-400 text-white' : 
+                                            product.currentStock <= 5 ? 'bg-yellow-400 text-gray-900' :
+                                            'bg-green-500 text-white'
+                                        }`}>
+                                            {product.currentStock} 
                                         </span>
-                                    </td> {/* 🎯 VALOR HARDCODEADO TEMPORAL */}
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{product.supplier}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    </TableCell> 
+                                    <TableCell className="text-gray-700">{product.supplierName}</TableCell>
+                                    <TableCell className="text-center">
                                         <div className="flex justify-center space-x-2">
-                                            <button 
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon"
                                                 onClick={() => handleOpenForm(product)}
-                                                className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                                className="text-indigo-600 hover:bg-indigo-100"
                                             >
                                                 <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button 
+                                            </Button>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon"
                                                 onClick={() => product.id && handleConfirmDelete(product)}
-                                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                                className="text-red-600 hover:bg-red-100"
                                                 disabled={deleteMutation.isPending}
                                             >
                                                 <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            </Button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </TableCell>
+                                </TableRow>
                             ))
                         ) : (
-                            <tr>
-                                <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
-                                    No hay productos en el catálogo. ¡Crea uno para empezar!
-                                </td>
-                            </tr>
+                            <TableRow>
+                                <TableCell colSpan={10} className="px-6 py-10 text-center text-gray-500">
+                                    No hay productos que coincidan con la búsqueda.
+                                </TableCell>
+                            </TableRow>
                         )}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
         </div>
     );
