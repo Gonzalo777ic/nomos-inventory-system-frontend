@@ -92,7 +92,7 @@ const LotManagementModal: React.FC<LotManagementModalProps> = ({ productId, prod
                             <TableRow key={item.id}>
                                 <TableCell className="font-medium">{item.lotNumber}</TableCell>
                                 <TableCell>{item.currentStock}</TableCell>
-                                <TableCell>${item.unitCost.toFixed(2)}</TableCell>
+                                <TableCell>S/.{item.unitCost.toFixed(2)}</TableCell>
                                 <TableCell>{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : 'N/A'}</TableCell>
                                 <TableCell>{item.location}</TableCell>
                                 <TableCell>{new Date(item.entryDate).toLocaleDateString()}</TableCell>
