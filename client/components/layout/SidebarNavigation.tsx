@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavLink } from "react-router-dom";
 import { SubMenu } from './SubMenu'; // Importamos el componente desplegable
-// 🎯 ÍCONOS DE LUCIDE-REACT IMPORTADOS
 import { 
     Home, 
     Package, 
@@ -9,14 +8,29 @@ import {
     Truck, 
     Settings, 
     BarChart3,
-    Icon, 
+    // Íconos adicionales para las subcategorías
+    ShoppingCart, // Catálogo de Productos
+    Archive, // Inventario Físico (Lotes)
+    Users, // Proveedores / Clientes / Usuarios
+    ClipboardList, // Órdenes de Abastecimiento / Reportes / Registros
+    Tag, // Promociones, Precios
+    CreditCard, // Cobranzas, Métodos de pago
+    RefreshCw, // Devoluciones
+    Map, // Guías de Remisión / Ubicación
+    PackageOpen, // Entregas / Delivery
+    ClipboardCheck, // Roles / Auditoría
+    Scale, // Unidades de Medida
+    Ruler, // Atributos
+    Percent, // Impuestos
+    Megaphone, // Anuncios
+    Clock, // Horarios
+    AlertTriangle, // Alertas
 } from 'lucide-react'; 
 
 // Definimos el tipo para las props de NavItem
 interface NavItemProps {
     to: string;
     label: string;
-    // Utilizamos React.ElementType para poder pasar cualquier componente de ícono de Lucide
     icon: React.ElementType<any>; 
 }
 
@@ -41,6 +55,13 @@ function NavItem({ to, label, icon: IconComponent }: NavItemProps) {
     );
 }
 
+// Interfaz que usa SubMenu (ahora con un ícono para el hijo)
+interface SubMenuItem {
+    to: string; 
+    label: string; 
+    icon: React.ReactNode; // El ícono para la subcategoría
+}
+
 // Componente principal del menú lateral
 export const SidebarNavigation: React.FC = () => {
 
@@ -53,55 +74,55 @@ export const SidebarNavigation: React.FC = () => {
             {/* 2. INVENTARIO Y ABASTECIMIENTO (Inventory-Service) */}
             <SubMenu label="Inventario" icon={<Package className="h-5 w-5" />}>
                 {[
-                    { to: "/products", label: "Catálogo de Productos" }, // Product, Category, ProductAttribute
-                    { to: "/inventory", label: "Inventario Físico (Lotes)" }, // InventoryItem, Warehouse
-                    { to: "/suppliers", label: "Proveedores" }, // Supplier
-                    { to: "/purchases", label: "Órdenes de Abastecimiento" }, // PurchaseOrder
-                ]}
+                    { to: "/products", label: "Catálogo de Productos", icon: <ShoppingCart className="h-4 w-4" /> },
+                    { to: "/inventory", label: "Inventario Físico (Lotes)", icon: <Archive className="h-4 w-4" /> },
+                    { to: "/suppliers", label: "Proveedores", icon: <Users className="h-4 w-4" /> },
+                    { to: "/purchases", label: "Órdenes de Abastecimiento", icon: <ClipboardList className="h-4 w-4" /> },
+                ] as SubMenuItem[]}
             </SubMenu>
 
             {/* 3. VENTAS Y COBRANZAS (Store-Service) */}
             <SubMenu label="Ventas & Caja" icon={<DollarSign className="h-5 w-5" />}>
                 {[
-                    { to: "/sales", label: "Registro de Ventas" }, // Sale, SaleDetail, Invoice
-                    { to: "/quotations", label: "Cotizaciones" }, // Quotation
-                    { to: "/promotions", label: "Promociones y Ofertas" }, // Promotion, PriceList
-                    { to: "/collections", label: "Gestión de Cobranzas" }, // Collection, PaymentMethod
-                    { to: "/returns", label: "Gestión de Devoluciones" }, // Return
-                ]}
+                    { to: "/sales", label: "Registro de Ventas", icon: <ClipboardList className="h-4 w-4" /> },
+                    { to: "/quotations", label: "Cotizaciones", icon: <Tag className="h-4 w-4" /> },
+                    { to: "/promotions", label: "Promociones y Ofertas", icon: <Tag className="h-4 w-4" /> },
+                    { to: "/collections", label: "Gestión de Cobranzas", icon: <CreditCard className="h-4 w-4" /> },
+                    { to: "/returns", label: "Gestión de Devoluciones", icon: <RefreshCw className="h-4 w-4" /> },
+                ] as SubMenuItem[]}
             </SubMenu>
 
             {/* 4. LOGÍSTICA (Logistics-Service) */}
             <SubMenu label="Logística & Envíos" icon={<Truck className="h-5 w-5" />}>
                 {[
-                    { to: "/shipping-guides", label: "Guías de Remisión" }, // ShippingGuide
-                    { to: "/deliveries", label: "Asignación de Delivery" }, // DeliveryAssignment
-                    { to: "/realtime-location", label: "Ubicación en Tiempo Real" }, // RealTimeLocation
-                ]}
+                    { to: "/shipping-guides", label: "Guías de Remisión", icon: <Map className="h-4 w-4" /> },
+                    { to: "/deliveries", label: "Asignación de Delivery", icon: <PackageOpen className="h-4 w-4" /> },
+                    { to: "/realtime-location", label: "Ubicación en Tiempo Real", icon: <Map className="h-4 w-4" /> },
+                ] as SubMenuItem[]}
             </SubMenu>
             
             {/* 5. CONFIGURACIÓN MAESTRA (Auth/Inventory/Store - Tablas de Apoyo) */}
             <SubMenu label="Maestros & Config" icon={<Settings className="h-5 w-5" />}>
                 {[
-                    { to: "/users", label: "Usuarios y Roles" }, // User, Role
-                    { to: "/clients", label: "Clientes" }, // Client
-                    { to: "/categories", label: "Clasificación (Categorías)" }, // Category
-                    { to: "/uom", label: "Unidades de Medida" }, // UnitOfMeasure
-                    { to: "/attributes", label: "Atributos de Producto" }, // ProductAttribute
-                    { to: "/taxes", label: "Tasas de Impuesto" }, // TaxRate
-                    { to: "/announcements", label: "Anuncios y Comunicados" }, // Announcement
-                ]}
+                    { to: "/users", label: "Usuarios y Roles", icon: <Users className="h-4 w-4" /> },
+                    { to: "/clients", label: "Clientes", icon: <Users className="h-4 w-4" /> },
+                    { to: "/categories", label: "Clasificación (Categorías)", icon: <Tag className="h-4 w-4" /> },
+                    { to: "/uom", label: "Unidades de Medida", icon: <Scale className="h-4 w-4" /> },
+                    { to: "/attributes", label: "Atributos de Producto", icon: <Ruler className="h-4 w-4" /> },
+                    { to: "/taxes", label: "Tasas de Impuesto", icon: <Percent className="h-4 w-4" /> },
+                    { to: "/announcements", label: "Anuncios y Comunicados", icon: <Megaphone className="h-4 w-4" /> },
+                ] as SubMenuItem[]}
             </SubMenu>
             
             {/* 6. REPORTES Y SISTEMA (General) */}
             <SubMenu label="Reportes & Sistema" icon={<BarChart3 className="h-5 w-5" />}>
                 {[
-                    { to: "/reports", label: "Generador de Reportes" }, // Reports (custom page)
-                    { to: "/alerts", label: "Alertas de Stock" }, // Notification
-                    { to: "/movements", label: "Historial de Movimientos" }, // InventoryMovement
-                    { to: "/audit", label: "Registro de Auditoría" }, // AuditLog
-                    { to: "/store-schedule", label: "Horarios de Atención" }, // StoreSchedule, ClosureDate
-                ]}
+                    { to: "/reports", label: "Generador de Reportes", icon: <BarChart3 className="h-4 w-4" /> },
+                    { to: "/alerts", label: "Alertas de Stock", icon: <AlertTriangle className="h-4 w-4" /> },
+                    { to: "/movements", label: "Historial de Movimientos", icon: <ClipboardList className="h-4 w-4" /> },
+                    { to: "/audit", label: "Registro de Auditoría", icon: <ClipboardCheck className="h-4 w-4" /> },
+                    { to: "/store-schedule", label: "Horarios de Atención", icon: <Clock className="h-4 w-4" /> },
+                ] as SubMenuItem[]}
             </SubMenu>
         </nav>
     );
