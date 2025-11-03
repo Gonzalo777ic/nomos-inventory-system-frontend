@@ -4,12 +4,14 @@ import { Package, PlusCircle, Search, Loader2 } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { useQuery, useQueryClient } from '@tanstack/react-query'; 
-import { getProducts, Product } from '../api/services/products'; 
+import { getProducts } from '../api/services/products'; 
 import { getProductTotalStock } from '../api/services/inventory-items';
 import LotManagementModal from '../components/LotManagementModal'; 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { useAuth } from '../hooks/useAuth'; // Importación del hook de autenticación
+import { Product } from '../types/index'; 
+
 
 type ProductWithStock = Product & { totalStock: number; };
 

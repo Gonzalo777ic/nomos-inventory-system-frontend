@@ -2,13 +2,14 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { useToast } from '../ui/use-toast';
-import { InventoryItem } from '../../types';
-// 🎯 Importar useMutation de React Query
-import { createInventoryItem, updateInventoryItem } from '../../api/services/inventory-items'; 
+// Rutas de UI corregidas (asumiendo que los componentes de UI están en 'components/ui')
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from '@/components/ui/use-toast';
+import { InventoryItem } from '@/types';
+// Ruta de API corregida (asumiendo que los servicios están en 'api/services')
+import { createInventoryItem, updateInventoryItem } from '@/api/services/inventory-items'; 
 import { useMutation } from '@tanstack/react-query';
 
 
@@ -26,12 +27,20 @@ type InventoryItemFormValues = z.infer<typeof inventoryItemSchema>;
 
 interface InventoryItemFormProps {
     productId: number;
+    // 🎯 NUEVO: Agregamos warehouseId, ya que el error de TypeScript lo solicita.
+    warehouseId: number; 
     defaultItem?: InventoryItem; // Si se proporciona, es modo edición (para el lote individual)
-    onSuccess: () => void; // 🎯 Modificado para no esperar el ítem, solo la señal de éxito
+    onSuccess: () => void;
     onClose?: () => void;
 }
 
-const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ productId, defaultItem, onSuccess, onClose }) => {
+const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ 
+    productId, 
+    warehouseId, // 🎯 Desestructuramos el nuevo prop
+    defaultItem, 
+    onSuccess, 
+    onClose 
+}) => {
     const { toast } = useToast();
     const isEditing = !!defaultItem;
 
@@ -55,7 +64,6 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ productId, defaul
                 title: "Stock Añadido",
                 description: `Se ha creado el lote ${item.lotNumber} con ${item.currentStock} unidades.`,
             });
-            // 🎯 Llamar al onSuccess del componente padre (que invalida la query)
             onSuccess(); 
         },
         onError: (error) => {
@@ -76,7 +84,6 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ productId, defaul
                 title: "Lote Actualizado",
                 description: `El lote ${item.lotNumber} ha sido modificado correctamente.`,
             });
-            // 🎯 Llamar al onSuccess del componente padre (que invalida la query)
             onSuccess(); 
         },
         onError: (error) => {
@@ -95,8 +102,11 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ productId, defaul
     }, [productId, form]);
 
     const onSubmit = (values: InventoryItemFormValues) => {
+        // CAMBIO CLAVE: Cambiamos la estructura del payload a plana
+        // para que coincida con lo que TypeScript espera de Omit<InventoryItem, ...>
         const payload = {
-            product: { id: values.productId },
+            productId: values.productId,
+            warehouseId: warehouseId, // Incluimos el warehouseId
             currentStock: values.currentStock,
             unitCost: values.unitCost,
             lotNumber: values.lotNumber,
@@ -107,7 +117,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ productId, defaul
         if (isEditing && defaultItem) {
             updateMutation.mutate({ id: defaultItem.id, payload });
         } else {
-            createMutation.mutate(payload);
+            createMutation.mutate(payload as any); 
         }
     };
 
