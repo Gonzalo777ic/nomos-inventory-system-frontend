@@ -1,7 +1,7 @@
 import { http } from '../http';
 import { Supplier } from '../../types'; // Importamos la definición de Supplier
 
-const API_BASE_URL = '/inventory/suppliers'; // Ruta base para el recurso Supplier
+const API_BASE_URL = '/v1/suppliers'; // Ruta base para el recurso Supplier
 
 /**
  * Servicio de API para gestionar las operaciones CRUD de la entidad Supplier (Proveedor).

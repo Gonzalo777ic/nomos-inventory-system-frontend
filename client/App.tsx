@@ -5,7 +5,7 @@ import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import AuthAxiosProvider from './components/AuthAxiosProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/auth'; 
-import { Toaster } from 'react-hot-toast'; // 🎯 Importar Toaster
+import { Toaster } from 'react-hot-toast'; 
 
 // Importaciones de páginas y layout
 import Index from './pages/Index';
@@ -20,11 +20,33 @@ import Suppliers from './pages/Suppliers';
 import NotFound from './pages/NotFound';
 import Layout from './components/layout/Layout';
 
+// Importaciones de NUEVAS páginas placeholder
+import Purchases from './pages/Purchases';
+import Quotations from './pages/Quotations';
+import Promotions from './pages/Promotions';
+import Collections from './pages/Collections';
+import Returns from './pages/Returns';
+import ShippingGuides from './pages/ShippingGuides';
+import Deliveries from './pages/Deliveries';
+import RealtimeLocation from './pages/RealtimeLocation';
+import Users from './pages/Users';
+import Clients from './pages/Clients';
+import Brands from './pages/Brands';
+import Categories from './pages/Categories';
+import UOM from './pages/UOM';
+import Attributes from './pages/Attributes';
+import Taxes from './pages/Taxes';
+import Announcements from './pages/Announcements';
+import Movements from './pages/Movements';
+import Audit from './pages/Audit';
+import StoreSchedule from './pages/StoreSchedule';
+
+
 const queryClient = new QueryClient();
 
 const LoadingScreen = () => (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-xl font-medium text-emerald-600">Cargando aplicación...</div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-xl font-medium text-emerald-600 dark:text-emerald-400">Cargando aplicación...</div>
     </div>
 );
 
@@ -33,18 +55,15 @@ const LoadingScreen = () => (
 const AuthSync = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, user, getAccessTokenSilently, isLoading, logout: auth0LogoutFunc } = useAuth0();
     const syncAuth = useAuthStore((state) => state.syncAuth);
-    const setAuth0Logout = useAuthStore((state) => state.setLogoutFunction); // Nueva acción
+    const setAuth0Logout = useAuthStore((state) => state.setLogoutFunction); 
     
     useEffect(() => {
         if (!isLoading) {
-            // 🎯 CORRECCIÓN CLAVE 1: Inyectar la función de Auth0 logout en la store
             setAuth0Logout(auth0LogoutFunc);
             
-            // Sincroniza el estado de Auth0 con tu store de Zustand
             syncAuth(isAuthenticated, user); 
             
             if (isAuthenticated) {
-                // Si está autenticado, intenta obtener el token y guardarlo
                 getAccessTokenSilently()
                     .then(token => {
                         useAuthStore.getState().setToken(token);
@@ -66,7 +85,7 @@ const AppContent = () => {
     }
 
     if (error) {
-        return <div className="p-8 text-red-600 font-bold">Error de Autenticación: {error.message}</div>;
+        return <div className="p-8 text-red-600 font-bold dark:text-red-400">Error de Autenticación: {error.message}</div>;
     }
     
     return (
@@ -91,6 +110,38 @@ const AppContent = () => {
                                 <Route path="/alerts" element={<Alerts />} />
                                 <Route path="/suppliers" element={<Suppliers />} />
                                 <Route path="/app" element={<Dashboard />} /> 
+                                
+                                {/* --- RUTAS AÑADIDAS DEL SIDEBAR --- */}
+                                
+                                {/* Inventario y Abastecimiento */}
+                                <Route path="/purchases" element={<Purchases />} />
+                                
+                                {/* Ventas y Caja */}
+                                <Route path="/quotations" element={<Quotations />} />
+                                <Route path="/promotions" element={<Promotions />} />
+                                <Route path="/collections" element={<Collections />} />
+                                <Route path="/returns" element={<Returns />} />
+                                
+                                {/* Logística y Envíos */}
+                                <Route path="/shipping-guides" element={<ShippingGuides />} />
+                                <Route path="/deliveries" element={<Deliveries />} />
+                                <Route path="/realtime-location" element={<RealtimeLocation />} />
+                                
+                                {/* Maestros y Configuración */}
+                                <Route path="/users" element={<Users />} />
+                                <Route path="/clients" element={<Clients />} />
+                                <Route path="/brands" element={<Brands />} />
+                                <Route path="/categories" element={<Categories />} />
+                                <Route path="/uom" element={<UOM />} />
+                                <Route path="/attributes" element={<Attributes />} />
+                                <Route path="/taxes" element={<Taxes />} />
+                                <Route path="/announcements" element={<Announcements />} />
+
+                                {/* Reportes y Sistema */}
+                                <Route path="/movements" element={<Movements />} />
+                                <Route path="/audit" element={<Audit />} />
+                                <Route path="/store-schedule" element={<StoreSchedule />} />
+
                             </Route>
                         </Routes>
                     </BrowserRouter>
@@ -120,7 +171,6 @@ const App = () => {
             cacheLocation="localstorage"
         >
             <AppContent />
-            {/* 🎯 CORRECCIÓN CLAVE 2: Colocar el Toaster aquí */}
             <Toaster 
                 position="bottom-right" 
                 containerClassName="p-4"
