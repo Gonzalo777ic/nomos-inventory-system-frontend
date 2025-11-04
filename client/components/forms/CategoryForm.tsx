@@ -42,6 +42,7 @@ export type CategoryFormValues = z.infer<typeof CategorySchema>;
 
 interface CategoryFormProps {
   initialData?: Category | null;
+  categories: Category[];
   onSuccess: () => void;
   onClose: () => void;
 }
