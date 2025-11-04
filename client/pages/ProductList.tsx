@@ -125,7 +125,7 @@ const ProductList: React.FC = () => {
     };
 
     if (isLoadingProducts) {
-        return <div className="p-6 flex justify-center items-center h-64"><Loader2 className="w-8 h-8 animate-spin text-emerald-600" /> <span className="ml-3 text-lg">Cargando catálogo...</span></div>;
+        return <div className="p-6 flex justify-center items-center h-64 dark:text-gray-300"><Loader2 className="w-8 h-8 animate-spin text-emerald-600" /> <span className="ml-3 text-lg">Cargando catálogo...</span></div>;
     }
 
     if (isError) {
@@ -133,12 +133,14 @@ const ProductList: React.FC = () => {
     }
 
     return (
-        <div className="p-6 space-y-6 bg-gray-50 min-h-screen"> 
+        // APLICACIÓN DEL MODO OSCURO EN EL CONTENEDOR PRINCIPAL
+        <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"> 
             
             {/* Modal/Sheet de Creación/Edición de Producto (RESTAURADO) */}
             {isFormOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-lg w-full">
+                    {/* El formulario ya usa dark:bg-gray-900 en su interior */}
+                    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-lg w-full"> 
                         {/* El formulario recibe un 'Product' (entidad base con FKs) */}
                         <ProductForm 
                             isOpen={isFormOpen}
@@ -150,7 +152,7 @@ const ProductList: React.FC = () => {
                 </div>
             )}
 
-            {/* Modal de Confirmación de Eliminación (RESTAURADO) */}
+            {/* Modal de Confirmación de Eliminación (YA CORREGIDO) */}
             {isDeleteConfirmOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
@@ -185,14 +187,16 @@ const ProductList: React.FC = () => {
             
             {/* Encabezado y Acciones */}
             <div className="flex justify-between items-center pb-4">
-                <h1 className="text-3xl font-bold text-gray-900">Catálogo de Productos</h1>
+                {/* TEXTO CORREGIDO PARA MODO OSCURO */}
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Catálogo de Productos</h1>
                 <div className="flex space-x-4">
                     {/* Barra de búsqueda adoptada del Inventory */}
                     <div className="relative flex items-center w-full max-w-xs">
                         <Search className="absolute left-3 h-4 w-4 text-gray-400" />
+                        {/* INPUT CORREGIDO PARA MODO OSCURO */}
                         <Input
                             placeholder="Buscar producto, SKU o marca..."
-                            className="pl-9 bg-white border-gray-300 focus:border-emerald-500"
+                            className="pl-9 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 focus:border-emerald-500"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -208,32 +212,37 @@ const ProductList: React.FC = () => {
             </div>
 
             {/* Tabla de Productos (Estilo Unificado) */}
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+            {/* FONDO Y SOMBRA CORREGIDOS PARA MODO OSCURO */}
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl overflow-hidden">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-gray-100 hover:bg-gray-100/80">
-                            <TableHead className="w-10">Imagen</TableHead>
-                            <TableHead className="w-[100px]">SKU</TableHead>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>Marca</TableHead>
-                            <TableHead>Categoría</TableHead>
-                            <TableHead className="w-[100px]">U. Medida</TableHead>
-                            <TableHead className="text-right">Precio</TableHead>
-                            <TableHead className="text-center w-[120px]">Stock</TableHead>
-                            <TableHead>Proveedor</TableHead>
-                            <TableHead className="text-center w-[100px]">Acciones</TableHead>
+                        {/* CABECERA DE TABLA CORREGIDA PARA MODO OSCURO */}
+                        <TableRow className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-100/80 dark:hover:bg-gray-700/80">
+                            {/* TEXTO DE CABECERA CORREGIDO PARA MODO OSCURO */}
+                            <TableHead className="w-10 text-gray-600 dark:text-gray-400">Imagen</TableHead>
+                            <TableHead className="w-[100px] text-gray-600 dark:text-gray-400">SKU</TableHead>
+                            <TableHead className="text-gray-600 dark:text-gray-400">Nombre</TableHead>
+                            <TableHead className="text-gray-600 dark:text-gray-400">Marca</TableHead>
+                            <TableHead className="text-gray-600 dark:text-gray-400">Categoría</TableHead>
+                            <TableHead className="w-[100px] text-gray-600 dark:text-gray-400">U. Medida</TableHead>
+                            <TableHead className="text-right text-gray-600 dark:text-gray-400">Precio</TableHead>
+                            <TableHead className="text-center w-[120px] text-gray-600 dark:text-gray-400">Stock</TableHead>
+                            <TableHead className="text-gray-600 dark:text-gray-400">Proveedor</TableHead>
+                            <TableHead className="text-center w-[100px] text-gray-600 dark:text-gray-400">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {isStockLoading ? (
                             <TableRow>
-                                <TableCell colSpan={10} className="text-center py-10 text-base text-indigo-500">
+                                {/* TEXTO DE CARGA CORREGIDO */}
+                                <TableCell colSpan={10} className="text-center py-10 text-base text-indigo-500 dark:text-indigo-400">
                                     <Loader2 className="h-5 w-5 mr-3 inline-block animate-spin" /> Calculando existencias...
                                 </TableCell>
                             </TableRow>
                         ) : filteredProducts.length > 0 ? (
                             filteredProducts.map((product) => (
-                                <TableRow key={product.id} className="hover:bg-emerald-50/20 transition-colors duration-150">
+                                // FILA CORREGIDA PARA MODO OSCURO Y SINTAXIS
+                                <TableRow key={product.id} className="border-gray-200 dark:border-gray-800 hover:bg-emerald-50/20 dark:hover:bg-gray-800 transition-colors duration-150">
                                     <TableCell>
                                         <img 
                                             src={product.imageUrl} 
@@ -246,12 +255,13 @@ const ProductList: React.FC = () => {
                                             }}
                                         />
                                     </TableCell>
-                                    <TableCell className="font-medium text-gray-900">{product.sku}</TableCell>
-                                    <TableCell className="font-semibold text-gray-900">{product.name}</TableCell>
-                                    <TableCell className="text-gray-700">{product.brandName}</TableCell>
-                                    <TableCell className="text-gray-600">{product.categoryName}</TableCell>
-                                    <TableCell className="text-gray-600">{product.unitOfMeasureName}</TableCell>
-                                    <TableCell className="text-right font-mono">${product.price.toFixed(2)}</TableCell>
+                                    {/* TEXTO DE CELDAS CORREGIDO PARA MODO OSCURO */}
+                                    <TableCell className="font-medium text-gray-900 dark:text-gray-100">{product.sku}</TableCell>
+                                    <TableCell className="font-semibold text-gray-900 dark:text-gray-100">{product.name}</TableCell>
+                                    <TableCell className="text-gray-700 dark:text-gray-300">{product.brandName}</TableCell>
+                                    <TableCell className="text-gray-600 dark:text-gray-400">{product.categoryName}</TableCell>
+                                    <TableCell className="text-gray-600 dark:text-gray-400">{product.unitOfMeasureName}</TableCell>
+                                    <TableCell className="text-right font-mono text-gray-900 dark:text-gray-100">${product.price.toFixed(2)}</TableCell>
                                     <TableCell className="text-center">
                                         <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-sm ${
                                             product.currentStock === 0 ? 'bg-red-400 text-white' : 
@@ -261,14 +271,14 @@ const ProductList: React.FC = () => {
                                             {product.currentStock} 
                                         </span>
                                     </TableCell> 
-                                    <TableCell className="text-gray-700">{product.supplierName}</TableCell>
+                                    <TableCell className="text-gray-700 dark:text-gray-300">{product.supplierName}</TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex justify-center space-x-2">
                                             <Button 
                                                 variant="ghost" 
                                                 size="icon"
                                                 onClick={() => handleOpenForm(product)}
-                                                className="text-indigo-600 hover:bg-indigo-100"
+                                                className="text-indigo-600 hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-gray-700"
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </Button>
@@ -276,7 +286,7 @@ const ProductList: React.FC = () => {
                                                 variant="ghost" 
                                                 size="icon"
                                                 onClick={() => product.id && handleConfirmDelete(product)}
-                                                className="text-red-600 hover:bg-red-100"
+                                                className="text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-gray-700"
                                                 disabled={deleteMutation.isPending}
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -287,7 +297,8 @@ const ProductList: React.FC = () => {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={10} className="px-6 py-10 text-center text-gray-500">
+                                {/* TEXTO DE NO ENCONTRADO CORREGIDO */}
+                                <TableCell colSpan={10} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                     No hay productos que coincidan con la búsqueda.
                                 </TableCell>
                             </TableRow>

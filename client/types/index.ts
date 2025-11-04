@@ -3,7 +3,7 @@
  * ENTIDADES MAESTRAS DEL INVENTORY-SERVICE
  * ====================================================================
  */
-
+import { z } from 'zod';
 // 1. NUEVA ENTIDAD: Brand (Marca)
 export type Brand = {
   id: number;
@@ -207,3 +207,15 @@ export type User = {
     name?: string;
     role?: "admin" | "seller";
 };
+
+
+
+export const SupplierSchema = z.object({
+    id: z.number().int().positive().optional(),
+    name: z.string().min(2, { message: "El nombre de la compañía es obligatorio." }).max(150),
+    taxId: z.string().min(5, { message: "El ID Fiscal (RUC/NIT) es obligatorio." }).max(50),
+    email: z.string().email({ message: "El correo electrónico no es válido." }),
+    phone: z.string().min(8, { message: "El teléfono debe tener al menos 8 dígitos." }).max(20),
+    address: z.string().min(5, { message: "La dirección es obligatoria." }).max(250),
+    contactName: z.string().min(3, { message: "El nombre del contacto es obligatorio." }).max(100),
+});
