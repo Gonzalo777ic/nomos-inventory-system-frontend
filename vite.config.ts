@@ -10,7 +10,8 @@ export default defineConfig(({ mode }) => ({
     port: 8081,
     cors: true,
     fs: {
-      allow: ["./client", "./shared"],
+      // ⬇️ MODIFICACIÓN AQUÍ: Añadimos '..' para permitir el acceso a node_modules de pnpm
+      allow: ["./client", "./shared", ".."],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
     // Configuración del proxy para redirigir las llamadas a la API
