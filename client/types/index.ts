@@ -26,6 +26,9 @@ export type Category = {
   name: string;
   description?: string;
   parent?: Category | null; 
+  
+  // AÑADIDO: Campo para almacenar subcategorías al mapear a formato de árbol
+  children?: Category[]; 
 };
 // 4. Supplier (Proveedor)
 export type Supplier = {

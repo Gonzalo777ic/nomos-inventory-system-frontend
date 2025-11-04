@@ -23,6 +23,7 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.8.0",
     "axios": "^1.12.2",
+    "d3": "^7.9.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "react-hot-toast": "^2.6.0",
