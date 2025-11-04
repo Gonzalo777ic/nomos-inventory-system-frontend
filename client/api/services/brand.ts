@@ -1,7 +1,7 @@
 import { http } from '../http';
 import { Brand } from '../../types'; // 🎯 Importamos la definición de Brand
 
-const API_BASE_URL = '/inventory/brands'; // Ruta base para el recurso Brand
+const API_BASE_URL = '/masters/brands'; // Ruta base para el recurso Brand
 
 /**
  * Servicio de API para gestionar las operaciones CRUD de la entidad Brand (Marca).

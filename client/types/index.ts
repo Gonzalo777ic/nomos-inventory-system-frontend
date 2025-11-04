@@ -24,9 +24,9 @@ export type UnitOfMeasure = {
 export type Category = {
   id: number;
   name: string;
-  parentId?: number; // FK recursiva a Category (null si es raíz)
+  description?: string;
+  parent?: Category | null; 
 };
-
 // 4. Supplier (Proveedor)
 export type Supplier = {
   id: number;
@@ -219,3 +219,34 @@ export const SupplierSchema = z.object({
     address: z.string().min(5, { message: "La dirección es obligatoria." }).max(250),
     contactName: z.string().min(3, { message: "El nombre del contacto es obligatorio." }).max(100),
 });
+
+
+
+// Esquema de validación para la Unidad de Medida (UOM)
+export const UnitOfMeasureSchema = z.object({
+    name: z.string().min(2, "El nombre de la unidad es requerido y debe tener al menos 2 caracteres.").max(50, "El nombre no puede exceder los 50 caracteres."),
+    // Corregido: Usamos 'abbreviation' en lugar de 'symbol'
+    abbreviation: z.string().min(1, "La abreviatura es requerida.").max(10, "La abreviatura no puede exceder los 10 caracteres."),
+    // Eliminado: El campo 'description' no existe en la entidad conceptual
+});
+
+// Tipo derivado del esquema para uso en el formulario (sin el ID)
+export type UnitOfMeasureFormValues = z.infer<typeof UnitOfMeasureSchema>;
+
+
+export const BrandSchema = z.object({
+    // Nombre es requerido y debe ser único
+    name: z.string().min(2, "El nombre de la marca es obligatorio.").max(150),
+    
+    // Código es opcional
+    code: z.string().max(20, "El código no puede exceder los 20 caracteres.").optional().nullable(),
+    
+    // Website es opcional, pero si existe debe ser una URL válida
+    website: z.string().max(255).url("Debe ser una URL válida (Ej: https://marca.com)").optional().nullable().or(z.literal('')),
+    
+    // Logo URL es opcional, pero si existe debe ser una URL válida
+    logoUrl: z.string().max(255).url("Debe ser una URL válida para la imagen").optional().nullable().or(z.literal('')),
+});
+
+// Tipo derivado del esquema para el formulario Brand (Omit<Brand, 'id'>)
+export type BrandFormValues = z.infer<typeof BrandSchema>;
