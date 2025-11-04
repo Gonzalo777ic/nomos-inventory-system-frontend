@@ -14,6 +14,7 @@ import {
   FolderTree,
   List,
   GitFork,
+  AlertTriangle,
 } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
@@ -36,6 +37,7 @@ import {
 import CategoryForm from "../components/forms/CategoryForm";
 import CategoryTreeViewer from "../components/CategoryTreeViewer";
 import { listToTree } from "../utils/categoryMappers";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'; 
 
 const Categories: React.FC = () => {
   const queryClient = useQueryClient();
@@ -328,6 +330,66 @@ const Categories: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      
+      {/* 🟢 DIALOG/MODAL PARA EL FORMULARIO (Componente Añadido) */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
+          <DialogHeader>
+            <DialogTitle className="dark:text-gray-100">
+              {selectedCategory ? "Editar Categoría" : "Crear Nueva Categoría"}
+            </DialogTitle>
+          </DialogHeader>
+          <CategoryForm
+            initialData={selectedCategory}
+            onSuccess={handleFormClose} 
+            onClose={handleFormClose}
+            categories={categories} // Aunque se hace query interna, es bueno tenerla por si acaso.
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* 🔴 DIALOG/MODAL DE CONFIRMACIÓN DE ELIMINACIÓN (Componente Añadido) */}
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-red-500">
+              <AlertTriangle className="mr-2 h-5 w-5" /> Confirmar Eliminación
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-gray-700 dark:text-gray-300">
+              ¿Está seguro que desea eliminar la categoría{" "}
+              <span className="font-bold text-gray-900 dark:text-gray-100">
+                "{categoryToDeleteName}"
+              </span>
+              ?
+            </p>
+            <p className="text-sm text-red-500">
+              ¡Esta acción no se puede deshacer!
+            </p>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteConfirmOpen(false)}
+              disabled={deleteMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteExecute}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Eliminar"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
