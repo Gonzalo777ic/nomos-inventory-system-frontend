@@ -26,6 +26,7 @@ import {
     Clock, // Horarios
     AlertTriangle, // Alertas
     Briefcase, // 🎯 NUEVO ÍCONO PARA MARCAS
+    Warehouse, // 🎯 NUEVO ÍCONO PARA ALMACÉN
 } from 'lucide-react'; 
 
 // Definimos el tipo para las props de NavItem
@@ -77,6 +78,8 @@ export const SidebarNavigation: React.FC = () => {
                 {[
                     { to: "/products", label: "Catálogo de Productos", icon: <ShoppingCart className="h-4 w-4" /> },
                     { to: "/inventory", label: "Inventario Físico (Lotes)", icon: <Archive className="h-4 w-4" /> },
+                    // 🎯 AÑADIDO: Gestión de Almacenes
+                    { to: "/warehouses", label: "Almacenes y Ubicaciones", icon: <Warehouse className="h-4 w-4" /> }, 
                     { to: "/suppliers", label: "Proveedores", icon: <Users className="h-4 w-4" /> },
                     { to: "/purchases", label: "Órdenes de Abastecimiento", icon: <ClipboardList className="h-4 w-4" /> },
                 ] as SubMenuItem[]}

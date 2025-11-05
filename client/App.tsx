@@ -40,6 +40,8 @@ import Announcements from './pages/Announcements';
 import Movements from './pages/Movements';
 import Audit from './pages/Audit';
 import StoreSchedule from './pages/StoreSchedule';
+// 🎯 NUEVA IMPORTACIÓN: Warehouse
+import Warehouses from './pages/Warehouses'; 
 
 
 const queryClient = new QueryClient();
@@ -115,6 +117,8 @@ const AppContent = () => {
                                 
                                 {/* Inventario y Abastecimiento */}
                                 <Route path="/purchases" element={<Purchases />} />
+                                {/* 🎯 NUEVA RUTA: Warehouse */}
+                                <Route path="/warehouses" element={<Warehouses />} />
                                 
                                 {/* Ventas y Caja */}
                                 <Route path="/quotations" element={<Quotations />} />
