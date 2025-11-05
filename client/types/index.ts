@@ -116,24 +116,62 @@ export type InventoryItem = {
     entryDate: string; // Si el backend lo retorna, descomentar
 }
 
-// 10. PurchaseOrder (Pedidos a proveedores)
-export type PurchaseOrder = {
-    id: number;
-    supplierId: number; // FK a Supplier
-    orderDate: string; // LocalDate
-    deliveryDate: string; // LocalDate (Fecha esperada)
-    totalAmount: number; // Double
-    status: 'PENDING' | 'PARTIAL' | 'COMPLETE' | string; // Ejemplo de estados
-}
+// --- TIPOS DE BASE DE DATOS/API (ASUMIDOS) ---
 
-// 11. PurchaseOrderDetail (Detalle de la Orden de Compra)
+// 1. OrderStatus (Sincronizado con el Enum de Java)
+export type JavaOrderStatus = 'PENDIENTE' | 'RECIBIDO_PARCIAL' | 'COMPLETO' | 'CANCELADO';
+
+// Tipo que incluye los estados de la UI/Formulario
+export type OrderStatus = JavaOrderStatus | 'BORRADOR' | 'ENVIADA'; 
+
 export type PurchaseOrderDetail = {
     id: number;
-    purchaseOrderId: number; // FK a PurchaseOrder
-    productId: number; // FK a Product
-    quantity: number; // Integer
-    unitCost: number; // Double
+    purchaseOrderId: number; 
+    product: Product; 
+    quantity: number;
+    unitCost: number;
 }
+
+export type PurchaseOrder = {
+    id: number;
+    // ❌ Antes: supplierId: number; 
+    // ✅ Ahora: Si el API de GET devuelve el objeto anidado 'supplier':
+    supplier: Supplier; // <-- ¡CLAVE! Se asume que trae el objeto completo
+    
+    // Si necesitas el supplierId por separado para otras vistas, puedes dejarlo:
+    // supplierId: number; 
+    
+    orderDate: string; 
+    deliveryDate: string; 
+    totalAmount: number;
+    status: JavaOrderStatus; 
+    details: PurchaseOrderDetail[]; 
+}
+
+/**
+ * TIPOS DE PAYLOAD (API REQUEST - Solución para relaciones ManyToOne)
+ */
+
+type IdPayload = { id: number };
+
+// 4. PurchaseOrderDetailPayload
+export type PurchaseOrderDetailPayload = {
+    product: IdPayload; 
+    quantity: number;
+    unitCost: number;
+    // No necesita id, purchaseOrderId, ni productId
+}
+
+
+// 5. PurchaseOrderPayload (El status enviado debe ser de tipo JavaOrderStatus)
+export type PurchaseOrderPayload = {
+    supplier: IdPayload; 
+    orderDate: string;
+    deliveryDate: string;
+    totalAmount: number;
+    status: JavaOrderStatus; // ⭐ CLAVE: Solo enviamos los valores válidos de Java.
+    details: PurchaseOrderDetailPayload[]; 
+};
 
 // 12. InventoryMovement (Trazabilidad histórica de stock)
 export type InventoryMovement = {
