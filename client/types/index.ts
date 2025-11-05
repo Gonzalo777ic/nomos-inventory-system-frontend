@@ -64,6 +64,7 @@ export type Warehouse = {
     isMain: boolean;
 }
 
+
 /**
  * ====================================================================
  * TRANSACCIONALES CORE
