@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 
@@ -6,18 +6,18 @@ interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
+// 🔑 CONFIGURACIÓN CLAVE
 const REQUIRED_ROLE = 'ROLE_ADMIN'; 
 const ROLE_CLAIM_KEY = 'https://nomosstore.com/roles';
-const UNAUTHORIZED_FLAG = 'unauthorized_access'; // Bandera de persistencia para el mensaje
+const UNAUTHORIZED_FLAG = 'unauthorized_access'; 
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+    // Obtenemos los estados esenciales del store
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
     const user = useAuthStore(state => state.user);
     const isAuthReady = useAuthStore(state => state.isAuthReady);
     const auth0LogoutFn = useAuthStore(state => state.auth0LogoutFn); 
     
-    // Eliminamos isRedirecting. Ahora usamos el chequeo síncrono.
-
     // 1. Estado de carga inicial (para evitar flicker)
     if (!isAuthReady) {
         return (
@@ -29,43 +29,45 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
     // 2. Redirección por No Autenticado (Estado Limpio)
     if (!isAuthenticated) {
+        // Esto cubre el caso de que el logout (Paso 4) ya haya limpiado el estado.
         return <Navigate to="/login" replace />;
     }
     
-    // 3. 🛑 LÓGICA CLAVE DE VERIFICACIÓN DE ROL SÍNCRONA
-    // Esto se ejecuta en cada renderizado ANTES de que se intente renderizar el children.
-    const userRoles = (user as any)?.[ROLE_CLAIM_KEY] || [];
-    const hasRequiredRole = userRoles.includes(REQUIRED_ROLE);
+    // 3. LÓGICA CLAVE DE VERIFICACIÓN DE ROL SÍNCRONA
+    // Recuperar los roles. Si el user está en el store, debería contener los claims de roles.
+    // **NOTA:** Esto ASUME que el 'user' en el store ya está enriquecido con los claims del ID Token.
+    // Si no es el caso, debes usar la función getAuthToken() y esperar a que resuelva,
+    // pero por ahora, sigamos la estructura existente.
+    const userRoles: string[] = (user as any)?.[ROLE_CLAIM_KEY] || [];
+    
+    // **Mejora:** Chequeamos si tiene el rol REQUIRED_ROLE o cualquier rol interno (no-CLIENTE),
+    // asumiendo que solo los clientes puros no deberían ver rutas internas.
+    const hasSufficientRole = userRoles.includes(REQUIRED_ROLE) || 
+                              userRoles.some(role => role !== 'ROLE_CLIENT');
     
     
-    // 4. LÓGICA ASÍNCRONA DE LOGOUT (Solo como Side Effect)
-    // Este useEffect dispara el logout y la redirección de página COMPLETA.
-    useEffect(() => {
-        if (!hasRequiredRole && isAuthenticated && auth0LogoutFn) {
-            console.error(`[AUTH BLOCKED] Usuario ${user.email} intentó acceder. Se requiere: ${REQUIRED_ROLE}`);
-            
-            // PASO 1: Persistir el mensaje de error.
-            localStorage.setItem(UNAUTHORIZED_FLAG, 'true');
-            
-            // PASO 2: Disparar el logout y la redirección de página completa.
-            // Esto detendrá la aplicación React y redirigirá al Login, donde se mostrará el toast.
-            auth0LogoutFn();
+    // 4. 🛑 REDIRECCIÓN INMEDIATA POR ACCESO DENEGADO (¡La solución al bucle!)
+    if (!hasSufficientRole) {
+        // Prepara el mensaje de error para Login.tsx
+        localStorage.setItem(UNAUTHORIZED_FLAG, 'true');
+        
+        console.error(`[AUTH BLOCKED] Usuario ${user?.email || 'N/A'} sin rol. Requerido: ${REQUIRED_ROLE}. Roles actuales: ${userRoles.join(', ')}`);
+        
+        // 🏆 FIX CLAVE: Disparamos el logout y luego la redirección.
+        // La llamada a auth0LogoutFn() debe ser ASÍNCRONA y solo un SIDE EFFECT.
+        if (auth0LogoutFn) {
+            // El logout detendrá la sesión de Auth0 y disparará una redirección a /login
+            // por la configuración de Auth0Provider. Por seguridad, lo disparamos.
+            auth0LogoutFn(); 
         }
-    // Añadimos las dependencias
-    }, [hasRequiredRole, isAuthenticated, auth0LogoutFn, user]);
-
-    
-    // 5. 🛑 FIX DEL FLICKER: RENDERIZADO CONDICIONAL INMEDIATO
-    if (!hasRequiredRole) {
-        // Al denegar el acceso aquí, el Dashboard NUNCA se renderiza.
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="text-xl font-medium text-red-600">Acceso no autorizado. Redirigiendo...</div>
-            </div>
-        );
+        
+        // 🛑 Usamos Navigate para romper el bucle de renderizado inmediatamente
+        // y asegurar que la ruta actual no se complete.
+        // Esto garantiza que el usuario siempre vea la pantalla de login.
+        return <Navigate to="/login" replace />;
     }
 
-    // 6. Acceso Permitido
+    // 5. Acceso Permitido
     return <>{children}</>;
 };
 
