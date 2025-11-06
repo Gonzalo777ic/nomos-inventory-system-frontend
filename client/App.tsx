@@ -42,6 +42,7 @@ import Audit from './pages/Audit';
 import StoreSchedule from './pages/StoreSchedule';
 // 🎯 NUEVA IMPORTACIÓN: Warehouse
 import Warehouses from './pages/Warehouses'; 
+import PaymentMethods from './pages/PaymentMethods'; 
 
 
 const queryClient = new QueryClient();
@@ -139,6 +140,7 @@ const AppContent = () => {
                                 <Route path="/uom" element={<UOM />} />
                                 <Route path="/attributes" element={<Attributes />} />
                                 <Route path="/taxes" element={<Taxes />} />
+                                <Route path="/payment-methods" element={<PaymentMethods />} />
                                 <Route path="/announcements" element={<Announcements />} />
 
                                 {/* Reportes y Sistema */}

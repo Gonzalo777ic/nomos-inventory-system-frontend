@@ -14,7 +14,7 @@ import {
     Users, // Proveedores / Clientes / Usuarios
     ClipboardList, // Órdenes de Abastecimiento / Reportes / Registros
     Tag, // Promociones, Precios, Categorías
-    CreditCard, // Cobranzas, Métodos de pago
+    CreditCard, // Cobranzas
     RefreshCw, // Devoluciones
     Map, // Guías de Remisión / Ubicación
     PackageOpen, // Entregas / Delivery
@@ -27,6 +27,7 @@ import {
     AlertTriangle, // Alertas
     Briefcase, // 🎯 NUEVO ÍCONO PARA MARCAS
     Warehouse, // 🎯 NUEVO ÍCONO PARA ALMACÉN
+    Wallet,
 } from 'lucide-react'; 
 
 // Definimos el tipo para las props de NavItem
@@ -116,6 +117,7 @@ export const SidebarNavigation: React.FC = () => {
                     { to: "/uom", label: "Unidades de Medida", icon: <Scale className="h-4 w-4" /> },
                     { to: "/attributes", label: "Atributos de Producto", icon: <Ruler className="h-4 w-4" /> },
                     { to: "/taxes", label: "Tasas de Impuesto", icon: <Percent className="h-4 w-4" /> },
+                    { to: "/payment-methods", label: "Métodos de Pago", icon: <Wallet className="h-4 w-4" /> },
                     { to: "/announcements", label: "Anuncios y Comunicados", icon: <Megaphone className="h-4 w-4" /> },
                 ] as SubMenuItem[]}
             </SubMenu>
