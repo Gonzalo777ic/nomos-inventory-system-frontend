@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAuthStore } from '../store/auth';
-import { http } from '../api/http'; // Asegúrate que esta es tu instancia de Axios
+import { http } from '../api/http'; 
+import { httpStore } from '../api/httpStore'; // 🛑 IMPORTAR EL NUEVO CLIENTE 🛑
 
 /**
  * Componente que intercepta todas las peticiones de Axios y adjunta 
@@ -14,40 +15,41 @@ const AuthAxiosProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     useEffect(() => {
         console.log("[AXIOS] Configurando Interceptor. Token actual:", token ? "Presente" : "Ausente");
 
-        // 1. Elimina cualquier interceptor existente antes de añadir uno nuevo
-        // Esto evita múltiples interceptores si el componente se renderiza dos veces.
+        // 1. Limpia los interceptores existentes para evitar duplicados
         http.interceptors.request.clear();
+        httpStore.interceptors.request.clear(); // 🛑 LIMPIAR TAMBIÉN HTTPSTORE 🛑
 
         if (isAuthenticated && token) {
-            // 2. Añade el interceptor SÓLO si hay un usuario autenticado y un token.
-            const interceptor = http.interceptors.request.use(
-                (config) => {
-                    // Si la cabecera 'Authorization' no está definida, la establecemos.
-                    if (!config.headers.Authorization) {
-                        config.headers.Authorization = `Bearer ${token}`;
-                        console.log(`[AXIOS] 🔑 Adjuntando Token JWT a: ${config.url}`);
-                    }
-                    return config;
-                },
-                (error) => {
-                    // Manejo de errores de petición (ej. antes de ser enviada)
-                    return Promise.reject(error);
+            
+            const requestInterceptor = (config: any) => { // Usamos 'any' para evitar problemas de tipado
+                // Si la cabecera 'Authorization' no está definida, la establecemos.
+                if (!config.headers.Authorization) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                    console.log(`[AXIOS] 🔑 Adjuntando Token JWT a: ${config.url}`);
                 }
-            );
+                return config;
+            };
 
-            // 3. Función de limpieza para remover el interceptor cuando el componente se desmonte
+            const errorInterceptor = (error: any) => {
+                // Manejo de errores de petición
+                return Promise.reject(error);
+            };
+
+            // 🛑 2. AÑADE EL INTERCEPTOR A AMBOS CLIENTES 🛑
+            const interceptorIdHttp = http.interceptors.request.use(requestInterceptor, errorInterceptor);
+            const interceptorIdHttpStore = httpStore.interceptors.request.use(requestInterceptor, errorInterceptor);
+
+            // 3. Función de limpieza
             return () => {
-                http.interceptors.request.eject(interceptor);
-                console.log("[AXIOS] 🧹 Interceptor removido.");
+                http.interceptors.request.eject(interceptorIdHttp);
+                httpStore.interceptors.request.eject(interceptorIdHttpStore); // 🛑 REMOVER AMBOS 🛑
+                console.log("[AXIOS] 🧹 Interceptores removidos.");
             };
         }
         
-        // Si no hay token o no está autenticado, no añadimos el interceptor.
-        // Esto permite que peticiones a rutas públicas sigan funcionando, aunque aquí todas
-        // las rutas de la API están protegidas.
         return () => {};
 
-    }, [token, isAuthenticated]); // Se ejecuta cada vez que el token o el estado de autenticación cambia
+    }, [token, isAuthenticated]);
 
     return <>{children}</>;
 };
