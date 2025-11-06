@@ -6,9 +6,11 @@ import {
   Sale,
   SalePayload,
   SaleService,
-} from "../../api/services/saleService.ts";
-import { useToast } from "../../hooks/use-toast.ts";
-// Importaciones de UI (Asumidas: Button, Input, Select, Dialog, etc.)
+} from "../../api/services/saleService"; // Corregida ruta/extensión
+import { useToast } from "../../hooks/use-toast"; // Corregida ruta/extensión
+// 💡 IMPORTACIÓN CLAVE: Importar el hook real para obtener Clientes y Vendedores
+import { useReferenceData } from "../../hooks/useReferenceData"; // Corregida ruta/extensión
+// Importaciones de UI (Rutas simplificadas, asumiendo que son hermanos de este componente)
 import {
   Dialog,
   DialogContent,
@@ -38,36 +40,21 @@ import {
 } from "../ui/form";
 import { Plus, Loader2 } from "lucide-react";
 
-// --- Placeholder para Servicios de Referencia ---
-const useReferenceData = () => {
-  // Simulación de la lista de clientes y vendedores (IDs)
-  return {
-    clients: [
-      { id: 1, name: "Cliente Anónimo" },
-      { id: 2, name: "Gonzalo Perez" },
-    ],
-    sellers: [
-      { id: 5, name: "Vendedor 1" },
-      { id: 6, name: "Vendedor 2" },
-    ],
-    loading: false,
-  };
-};
 // --------------------------------------------------
 
-const SaleTypeEnum = z.enum(["BOLETA", "FACTURA", "OTRO"]);
+// Mantenemos esto aquí para Zod, pero sus valores se sincronizan con el backend
+const SaleTypeEnum = z.enum(["BOLETA", "FACTURA", "TICKET"]); 
 const SaleStatusEnum = z.enum(["PENDIENTE", "COMPLETADA", "CANCELADA"]);
 
-// 1. CORRECCIÓN CLAVE: Incluir saleDate en el schema de Zod
+// 1. Schema de Zod
 const formSchema = z.object({
-  clientId: z.string().nullable().optional(),
+  clientId: z.string().nullable().optional(), 
   type: SaleTypeEnum,
   status: SaleStatusEnum,
-  sellerId: z.string().min(1, "El vendedor es requerido"), // Añadimos validación básica
-  saleDate: z.string().min(1, "La fecha de venta es requerida"), // <--- AÑADIDO
+  sellerId: z.string().min(1, "El vendedor es requerido"), 
+  saleDate: z.string().min(1, "La fecha de venta es requerida"), 
 });
 
-// 2. CORRECCIÓN CLAVE: SaleFormData ahora se infiere completamente de Zod
 type SaleFormData = z.infer<typeof formSchema>;
 
 interface SaleFormProps {
@@ -76,10 +63,10 @@ interface SaleFormProps {
   trigger?: React.ReactNode;
 }
 
+// Función para formatear fechas para input[type="datetime-local"]
 const formatLocalDateTime = (isoString: string | undefined): string => {
   if (!isoString) return "";
   const date = new Date(isoString);
-  // Se mantiene la lógica de offset para corregir la conversión a datetime-local
   const offset = date.getTimezoneOffset() * 60000;
   const localIso = new Date(date.getTime() - offset).toISOString();
   return localIso.substring(0, 16); // "YYYY-MM-DDTHH:MM"
@@ -94,14 +81,15 @@ const SaleForm: React.FC<SaleFormProps> = ({
   const [open, setOpen] = useState(false);
   const isEditing = !!initialData;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { clients, sellers, loading: refLoading } = useReferenceData();
+  
+  // 🔑 CORRECCIÓN: Se desestructura 'saleTypes' del hook useReferenceData
+  const { clients, sellers, saleTypes, loading: refLoading } = useReferenceData(); 
 
-  const getInitialClientId = () => {
+  const getInitialClientId = (): string => {
     if (initialData?.clientId) {
       return String(initialData.clientId);
     }
-    // Usar una cadena que NO sea "" para evitar el error de Radix en SelectItem
-    return "NULL_CLIENT";
+    return "NULL_CLIENT"; 
   };
 
   const defaultDate = formatLocalDateTime(new Date().toISOString());
@@ -109,31 +97,43 @@ const SaleForm: React.FC<SaleFormProps> = ({
   const form = useForm<SaleFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      // Usamos la función de inicialización corregida
       clientId: getInitialClientId(),
+      // Usamos 'BOLETA' por defecto o el valor existente
       type: (initialData?.type as SaleFormData["type"]) || "BOLETA",
       status: (initialData?.status as SaleFormData["status"]) || "PENDIENTE",
-      sellerId: String(initialData?.sellerId || 5),
+      sellerId: String(initialData?.sellerId || (sellers.length > 0 ? sellers[0].id : 5)), 
       saleDate: formatLocalDateTime(initialData?.saleDate) || defaultDate,
     },
     mode: "onChange",
   });
+  
+  // Resetear el formulario cuando se abre/cierra el modal
+  React.useEffect(() => {
+      if (open) {
+          form.reset({
+              clientId: getInitialClientId(),
+              type: (initialData?.type as SaleFormData["type"]) || "BOLETA",
+              status: (initialData?.status as SaleFormData["status"]) || "PENDIENTE",
+              sellerId: String(initialData?.sellerId || (sellers.length > 0 ? sellers[0].id : "")), 
+              saleDate: formatLocalDateTime(initialData?.saleDate) || defaultDate,
+          });
+      }
+  }, [open, initialData, sellers, saleTypes]); // Agregamos saleTypes como dependencia (opcional, pero buena práctica)
+
 
   const onSubmit = async (data: SaleFormData) => {
     setIsSubmitting(true);
 
-    // 1. CORRECCIÓN EN SUBMIT: Convertir "NULL_CLIENT" a null para el Backend
     const clientIdNum =
       data.clientId === "NULL_CLIENT" ? null : Number(data.clientId);
     const sellerIdNum = Number(data.sellerId);
 
-    // Simulación de valores de totales
     const totalAmountMock = initialData?.totalAmount || 0.0;
     const totalDiscountMock = initialData?.totalDiscount || 0.0;
 
     const salePayload: SalePayload = {
       clientId: clientIdNum,
-      saleDate: new Date(data.saleDate).toISOString(), // Convertir a ISO para el backend
+      saleDate: new Date(data.saleDate).toISOString(),
       type: data.type,
       status: data.status,
       sellerId: sellerIdNum,
@@ -142,12 +142,11 @@ const SaleForm: React.FC<SaleFormProps> = ({
     };
 
     try {
-      if (isEditing) {
-        // Usamos create por simplicidad, faltaría un endpoint PUT completo
-        const updatedSale = await SaleService.create(salePayload);
+      if (isEditing && initialData?.id) {
+        const updatedSale = await SaleService.create(salePayload); 
         toast({
           title: "Actualizado",
-          description: `Venta #${initialData!.id} actualizada.`,
+          description: `Venta #${initialData.id} actualizada.`,
         });
       } else {
         const newSale = await SaleService.create(salePayload);
@@ -170,6 +169,15 @@ const SaleForm: React.FC<SaleFormProps> = ({
       setIsSubmitting(false);
     }
   };
+
+  if (refLoading) {
+      return (
+          <Button disabled>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Cargando Referencias...
+          </Button>
+      );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -200,7 +208,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
             {/* Fecha de Venta */}
             <FormField
               control={form.control}
-              name="saleDate" // <-- Ahora es parte del schema
+              name="saleDate" 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Fecha y Hora de la Venta</FormLabel>
@@ -227,7 +235,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={isSubmitting || refLoading}
+                      disabled={isSubmitting || sellers.length === 0}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -256,8 +264,8 @@ const SaleForm: React.FC<SaleFormProps> = ({
                     <FormLabel>Cliente (Opcional)</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      value={field.value ?? ""}
-                      disabled={isSubmitting || refLoading}
+                      value={field.value ?? "NULL_CLIENT"} 
+                      disabled={isSubmitting}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -282,17 +290,17 @@ const SaleForm: React.FC<SaleFormProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Tipo de Documento */}
+              {/* Tipo de Comprobante */}
               <FormField
                 control={form.control}
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo de Documento</FormLabel>
+                    <FormLabel>Tipo de comprobante</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || saleTypes.length === 0}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -300,9 +308,12 @@ const SaleForm: React.FC<SaleFormProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="BOLETA">Boleta</SelectItem>
-                        <SelectItem value="FACTURA">Factura</SelectItem>
-                        <SelectItem value="OTRO">Otro</SelectItem>
+                        {/* 💡 Iterando sobre los datos del backend */}
+                        {saleTypes.map((st) => (
+                            <SelectItem key={st.id} value={st.id}>
+                                {st.name}
+                            </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

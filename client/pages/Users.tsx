@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 
+// Tipos permitidos por el componente Badge (sin 'warning')
+type BadgeVariant = "default" | "destructive" | "secondary" | "outline";
+
 const Users: React.FC = () => {
     const [users, setUsers] = useState<InternalUser[]>([]);
     const [loading, setLoading] = useState(true);
@@ -30,12 +33,36 @@ const Users: React.FC = () => {
         fetchUsers();
     }, []);
 
-    // Función para obtener el color del rol
-    const getRoleVariant = (role: string) => {
-        if (role.includes('ADMIN')) return 'destructive';
-        if (role.includes('SELLER')) return 'default';
-        if (role.includes('INVENTORY')) return 'secondary';
-        return 'outline';
+    // Función para obtener la variante base de la Badge
+    const getRoleVariant = (role: string): BadgeVariant => {
+        const upperRole = role.toUpperCase();
+
+        if (upperRole.includes('ADMIN')) return 'destructive';
+        if (upperRole.includes('SELLER')) return 'default';
+        if (upperRole.includes('INVENTORY')) return 'secondary';
+        
+        // Para DELIVERY y CLIENT usaremos 'outline' o 'default' y manejaremos el color con getRoleClassName
+        if (upperRole.includes('DELIVERY')) return 'outline'; 
+
+        return 'outline'; // Para ROLE_CLIENT
+    };
+
+    // Función para obtener la clase Tailwind CSS específica para el color
+    const getRoleClassName = (role: string): string => {
+        const upperRole = role.toUpperCase();
+        
+        // Usamos una combinación de bg- y text- para crear un color similar al 'warning'
+        if (upperRole.includes('DELIVERY')) {
+            // Un color amarillo/naranja suave (ejemplo)
+            return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-300";
+        }
+        
+        // Si es ROLE_CLIENT, le damos un estilo verde/información suave
+        if (upperRole.includes('CLIENT')) {
+             return "bg-green-100 text-green-800 hover:bg-green-200 border-green-300";
+        }
+
+        return ""; // No aplicar clase adicional si la variante ya es suficiente
     };
 
     return (
@@ -66,13 +93,15 @@ const Users: React.FC = () => {
                                 {users.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell className="font-medium">U-{user.id}</TableCell>
-                                        {/* DEBE LEER user.username */}
                                         <TableCell>{user.username}</TableCell> 
                                         <TableCell>
                                             <div className="flex space-x-1">
-                                                {/* DEBE LEER user.roles (ya corregido el .map()) */}
                                                 {(user.roles || []).map(role => (
-                                                    <Badge key={role} variant={getRoleVariant(role)} className="uppercase">
+                                                    <Badge 
+                                                        key={role} 
+                                                        variant={getRoleVariant(role)} 
+                                                        className={`uppercase ${getRoleClassName(role)}`} // 🔑 Clases condicionales aquí
+                                                    >
                                                         {role.replace('ROLE_', '')}
                                                     </Badge>
                                                 ))}
