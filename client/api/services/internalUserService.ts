@@ -1,8 +1,6 @@
-import { httpAuth } from '../httpAuth'; // 💡 Importa el nuevo cliente de Axios para AUTH
-// Importaciones de tipos de ejemplo no son necesarias aquí, las eliminamos.
+// client/api/services/internalUserService.ts
 
-// ⚠️ Definición de la URL base RELATIVA al baseURL de httpAuth
-
+import { httpAuth } from '../httpAuth'; 
 
 const AUTH_API_BASE_URL = 'http://localhost:8080/api/auth/users'; 
 const ROLES_API_BASE_URL = 'http://localhost:8080/api/auth/roles'; 
@@ -13,13 +11,9 @@ export interface InternalUser {
     id: number;
     username: string; // Email
     auth0Id: string | null;
-    roles: string[]; // Nombres de los roles (ej: "ROLE_ADMIN", "ROLE_SELLER")
-}
-
-export interface InternalUserPayload {
-    username: string;
-    roleNames: string[]; // Roles a asignar/actualizar
-    password?: string; // Opcional
+    firstName?: string; // Asumo que estos campos están en el DTO para usar en el nombre
+    lastName?: string;
+    roles: string[]; // Nombres de los roles (ej: "ADMIN", "SELLER")
 }
 
 // -----------------------------------------------------------
@@ -30,9 +24,27 @@ export const InternalUserService = {
      * GET /api/auth/users/internal
      */
     getAll: async (): Promise<InternalUser[]> => {
-        // httpAuth.get('/auth/users/internal') -> http://localhost:8080/api/auth/users/internal
         const response = await httpAuth.get<InternalUser[]>(`${AUTH_API_BASE_URL}/internal`);
         return response.data;
+    },
+
+    /**
+     * Obtiene solo los usuarios con el rol de Vendedor.
+     * Reutiliza getAll y filtra en el frontend.
+     */
+    getSellers: async (): Promise<Array<{ id: number; name: string }>> => {
+        const users = await InternalUserService.getAll();
+        const SELLER_ROLE_NAME = "ROLE_SELLER"; 
+
+        return users
+            .filter(user => user.roles.includes(SELLER_ROLE_NAME))
+            .map(user => ({
+                id: user.id,
+                // Combina nombre y apellido si están disponibles, sino usa el username
+                name: (user.firstName && user.lastName) 
+                    ? `${user.firstName} ${user.lastName}` 
+                    : user.username
+            }));
     },
 
     /**
@@ -40,7 +52,6 @@ export const InternalUserService = {
      * GET /api/auth/roles 
      */
     getAvailableRoles: async (): Promise<string[]> => {
-        // httpAuth.get('http://localhost:8080/api/auth/roles') -> ¡FUNCIONA!
         const response = await httpAuth.get<string[]>(ROLES_API_BASE_URL); 
         return response.data.filter((role: string) => role !== 'ROLE_CLIENT'); 
     },

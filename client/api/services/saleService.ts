@@ -21,6 +21,12 @@ export interface Sale {
 // 🎯 Payload para la creación/edición
 export type SalePayload = Omit<Sale, 'id'>;
 
+
+export interface SaleTypeRef {
+    key: string;
+    description: string;
+}
+
 // 🎯 DTO para la Creación completa (Asumiendo que incluiremos detalles más tarde)
 // Por ahora, solo usamos Sale, pero esto es lo que se usaría en un sistema real:
 // export interface SaleCreationDTO extends SalePayload {
@@ -56,6 +62,15 @@ export const SaleService = {
         });
         return response.data;
     },
+
+    /**
+     * Obtener los tipos de comprobante de venta desde el backend.
+     * GET /api/store/sales/types
+     */
+    getSaleTypes: async (): Promise<SaleTypeRef[]> => {
+        const response = await httpStore.get<SaleTypeRef[]>(`${SALES_URL}/types`);
+        return response.data;
+    }
     
     // No se implementará el update completo de la cabecera, solo el estado, por la complejidad del flujo de ventas.
 };
