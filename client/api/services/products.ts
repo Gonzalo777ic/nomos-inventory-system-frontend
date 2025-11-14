@@ -11,9 +11,18 @@ const API_BASE_URL = '/inventory/products'; // Ruta base para el recurso Product
 
 // 1. Obtener lista de productos (GET)
 export const getProducts = async (): Promise<Product[]> => {
-    // Retorna la lista de productos con las IDs de sus relaciones (brandId, categoryId, etc.)
-    const response = await http.get<Product[]>(API_BASE_URL);
-    return response.data;
+    try {
+        const response = await http.get<Product[]>(API_BASE_URL);
+        
+        // 🔑 LOG DE DEPURACIÓN CLAVE: Muestra la data bruta recibida de la API
+        console.log("[Products API] 📥 Data recibida de /inventory/products:", response.data);
+        
+        return response.data;
+    } catch (error) {
+        // 🔑 LOG de error
+        console.error("[Products API] 🚨 Error al obtener productos:", error);
+        throw error;
+    }
 };
 
 // 2. Crear un nuevo producto (POST)

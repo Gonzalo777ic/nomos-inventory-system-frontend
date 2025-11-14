@@ -1,0 +1,62 @@
+import { httpStore } from "../httpStore"; // Asumo que usas httpStore como en saleService.ts
+
+const BASE_URL = 'http://localhost:8083/api/store';
+const DETAIL_API_BASE_URL = `${BASE_URL}/saledetails`; // Usando la ruta base para consistencia
+
+
+/**
+ * Interfaz que representa un ítem (detalle) de una venta.
+ * Coincide con la entidad SaleDetail del backend.
+ */
+export interface SaleDetail {
+    id: number;
+    saleId: number;
+    productId: number;
+    unitPrice: number;
+    quantity: number;
+    subtotal: number;
+    taxRateId: number;
+    promotionId: number | null;
+}
+
+/**
+ * Payload para crear o modificar un detalle de venta.
+ */
+export interface SaleDetailPayload {
+    saleId: number;
+    productId: number;
+    unitPrice: number;
+    quantity: number;
+    subtotal: number;
+    taxRateId: number;
+    promotionId: number | null;
+}
+
+export const SaleDetailService = {
+
+    /**
+     * Obtiene todos los detalles de una venta específica por su ID.
+     * GET /api/store/saledetails/sale/{saleId}
+     */
+    getDetailsBySaleId: async (saleId: number): Promise<SaleDetail[]> => {
+        const response = await httpStore.get<SaleDetail[]>(`${DETAIL_API_BASE_URL}/sale/${saleId}`);
+        return response.data;
+    },
+
+    /**
+     * Añade un nuevo detalle (ítem/producto) a una venta.
+     * POST /api/store/saledetails
+     */
+    addDetail: async (detailPayload: SaleDetailPayload): Promise<SaleDetail> => {
+        const response = await httpStore.post<SaleDetail>(DETAIL_API_BASE_URL, detailPayload);
+        return response.data;
+    },
+
+    /**
+     * Elimina un detalle de venta por su ID.
+     * DELETE /api/store/saledetails/{id}
+     */
+    deleteDetail: async (detailId: number): Promise<void> => {
+        await httpStore.delete(`${DETAIL_API_BASE_URL}/${detailId}`);
+    },
+};

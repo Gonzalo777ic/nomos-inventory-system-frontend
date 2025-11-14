@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Product, Brand, Category, Supplier, UnitOfMeasure } from '../types'; // 🎯 Importamos los tipos completos
-import { createProduct, updateProduct } from '../api/services/products'; // 🎯 El archivo product.ts ya fue corregido
-import { getBrands } from '../api/services/brand'; // 🎯 Importamos el servicio Brand
-// NOTA: Asumimos que los servicios para Category, Supplier y UnitOfMeasure existen y funcionan
-// import { getCategories } from '../api/services/category'; 
-// import { getSuppliers } from '../api/services/supplier';
-// import { getUnitsOfMeasure } from '../api/services/unitOfMeasure';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Product, Brand, Category, Supplier, UnitOfMeasure } from '../types'; 
+import { createProduct, updateProduct } from '../api/services/products'; 
+import { getBrands } from '../api/services/brand'; 
+import { getCategories } from '../api/services/category'; 
+import { getSuppliers } from '../api/services/supplier'; 
+import { getUnitsOfMeasure } from '../api/services/unitOfMeasure'; 
+import { createProductSupplierRelation } from '../api/services/productSupplier'; 
+import ImageUploader from './ImageUploader'; 
 
 import { Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,32 +19,94 @@ interface ProductFormProps {
     initialData: Product | null;
 }
 
-// 🎯 Interfaz para el estado local del formulario (usamos IDs y string para price)
 interface FormData {
     sku: string;
     name: string;
-    // Usamos IDs numéricas para las FKs
     brandId: number | ''; 
     categoryId: number | '';
-    defaultSupplierId: number | '';
+    preferredSupplierId: number | ''; 
     unitOfMeasureId: number | '';
-    
     price: string; 
-    minStockThreshold: string; // Para el input de texto
+    minStockThreshold: string; 
+    imageUrl?: string; 
 }
 
-// 🎯 Tipos de estado para almacenar las listas de datos maestros
+
 interface MasterData {
     brands: Brand[];
     categories: Category[];
-    suppliers: Supplier[];
+    suppliers: Supplier[]; 
     unitsOfMeasure: UnitOfMeasure[];
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+    const [currentProductId, setCurrentProductId] = useState<number | undefined>(initialData?.id);
     const isEditMode = initialData !== null && initialData.id !== undefined;
     const [isLoading, setIsLoading] = useState(false);
-    const [isDataLoading, setIsDataLoading] = useState(true); // Nuevo estado para cargar maestros
+    const [isDataLoading, setIsDataLoading] = useState(true);
+    
+    useEffect(() => {
+        const loadMasterData = async () => {
+            setIsDataLoading(true);
+            console.log("[ProductForm] ⌛ Iniciando carga de datos maestros...");
+            try {
+                const [loadedBrands, loadedCategories, loadedSuppliers, loadedUnits] = await Promise.all([
+                    getBrands(),
+                    getCategories(),
+                    getSuppliers(),
+                    getUnitsOfMeasure(),
+                ]);
+                
+                let initialPreferredSupplierId: number | '' = '';
+                
+                if (isEditMode && initialData) {
+                    const initialSupplierName = (initialData as any)?.supplierName;
+                    const preferredSupplier = loadedSuppliers.find(
+                        (s) => s.name === initialSupplierName
+                    );
+                    
+                    if (preferredSupplier) {
+                        initialPreferredSupplierId = preferredSupplier.id;
+                        console.log(`[ProductForm] 🟢 Proveedor Preferido encontrado por Nombre: ID ${preferredSupplier.id}`);
+                    } else if (initialSupplierName) {
+                        console.warn(`[ProductForm] 🟡 Advertencia: Proveedor '${initialSupplierName}' de initialData no encontrado en la lista maestra.`);
+                    }
+                }
+                
+                setMasterData({
+                    brands: loadedBrands,
+                    categories: loadedCategories,
+                    suppliers: loadedSuppliers,
+                    unitsOfMeasure: loadedUnits,
+                });
+
+                 setFormData({
+                    sku: initialData?.sku || '',
+                    name: initialData?.name || '',
+                    brandId: initialData?.brandId || '',
+                    categoryId: initialData?.categoryId || '',
+                    preferredSupplierId: initialPreferredSupplierId || (initialData as any)?.defaultSupplierId || '', 
+                    unitOfMeasureId: initialData?.unitOfMeasureId || '',
+                    price: initialData?.price ? initialData.price.toString() : '',
+                    minStockThreshold: initialData?.minStockThreshold ? initialData.minStockThreshold.toString() : '0',
+                    imageUrl: (initialData as any)?.imageUrl || undefined,
+                });
+                
+                console.log(`[ProductForm] ✅ Carga exitosa. Marcas: ${loadedBrands.length}, Categorías: ${loadedCategories.length}, Proveedores: ${loadedSuppliers.length}, UoM: ${loadedUnits.length}`);
+                
+            } catch (error) {
+                console.error("[ProductForm] 🚨 Error al cargar datos maestros:", error);
+                toast.error("Error al cargar datos maestros para el formulario.");
+            } finally {
+                setIsDataLoading(false);
+                console.log("[ProductForm] 🏁 Carga de datos maestros finalizada.");
+            }
+        };
+
+        if (isOpen) {
+             loadMasterData();
+        }
+    }, [isOpen, initialData, isEditMode]);
 
     const [masterData, setMasterData] = useState<MasterData>({
         brands: [],
@@ -52,30 +115,29 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
         unitsOfMeasure: [],
     });
 
-    // Estado inicial del formulario usando las IDs
     const [formData, setFormData] = useState<FormData>({
         sku: initialData?.sku || '',
         name: initialData?.name || '',
         brandId: initialData?.brandId || '',
         categoryId: initialData?.categoryId || '',
-        defaultSupplierId: initialData?.defaultSupplierId || '',
+        preferredSupplierId: (initialData as any)?.defaultSupplierId || '', 
         unitOfMeasureId: initialData?.unitOfMeasureId || '',
         price: initialData?.price ? initialData.price.toString() : '',
         minStockThreshold: initialData?.minStockThreshold ? initialData.minStockThreshold.toString() : '0',
+        imageUrl: (initialData as any)?.imageUrl || undefined, // Incluir imageUrl
     });
     
-    // 1. Efecto para cargar datos maestros (Brands, Categories, Suppliers, UoM)
     useEffect(() => {
         const loadMasterData = async () => {
             setIsDataLoading(true);
+            console.log("[ProductForm] ⌛ Iniciando carga de datos maestros...");
             try {
-                // 🎯 Implementación de carga de Brands (ya tenemos el servicio)
-                const loadedBrands = await getBrands();
-                
-                // 🛑 Simulación de carga para las otras entidades
-                const loadedCategories: Category[] = [{ id: 1, name: "Electrónica" }, { id: 2, name: "Alimentos" }];
-                const loadedSuppliers: Supplier[] = [{ id: 101, name: "TechGlobal", email: 'a', phone: 'a', taxId: 'a', address: 'a', contactName: 'a' }];
-                const loadedUnits: UnitOfMeasure[] = [{ id: 1, name: "Unidad", abbreviation: "UND" }, { id: 2, name: "Kilogramo", abbreviation: "KG" }];
+                const [loadedBrands, loadedCategories, loadedSuppliers, loadedUnits] = await Promise.all([
+                    getBrands(),
+                    getCategories(),
+                    getSuppliers(),
+                    getUnitsOfMeasure(),
+                ]);
                 
                 setMasterData({
                     brands: loadedBrands,
@@ -83,105 +145,153 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                     suppliers: loadedSuppliers,
                     unitsOfMeasure: loadedUnits,
                 });
+                console.log(`[ProductForm] ✅ Carga exitosa. Marcas: ${loadedBrands.length}, Categorías: ${loadedCategories.length}, Proveedores: ${loadedSuppliers.length}, UoM: ${loadedUnits.length}`);
                 
             } catch (error) {
-                console.error("Error al cargar datos maestros:", error);
+                console.error("[ProductForm] 🚨 Error al cargar datos maestros:", error);
                 toast.error("Error al cargar datos maestros para el formulario.");
             } finally {
                 setIsDataLoading(false);
+                console.log("[ProductForm] 🏁 Carga de datos maestros finalizada.");
             }
         };
 
         if (isOpen) {
-             // Sincroniza el estado del formulario con initialData
              setFormData({
                 sku: initialData?.sku || '',
                 name: initialData?.name || '',
                 brandId: initialData?.brandId || '',
                 categoryId: initialData?.categoryId || '',
-                defaultSupplierId: initialData?.defaultSupplierId || '',
+                preferredSupplierId: (initialData as any)?.defaultSupplierId || '', 
                 unitOfMeasureId: initialData?.unitOfMeasureId || '',
                 price: initialData?.price ? initialData.price.toString() : '',
                 minStockThreshold: initialData?.minStockThreshold ? initialData.minStockThreshold.toString() : '0',
+                imageUrl: (initialData as any)?.imageUrl || undefined,
             });
             loadMasterData();
         }
-    }, [isOpen, initialData]);
+    }, [isOpen, initialData]); 
 
+
+    const handleImageUpdate = useCallback((newImageUrl: string | undefined) => {
+        setFormData(prev => ({ ...prev, imageUrl: newImageUrl }));
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        // Convertimos a número si el campo es una ID numérica, si no, guardamos el valor (incluyendo '')
-        const parsedValue = ['brandId', 'categoryId', 'defaultSupplierId', 'unitOfMeasureId', 'minStockThreshold'].includes(name)
+        const parsedValue = ['brandId', 'categoryId', 'preferredSupplierId', 'unitOfMeasureId', 'minStockThreshold'].includes(name)
             ? (value === '' ? '' : parseInt(value, 10))
             : value;
             
         setFormData(prev => ({ ...prev, [name]: parsedValue }));
+        
+        console.log(`[ProductForm] Cambio: ${name}=${parsedValue}`);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // 1. Validar y Parsear datos
         const priceValue = parseFloat(formData.price);
         const minStockThresholdValue = parseInt(formData.minStockThreshold.toString(), 10);
+        const preferredSupplierId = formData.preferredSupplierId as number | '';
         
-        // Validaciones clave (ahora incluimos las IDs)
+        console.log("[ProductForm] 🔍 Validando y parseando datos...");
+        
         if (
             isNaN(priceValue) || priceValue <= 0 || 
             !formData.sku || !formData.name || 
             formData.brandId === '' || formData.categoryId === '' || 
-            formData.defaultSupplierId === '' || formData.unitOfMeasureId === ''
+            formData.unitOfMeasureId === '' ||
+            preferredSupplierId === ''
         ) {
-            toast.error('Por favor, completa todos los campos requeridos y asegúrate de que el precio sea válido.');
+            console.error("[ProductForm] ❌ Error de validación en Frontend. Faltan campos, precio inválido o Proveedor Preferido no seleccionado.");
+            toast.error('Por favor, completa todos los campos requeridos, incluyendo el Proveedor Preferido.');
             setIsLoading(false);
             return;
         }
 
         try {
-            // 2. Crear el objeto Product para la API (Omite 'id')
             const productData: Omit<Product, 'id'> = {
                 sku: formData.sku,
                 name: formData.name,
+                imageUrl: formData.imageUrl, 
                 brandId: formData.brandId as number,
                 categoryId: formData.categoryId as number,
-                defaultSupplierId: formData.defaultSupplierId as number,
                 unitOfMeasureId: formData.unitOfMeasureId as number,
                 price: priceValue,
                 minStockThreshold: minStockThresholdValue,
             };
-
+            
+            console.log(`[ProductForm] 📤 Paso 1: Enviando DTO de Producto:`, productData);
+            
             let resultProduct: Product;
+            const supplierId = preferredSupplierId as number;
 
             if (isEditMode) {
-                // Modo Edición (PUT)
                 if (!initialData?.id) throw new Error("ID de producto no definido para edición.");
                 resultProduct = await updateProduct(initialData.id, productData);
+                
+                await createProductSupplierRelation({
+                    productId: resultProduct.id as number,
+                    supplierId: supplierId,
+                    supplierProductCode: null,
+                    unitCost: 0.0, 
+                    leadTimeDays: 0,
+                    isPreferred: true, 
+                    isActive: true,
+                });
+                
+                console.log(`[ProductForm] ✅ Producto ID ${resultProduct.id} actualizado y relación de proveedor POST intentada.`);
                 toast.success(`Producto "${resultProduct.name}" actualizado con éxito.`);
             } else {
-                // Modo Creación (POST)
                 resultProduct = await createProduct(productData);
+                
+                await createProductSupplierRelation({
+                    productId: resultProduct.id as number,
+                    supplierId: supplierId,
+                    supplierProductCode: null,
+                    unitCost: 0.0, 
+                    leadTimeDays: 0,
+                    isPreferred: true,
+                    isActive: true,
+                });
+
+                 setCurrentProductId(resultProduct.id);
+                console.log(`[ProductForm] ✅ Nuevo producto ID ${resultProduct.id} creado y relación de proveedor establecida.`);
                 toast.success(`Producto "${resultProduct.name}" creado con éxito.`);
             }
 
             onSubmit(resultProduct);
 
         } catch (error) {
-            console.error('Error al guardar el producto:', error);
-            // Manejo de errores específicos del backend (ej: SKU duplicado)
-            toast.error('Error al guardar el producto. Revisa los datos y la conexión.');
+            console.error('[ProductForm] 🚨 Error al guardar/actualizar producto o su relación:', error);
+            
+            const axiosError = error as any;
+            const status = axiosError.response?.status;
+            let errorMessage = axiosError.message || 'Error de conexión/servidor.';
+            
+            if (status === 409) {
+                 errorMessage = 'Ya existe una relación de Proveedor Principal para este producto (409 Conflict).';
+            } else if (status === 500) {
+                 errorMessage = 'Error interno del servidor (500).';
+            } else if (status === 400) {
+                 errorMessage = axiosError.response?.data?.message || 'Solicitud incorrecta (400).';
+            }
+
+            toast.error(`Error al guardar: ${errorMessage}`);
+            
         } finally {
             setIsLoading(false);
+            console.log("[ProductForm] 🏁 Envío finalizado.");
         }
     };
     
     if (!isOpen) return null;
 
     return (
-        // Modal Overlay y Contenido (Simplificado para el código React)
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+            <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full ${currentProductId ? 'max-w-4xl' : 'max-w-2xl'} max-h-[90vh] overflow-y-auto transform transition-all duration-300`}>
                 <div className="p-6">
                     <div className="flex justify-between items-center border-b pb-4 mb-4">
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -198,9 +308,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                              <span className="ml-3 text-gray-500">Cargando datos maestros...</span>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Fila 1: SKU y Nombre */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            
+                            {/* Columna 1: Formulario Principal */}
+                            <form 
+                                onSubmit={handleSubmit} 
+                                // Ocupa 2/3 si el ImageUploader está activo, o 3/3 si no.
+                                className={`space-y-4 ${currentProductId ? 'lg:col-span-2' : 'lg:col-span-3'}`} 
+                            >
+                                {/* Fila 1: SKU y Nombre */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* ... (SKU y Nombre - Sin cambios) ... */}
                                 <div>
                                     <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300">SKU (Código)</label>
                                     <input
@@ -226,9 +344,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                     />
                                 </div>
                             </div>
-                            
                             {/* Fila 2: Brand y Category (Dropdowns) */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* ... (Brand/Marca y Category/Categoría - Sin cambios) ... */}
                                 {/* Brand/Marca (FK) */}
                                 <div>
                                     <label htmlFor="brandId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
@@ -265,90 +383,103 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                     </select>
                                 </div>
                             </div>
+                                
+                                {/* 🔑 MODIFICACIÓN 5: Fila 3 - Ahora incluye el campo de Proveedor Preferido */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    
+                                    {/* NUEVO CAMPO: Proveedor Preferido */}
+                                    <div>
+                                        <label htmlFor="preferredSupplierId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Proveedor Preferido</label>
+                                        <select
+                                            name="preferredSupplierId"
+                                            id="preferredSupplierId"
+                                            value={formData.preferredSupplierId}
+                                            onChange={handleChange}
+                                            required
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                                        >
+                                            <option value="">Selecciona un Proveedor</option>
+                                            {masterData.suppliers.map((supplier) => (
+                                                <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                            {/* Fila 3: Supplier y UnitOfMeasure (Dropdowns) */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Supplier/Proveedor (FK) */}
-                                <div>
-                                    <label htmlFor="defaultSupplierId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Proveedor por Defecto</label>
-                                    <select
-                                        name="defaultSupplierId"
-                                        id="defaultSupplierId"
-                                        value={formData.defaultSupplierId}
-                                        onChange={handleChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
-                                    >
-                                        <option value="">Selecciona un Proveedor</option>
-                                        {masterData.suppliers.map((supplier) => (
-                                            <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
-                                        ))}
-                                    </select>
+                                    {/* UnitOfMeasure/Unidad de Medida (FK) */}
+                                    <div>
+                                        <label htmlFor="unitOfMeasureId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Unidad de Medida</label>
+                                        <select
+                                            name="unitOfMeasureId"
+                                            id="unitOfMeasureId"
+                                            value={formData.unitOfMeasureId}
+                                            onChange={handleChange}
+                                            required
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                                        >
+                                            <option value="">Selecciona U.M.</option>
+                                            {masterData.unitsOfMeasure.map((unit) => (
+                                                <option key={unit.id} value={unit.id}>{unit.abbreviation} - {unit.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                                 
-                                {/* UnitOfMeasure/Unidad de Medida (FK) */}
-                                <div>
-                                    <label htmlFor="unitOfMeasureId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Unidad de Medida</label>
-                                    <select
-                                        name="unitOfMeasureId"
-                                        id="unitOfMeasureId"
-                                        value={formData.unitOfMeasureId}
-                                        onChange={handleChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
-                                    >
-                                        <option value="">Selecciona U.M.</option>
-                                        {masterData.unitsOfMeasure.map((unit) => (
-                                            <option key={unit.id} value={unit.id}>{unit.abbreviation} - {unit.name}</option>
-                                        ))}
-                                    </select>
+                                {/* Fila 4: Precio y Stock Mínimo */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* ... (Precio y Stock Mínimo - Sin cambios) ... */}
+                                    <div>
+                                        <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio Base ($)</label>
+                                        <input
+                                            type="number"
+                                            name="price"
+                                            id="price"
+                                            value={formData.price}
+                                            onChange={handleChange}
+                                            required
+                                            step="0.01"
+                                            min="0.01"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label htmlFor="minStockThreshold" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Mínimo (Alerta)</label>
+                                        <input
+                                            type="number"
+                                            name="minStockThreshold"
+                                            id="minStockThreshold"
+                                            value={formData.minStockThreshold}
+                                            onChange={handleChange}
+                                            required
+                                            min="0"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+
+                                {/* Botón de Submit */}
+                                <div className="flex justify-end pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading || isDataLoading}
+                                        className="flex items-center space-x-2 px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                    >
+                                        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                        <span>{isEditMode ? 'Guardar Cambios' : (currentProductId ? 'Guardar y Continuar' : 'Crear Producto')}</span>
+                                    </button>
+                                </div>
+                            </form>
                             
-                            {/* Fila 4: Precio y Stock Mínimo */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio Base ($)</label>
-                                    <input
-                                        type="number"
-                                        name="price"
-                                        id="price"
-                                        value={formData.price}
-                                        onChange={handleChange}
-                                        required
-                                        step="0.01"
-                                        min="0.01"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
+                            {/* Columna 2: Image Uploader (Aparece solo si el producto tiene ID) */}
+                            {currentProductId && (
+                                <div className="lg:col-span-1 border-t lg:border-t-0 lg:border-l pt-4 lg:pl-6 border-gray-200 dark:border-gray-700">
+                                    <ImageUploader 
+                                        productId={currentProductId} // Pasamos el ID del producto
+                                        onUpdateProductImage={handleImageUpdate} // Pasamos el callback
                                     />
                                 </div>
-                                
-                                <div>
-                                    <label htmlFor="minStockThreshold" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Mínimo (Alerta)</label>
-                                    <input
-                                        type="number"
-                                        name="minStockThreshold"
-                                        id="minStockThreshold"
-                                        value={formData.minStockThreshold}
-                                        onChange={handleChange}
-                                        required
-                                        min="0"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Botón de Submit */}
-                            <div className="flex justify-end pt-4">
-                                <button
-                                    type="submit"
-                                    disabled={isLoading || isDataLoading}
-                                    className="flex items-center space-x-2 px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                >
-                                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                                    <span>{isEditMode ? 'Guardar Cambios' : 'Crear Producto'}</span>
-                                </button>
-                            </div>
-                        </form>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>

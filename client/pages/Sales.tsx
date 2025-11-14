@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Sale, SaleService } from '../api/services/saleService.ts';
+// 🔑 Aquí importamos el tipo Sale y SaleService del servicio de API
+import { Sale, SaleService } from '../api/services/saleService.ts'; 
 import SaleForm from '../components/forms/SaleForm.tsx';
 import { useToast } from '../hooks/use-toast.ts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-// Importaciones de UI (Asumidas: Table, Button, Card, etc.)
+// Importaciones de UI
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Button } from '../components/ui/button';
@@ -17,14 +18,24 @@ const SalesPage: React.FC = () => {
 
     const fetchSales = async () => {
         setLoading(true);
+        console.log("[SalesPage] 🚀 Iniciando fetch de ventas...");
         try {
+            // Llama a GET /api/store/sales
             const data = await SaleService.getAll();
             setSales(data);
+            console.log(`[SalesPage] ✅ Fetch exitoso. ${data.length} ventas encontradas.`);
         } catch (e) {
             console.error("Error fetching sales:", e);
-            toast({ title: "Error", description: "No se pudieron cargar las ventas desde el servidor.", variant: "destructive" });
+            // 🚨 LOG CLAVE: Muestra el error específico que no es un 500
+            if (e.response && e.response.status === 405) {
+                console.error("[SalesPage] 🛑 ERROR 405: El endpoint /api/store/sales no permite el método GET. Revisar el SaleController de Spring Boot.");
+                toast({ title: "Error 405", description: "El servidor no permite listar ventas en esa URL (Method Not Allowed).", variant: "destructive" });
+            } else {
+                toast({ title: "Error", description: "No se pudieron cargar las ventas desde el servidor.", variant: "destructive" });
+            }
         } finally {
             setLoading(false);
+            console.log("[SalesPage] ⌛ Fetch finalizado.");
         }
     };
 
@@ -54,6 +65,7 @@ const SalesPage: React.FC = () => {
                     <CardTitle className="text-2xl font-bold flex items-center">
                         <DollarSign className="w-6 h-6 mr-2" /> Listado de Transacciones de Venta
                     </CardTitle>
+                    {/* El trigger de creación de venta */}
                     <SaleForm onSuccess={fetchSales} />
                 </CardHeader>
                 <CardContent>
@@ -63,46 +75,53 @@ const SalesPage: React.FC = () => {
                             <span className="ml-2">Cargando ventas...</span>
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>ID</TableHead>
-                                    <TableHead>Fecha</TableHead>
-                                    <TableHead>Tipo</TableHead>
-                                    <TableHead>Cliente ID</TableHead>
-                                    <TableHead>Vendedor ID</TableHead>
-                                    <TableHead>Descuento</TableHead>
-                                    <TableHead>Monto Total</TableHead>
-                                    <TableHead>Estado</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {sales.map((sale) => (
-                                    <TableRow key={sale.id}>
-                                        <TableCell className="font-medium">V-{sale.id}</TableCell>
-                                        <TableCell>{format(new Date(sale.saleDate), 'dd/MM/yyyy HH:mm', { locale: es })}</TableCell>
-                                        <TableCell>{sale.type}</TableCell>
-                                        <TableCell>{sale.clientId ?? 'N/A'}</TableCell>
-                                        <TableCell>{sale.sellerId}</TableCell>
-                                        <TableCell>{formatCurrency(sale.totalDiscount)}</TableCell>
-                                        <TableCell className="font-semibold">{formatCurrency(sale.totalAmount)}</TableCell>
-                                        <TableCell>
-                                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(sale.status)}`}>
-                                                {sale.status}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <SaleForm initialData={sale} onSuccess={fetchSales} trigger={
-                                                <Button variant="ghost" size="icon">
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                            } />
-                                        </TableCell>
+                        sales.length === 0 ? (
+                            <div className="text-center py-10 text-gray-500">
+                                No hay ventas registradas o hubo un error al cargar la lista.
+                            </div>
+                        ) : (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>ID</TableHead>
+                                        <TableHead>Fecha</TableHead>
+                                        <TableHead>Tipo</TableHead>
+                                        <TableHead>Cliente ID</TableHead>
+                                        <TableHead>Vendedor ID</TableHead>
+                                        <TableHead>Descuento</TableHead>
+                                        <TableHead>Monto Total</TableHead>
+                                        <TableHead>Estado</TableHead>
+                                        <TableHead className="text-right">Acciones</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {sales.map((sale) => (
+                                        <TableRow key={sale.id}>
+                                            <TableCell className="font-medium">V-{sale.id}</TableCell>
+                                            <TableCell>{format(new Date(sale.saleDate), 'dd/MM/yyyy HH:mm', { locale: es })}</TableCell>
+                                            <TableCell>{sale.type}</TableCell>
+                                            <TableCell>{sale.clientId ?? 'N/A'}</TableCell>
+                                            <TableCell>{sale.sellerId}</TableCell>
+                                            <TableCell>{formatCurrency(sale.totalDiscount)}</TableCell>
+                                            <TableCell className="font-semibold">{formatCurrency(sale.totalAmount)}</TableCell>
+                                            <TableCell>
+                                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(sale.status)}`}>
+                                                    {sale.status}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {/* El initialData es de tipo Sale (de saleService.ts) */}
+                                                <SaleForm initialData={sale} onSuccess={fetchSales} trigger={
+                                                    <Button variant="ghost" size="icon">
+                                                        <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                } />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        )
                     )}
                 </CardContent>
             </Card>
