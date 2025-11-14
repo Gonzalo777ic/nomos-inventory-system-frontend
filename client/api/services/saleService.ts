@@ -1,12 +1,12 @@
 import { httpStore } from "../httpStore";
+import { SaleDetailPayload } from "./saleDetailService"; // 🔑 Importar el payload del detalle (sin el tempId)
 
-const API_BASE_URL = '/api/store/sales';
-
+const API_BASE_URL = '/api/store/sales'; // Esto no se usa, pero se mantiene si es parte de tu convención
 const BASE_URL = 'http://localhost:8083/api/store';
 const SALES_URL = `${BASE_URL}/sales`;
 
 
-// 🎯 Interfaz para la Cabecera de la Venta (Sale)
+// 🎯 Interfaz para la Cabecera de la Venta (Sale) - Sin cambios
 export interface Sale {
     id: number;
     clientId: number | null; // Puede ser nulo
@@ -18,8 +18,14 @@ export interface Sale {
     sellerId: number;
 }
 
-// 🎯 Payload para la creación/edición
-export type SalePayload = Omit<Sale, 'id'>;
+// 🎯 Payload para la creación/edición de CABECERA (solo los campos que envían el cliente)
+// Se han quitado totalAmount, totalDiscount y status, ya que el backend los calcula/asigna.
+export interface SalePayload {
+    clientId: number | null; 
+    saleDate: string; 
+    type: string;
+    sellerId: number;
+}
 
 
 export interface SaleTypeRef {
@@ -27,11 +33,11 @@ export interface SaleTypeRef {
     description: string;
 }
 
-// 🎯 DTO para la Creación completa (Asumiendo que incluiremos detalles más tarde)
-// Por ahora, solo usamos Sale, pero esto es lo que se usaría en un sistema real:
-// export interface SaleCreationDTO extends SalePayload {
-//     details: SaleDetailPayload[];
-// }
+// 🔑 NUEVO DTO: Envío de Cabecera + Detalles (Transacción POS)
+export interface SaleCreationDTO extends SalePayload {
+    // Al mapear el carrito (SaleDetailPayload del frontend), quitaremos el 'tempId'
+    details: Omit<SaleDetailPayload, 'tempId'>[]; 
+}
 
 
 export const SaleService = {
@@ -47,7 +53,16 @@ export const SaleService = {
         return response.data;
     },
 
-    /** 3. Crear una nueva venta (POST) */
+    /** 🔑 NUEVO MÉTODO PARA EL FLUJO POS: Crear venta completa */
+    createSaleWithDetails: async (data: SaleCreationDTO): Promise<Sale> => {
+        // Llama al POST /api/store/sales modificado en el backend
+        const response = await httpStore.post<Sale>(SALES_URL, data);
+        return response.data;
+    },
+
+    /** 3. Crear una nueva venta (POST)
+     * Se mantiene por si se usa en otro flujo, pero se recomienda usar createSaleWithDetails para ventas nuevas.
+     */
     create: async (data: SalePayload): Promise<Sale> => {
         // En una implementación real, aquí se enviarían todos los detalles de la venta
         const response = await httpStore.post<Sale>(SALES_URL, data);
@@ -56,9 +71,8 @@ export const SaleService = {
 
     /** 4. Actualizar el estado de la venta (PUT) */
     updateStatus: async (id: number, newStatus: string): Promise<Sale> => {
-        // PUT /api/store/sales/{id}/status con el nuevo estado en el body
         const response = await httpStore.put<Sale>(`${SALES_URL}/${id}/status`, newStatus, {
-             headers: { 'Content-Type': 'text/plain' } // El backend espera un String directo
+             headers: { 'Content-Type': 'text/plain' }
         });
         return response.data;
     },
@@ -71,6 +85,4 @@ export const SaleService = {
         const response = await httpStore.get<SaleTypeRef[]>(`${SALES_URL}/types`);
         return response.data;
     }
-    
-    // No se implementará el update completo de la cabecera, solo el estado, por la complejidad del flujo de ventas.
 };

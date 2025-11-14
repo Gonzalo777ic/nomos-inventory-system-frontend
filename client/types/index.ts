@@ -71,21 +71,47 @@ export type Warehouse = {
  * ====================================================================
  */
 
+
+export type ProductImage = {
+  id: number;
+  productId: number;
+  imageUrl: string; // URL de la imagen en el storage (ej: S3, Firebase, etc.)
+  isDefault: boolean; // Indica si es la imagen principal del producto
+  // Nota: Podríamos añadir 'order' para el orden de las imágenes en una galería.
+  sortOrder: number;
+};
+
 // 8. Product (Definición maestra) - Actualizada con FKs numéricas
 export type Product = {
   id: number;
   sku: string; // Unique
   name: string;
   imageUrl?: string; // 🖼️ URL de la imagen del producto (Añadida)
-  
-  // 🎯 Nuevas Claves Foráneas (Long en Java -> number en TS)
+
   brandId: number; 
   categoryId: number; 
-  defaultSupplierId: number;
   unitOfMeasureId: number;
+  
   
   price: number; // Precio Base (Double en Java)
   minStockThreshold: number; // (Integer en Java)
+};
+
+export type ProductSupplierDTO = {
+    // Claves Compuestas (obligatorias)
+    productId: number; // FK a Product
+    supplierId: number; // FK a Supplier
+
+    // Atributos obligatorios para la lógica de negocio (según tu modelo Java)
+    unitCost: number; // Double en Java -> number en TS
+    leadTimeDays: number; // Integer en Java -> number en TS
+    isPreferred: boolean; // Indica si es el proveedor principal
+
+    // Atributos de estado (obligatorios en tu modelo Java)
+    isActive: boolean; // Indica si la relación está activa
+
+    // Atributo opcional
+    supplierProductCode?: string | null; // Código del proveedor (opcional)
 };
 
 // 8.1 ProductListItem (Extensión para la vista de lista)
