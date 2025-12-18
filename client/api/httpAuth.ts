@@ -6,5 +6,4 @@ import axios from "axios";
  */
 export const httpAuth = axios.create({
 });
-// Nota: Al igual que httpStore, asumimos que la lógica del token JWT
-// se maneja a través de un interceptor global o un contexto (AuthAxiosProvider).
+

@@ -3,45 +3,45 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast'; // Importar toast para mostrar el mensaje
+import toast from 'react-hot-toast';
 
-const UNAUTHORIZED_FLAG = 'unauthorized_access'; // Bandera de persistencia (Debe coincidir con ProtectedRoute)
+const UNAUTHORIZED_FLAG = 'unauthorized_access';
 
 const Login = () => {
     const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
     const navigate = useNavigate();
 
-    // 🛑 LÓGICA CLAVE 1: Manejar el mensaje de acceso denegado al regresar
+
     useEffect(() => {
         const wasUnauthorized = localStorage.getItem(UNAUTHORIZED_FLAG);
 
         if (wasUnauthorized === 'true') {
-            // 🎯 Paso 1: Mostrar el mensaje de error persistente (aparecerá en esta página).
+
             toast.error('Privilegios insuficientes. Acceso denegado. Se requiere el rol ADMIN.', {
                 position: 'bottom-right',
                 duration: 5000,
             });
             
-            // 🎯 Paso 2: Limpiar el flag para que no se muestre de nuevo.
+
             localStorage.removeItem(UNAUTHORIZED_FLAG);
         }
-    }, []); // Se ejecuta solo al montar el componente Login
+    }, []);
 
-    // 🛑 LÓGICA CLAVE 2: Redirigir si ya está autenticado y no está cargando
+
     useEffect(() => {
         if (isAuthenticated && !isLoading) {
-            // Redirige al dashboard después de iniciar sesión
+
             navigate("/dashboard", { replace: true });
         }
     }, [isAuthenticated, isLoading, navigate]);
 
 
     const handleAuth0Login = () => {
-        // Redirige a Auth0. Auth0 te devolverá a window.location.origin (configurado en App.tsx)
+
         loginWithRedirect();
     };
 
-    // Si está cargando o ya está autenticado, no renderiza el formulario
+
     if (isLoading || isAuthenticated) {
         return (
             <div className="flex min-h-screen items-center justify-center">

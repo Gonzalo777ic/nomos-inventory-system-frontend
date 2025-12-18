@@ -30,14 +30,14 @@ import {
 } from "../ui/select"; 
 import { Textarea } from '../ui/textarea'; 
 
-// 1. Esquema de validación para Category (Sin cambios)
+
 export const CategorySchema = z.object({
   name: z.string().min(2, "El nombre de la categoría es requerido.").max(100),
   description: z.string().optional(),
   parentId: z.string().nullable().optional().or(z.literal("null")), 
 });
 
-// Tipo derivado del esquema para uso en el formulario (Sin cambios)
+
 export type CategoryFormValues = z.infer<typeof CategorySchema>;
 
 interface CategoryFormProps {
@@ -62,7 +62,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     queryFn: getCategories,
   });
 
-  // CORRECCIÓN CLAVE: Extraer el parentId desde el objeto 'parent'
+
   const parentIdFromInitialData = initialData?.parent?.id 
     ? String(initialData.parent.id) 
     : "null";
@@ -72,7 +72,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
-      // Usamos el ID extraído del objeto 'parent'
+
       parentId: parentIdFromInitialData, 
     },
   });
@@ -101,7 +101,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       toast.success(
         `Categoría ${isEditMode ? "actualizada" : "creada"} con éxito.`,
       );
-      // Fuerte invalidación para refrescar la lista
+
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       onSuccess();
       onClose();
@@ -118,7 +118,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     mutation.mutate(values);
   };
 
-  // Se filtra para que la categoría actual no se pueda seleccionar como su propio padre
+
   const availableParents = categories.filter((c) => c.id !== initialData?.id);
 
   return (

@@ -1,4 +1,4 @@
-// client/components/layout/Layout.tsx
+
 
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
@@ -6,14 +6,14 @@ import { ThemeToggle } from "./ThemeToggle";
 import React from "react"; 
 import { SidebarNavigation } from "./SidebarNavigation";
 
-// 🎯 CORRECCIÓN: Layout NO recibe props, usa <Outlet /> para renderizar rutas hijas.
-// Eliminamos la interfaz LayoutProps y la desestructuración de children
+
+
 export default function Layout() {
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr] lg:grid-cols-[280px_1fr]">
       <aside className="hidden lg:block border-r bg-gray-100 p-4 dark:bg-gray-900">
         <Brand />
-        {/* 🎯 REEMPLAZO DE LA NAVEGACIÓN SIMPLE */}
+        {}
         <SidebarNavigation />
       </aside>
       <div className="flex flex-col">

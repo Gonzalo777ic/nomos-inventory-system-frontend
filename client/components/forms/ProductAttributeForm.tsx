@@ -6,7 +6,7 @@ import { Loader2, Ruler } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-// Importaciones de UI (ajustadas a rutas relativas)
+
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { 
@@ -25,16 +25,16 @@ import {
     SelectValue 
 } from '../ui/select';
 
-// Importación de Tipos y Servicios (ajustadas a rutas relativas)
+
 import { ProductAttribute } from '../../types';
 import { 
     createProductAttribute, 
     updateProductAttribute,
 } from '../../api/services/product-attribute'; 
 
-// --- 1. ESQUEMA ZOD (Mantenido dentro del Formulario) ---
 
-// Usamos el tipo literal de ProductAttribute
+
+
 const allowedDataTypes: [ProductAttribute['dataType'], ...ProductAttribute['dataType'][]] = ['String', 'Number', 'Boolean'];
 
 export const productAttributeSchema = z.object({
@@ -47,7 +47,7 @@ export const productAttributeSchema = z.object({
 export type ProductAttributeFormValues = z.infer<typeof productAttributeSchema>;
 
 
-// --- 2. PROPS DEL COMPONENTE ---
+
 
 interface ProductAttributeFormProps {
     initialData?: ProductAttribute | null;
@@ -56,7 +56,7 @@ interface ProductAttributeFormProps {
 }
 
 
-// --- 3. COMPONENTE DE FORMULARIO ---
+
 
 const ProductAttributeForm: React.FC<ProductAttributeFormProps> = ({
     initialData,
@@ -70,13 +70,13 @@ const ProductAttributeForm: React.FC<ProductAttributeFormProps> = ({
         resolver: zodResolver(productAttributeSchema),
         defaultValues: {
             name: initialData?.name || "",
-            dataType: initialData?.dataType || "String", // Default a String
+            dataType: initialData?.dataType || "String",
         },
     });
 
-    // Mutación para Creación/Actualización
+
     const mutation = useMutation({
-        // Usamos el tipo Omit<ProductAttribute, 'id'> que espera el servicio
+
         mutationFn: (data: Omit<ProductAttribute, 'id'>) => {
             if (isEditMode && initialData?.id) {
                 return updateProductAttribute(initialData.id, data);
@@ -87,13 +87,13 @@ const ProductAttributeForm: React.FC<ProductAttributeFormProps> = ({
             toast.success(
                 `Atributo ${isEditMode ? "actualizado" : "creado"} con éxito.`,
             );
-            // Invalida la query para refrescar la lista
+
             queryClient.invalidateQueries({ queryKey: ["product-attributes"] });
             onSuccess();
             onClose();
         },
         onError: (error: any) => {
-            // Manejo de error de conflicto (409) del backend
+
             const message = 
                 error.response?.data?.message || 
                 `Error al ${isEditMode ? "actualizar" : "crear"} el atributo.`;
@@ -102,7 +102,7 @@ const ProductAttributeForm: React.FC<ProductAttributeFormProps> = ({
     });
 
     const onSubmit = (values: ProductAttributeFormValues) => {
-        // El payload 'values' coincide con Omit<ProductAttribute, 'id'>
+
         mutation.mutate(values); 
     };
 
@@ -111,7 +111,7 @@ const ProductAttributeForm: React.FC<ProductAttributeFormProps> = ({
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Campo de Nombre */}
+                {}
                 <FormField
                     control={form.control}
                     name="name"
@@ -130,7 +130,7 @@ const ProductAttributeForm: React.FC<ProductAttributeFormProps> = ({
                     )}
                 />
 
-                {/* Campo de Tipo de Dato */}
+                {}
                 <FormField
                     control={form.control}
                     name="dataType"

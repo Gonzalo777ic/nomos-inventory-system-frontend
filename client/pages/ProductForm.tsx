@@ -11,7 +11,7 @@ import ImageUploader from './ImageUploader';
 import { Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Definición de las propiedades que espera el formulario
+
 interface ProductFormProps {
     isOpen: boolean;
     onClose: () => void;
@@ -124,7 +124,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
         unitOfMeasureId: initialData?.unitOfMeasureId || '',
         price: initialData?.price ? initialData.price.toString() : '',
         minStockThreshold: initialData?.minStockThreshold ? initialData.minStockThreshold.toString() : '0',
-        imageUrl: (initialData as any)?.imageUrl || undefined, // Incluir imageUrl
+        imageUrl: (initialData as any)?.imageUrl || undefined,
     });
     
     useEffect(() => {
@@ -310,15 +310,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             
-                            {/* Columna 1: Formulario Principal */}
+                            {}
                             <form 
                                 onSubmit={handleSubmit} 
-                                // Ocupa 2/3 si el ImageUploader está activo, o 3/3 si no.
+
                                 className={`space-y-4 ${currentProductId ? 'lg:col-span-2' : 'lg:col-span-3'}`} 
                             >
-                                {/* Fila 1: SKU y Nombre */}
+                                {}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* ... (SKU y Nombre - Sin cambios) ... */}
+                                {}
                                 <div>
                                     <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300">SKU (Código)</label>
                                     <input
@@ -344,10 +344,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                     />
                                 </div>
                             </div>
-                            {/* Fila 2: Brand y Category (Dropdowns) */}
+                            {}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* ... (Brand/Marca y Category/Categoría - Sin cambios) ... */}
-                                {/* Brand/Marca (FK) */}
+                                {}
+                                {}
                                 <div>
                                     <label htmlFor="brandId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
                                     <select
@@ -365,7 +365,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                     </select>
                                 </div>
                                 
-                                {/* Category/Categoría (FK) */}
+                                {}
                                 <div>
                                     <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
                                     <select
@@ -384,10 +384,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                 </div>
                             </div>
                                 
-                                {/* 🔑 MODIFICACIÓN 5: Fila 3 - Ahora incluye el campo de Proveedor Preferido */}
+                                {}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     
-                                    {/* NUEVO CAMPO: Proveedor Preferido */}
+                                    {}
                                     <div>
                                         <label htmlFor="preferredSupplierId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Proveedor Preferido</label>
                                         <select
@@ -405,7 +405,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                         </select>
                                     </div>
 
-                                    {/* UnitOfMeasure/Unidad de Medida (FK) */}
+                                    {}
                                     <div>
                                         <label htmlFor="unitOfMeasureId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Unidad de Medida</label>
                                         <select
@@ -424,9 +424,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                     </div>
                                 </div>
                                 
-                                {/* Fila 4: Precio y Stock Mínimo */}
+                                {}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* ... (Precio y Stock Mínimo - Sin cambios) ... */}
+                                    {}
                                     <div>
                                         <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio Base ($)</label>
                                         <input
@@ -457,7 +457,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                     </div>
                                 </div>
 
-                                {/* Botón de Submit */}
+                                {}
                                 <div className="flex justify-end pt-4">
                                     <button
                                         type="submit"
@@ -470,12 +470,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                                 </div>
                             </form>
                             
-                            {/* Columna 2: Image Uploader (Aparece solo si el producto tiene ID) */}
+                            {}
                             {currentProductId && (
                                 <div className="lg:col-span-1 border-t lg:border-t-0 lg:border-l pt-4 lg:pl-6 border-gray-200 dark:border-gray-700">
                                     <ImageUploader 
-                                        productId={currentProductId} // Pasamos el ID del producto
-                                        onUpdateProductImage={handleImageUpdate} // Pasamos el callback
+                                        productId={currentProductId}
+                                        onUpdateProductImage={handleImageUpdate}
                                     />
                                 </div>
                             )}

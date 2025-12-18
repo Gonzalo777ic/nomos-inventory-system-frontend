@@ -20,15 +20,15 @@ const WarehousesPage: React.FC = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | undefined>(undefined);
 
-    // 1. Obtener la lista de almacenes
+
     const { data: warehouses, isLoading, error } = useQuery<Warehouse[]>({
         queryKey: ['warehouses'],
         queryFn: getAllWarehouses,
-        // Refetch al volver a enfocar la ventana para mantener los datos frescos
+
         staleTime: 60000, 
     });
 
-    // 2. Mutación para eliminar
+
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteWarehouse(id),
         onSuccess: () => {
@@ -37,7 +37,7 @@ const WarehousesPage: React.FC = () => {
         },
         onError: (error: any) => {
             console.error("Error al eliminar almacén:", error);
-            // Mensaje de error más genérico para evitar exponer lógica de backend
+
             toast({
                 title: "Error",
                 description: "No se pudo eliminar el almacén. Puede que contenga inventario asociado.",
@@ -46,7 +46,7 @@ const WarehousesPage: React.FC = () => {
         },
     });
     
-    // --- Handlers de UI ---
+
 
     const handleOpenCreate = () => {
         setEditingWarehouse(undefined);
@@ -69,7 +69,7 @@ const WarehousesPage: React.FC = () => {
         }
     };
     
-    // --- Renderizado de Estados ---
+
 
     if (error) {
         const message = error instanceof Error ? error.message : "Error desconocido.";

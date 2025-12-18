@@ -3,12 +3,12 @@ import { InternalUser, InternalUserService } from '../api/services/internalUserS
 import { useToast } from '../hooks/use-toast.ts';
 import { User, Loader2 } from 'lucide-react';
 
-// Importaciones de UI (Asumidas: Table, Card, Badge, etc.)
+
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 
-// Tipos permitidos por el componente Badge (sin 'warning')
+
 type BadgeVariant = "default" | "destructive" | "secondary" | "outline";
 
 const Users: React.FC = () => {
@@ -33,7 +33,7 @@ const Users: React.FC = () => {
         fetchUsers();
     }, []);
 
-    // Función para obtener la variante base de la Badge
+
     const getRoleVariant = (role: string): BadgeVariant => {
         const upperRole = role.toUpperCase();
 
@@ -41,28 +41,28 @@ const Users: React.FC = () => {
         if (upperRole.includes('SELLER')) return 'default';
         if (upperRole.includes('INVENTORY')) return 'secondary';
         
-        // Para DELIVERY y CLIENT usaremos 'outline' o 'default' y manejaremos el color con getRoleClassName
+
         if (upperRole.includes('DELIVERY')) return 'outline'; 
 
-        return 'outline'; // Para ROLE_CLIENT
+        return 'outline';
     };
 
-    // Función para obtener la clase Tailwind CSS específica para el color
+
     const getRoleClassName = (role: string): string => {
         const upperRole = role.toUpperCase();
         
-        // Usamos una combinación de bg- y text- para crear un color similar al 'warning'
+
         if (upperRole.includes('DELIVERY')) {
-            // Un color amarillo/naranja suave (ejemplo)
+
             return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-300";
         }
         
-        // Si es ROLE_CLIENT, le damos un estilo verde/información suave
+
         if (upperRole.includes('CLIENT')) {
              return "bg-green-100 text-green-800 hover:bg-green-200 border-green-300";
         }
 
-        return ""; // No aplicar clase adicional si la variante ya es suficiente
+        return "";
     };
 
     return (
@@ -100,7 +100,7 @@ const Users: React.FC = () => {
                                                     <Badge 
                                                         key={role} 
                                                         variant={getRoleVariant(role)} 
-                                                        className={`uppercase ${getRoleClassName(role)}`} // 🔑 Clases condicionales aquí
+                                                        className={`uppercase ${getRoleClassName(role)}`}
                                                     >
                                                         {role.replace('ROLE_', '')}
                                                     </Badge>

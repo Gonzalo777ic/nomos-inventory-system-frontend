@@ -1,11 +1,11 @@
 import { http } from '../http';
-// Importamos el tipo base, aunque el payload de envío puede ser diferente
+
 import { ProductAttributeValue } from '../../types'; 
 
-// URL base del controlador: /api/inventory/product-attribute-values
+
 const API_BASE_URL = '/inventory/product-attribute-values';
 
-// --- Tipos de Payload (Basados en el Controller) ---
+
 
 /**
  * Payload para AÑADIR un nuevo valor de atributo a un producto.
@@ -26,7 +26,7 @@ export interface UpdateAttributeValuePayload {
 }
 
 
-// --- Funciones de Servicio ---
+
 
 /**
  * 1. Obtiene todos los valores de atributos asignados a un producto específico.

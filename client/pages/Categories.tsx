@@ -53,7 +53,7 @@ const Categories: React.FC = () => {
   const [categoryToDeleteName, setCategoryToDeleteName] = useState<string>("");
   const [isTreeView, setIsTreeView] = useState(false);
 
-  // 1️⃣ Obtener lista de categorías
+
   const {
     data: categories = [],
     isLoading,
@@ -63,7 +63,7 @@ const Categories: React.FC = () => {
     queryFn: getCategories,
   });
 
-  // 2️⃣ Convertir lista plana a árbol (memoizado)
+
   const treeData = useMemo(() => listToTree(categories), [categories]);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const Categories: React.FC = () => {
     }
   }, [categories, treeData]);
 
-  // 3️⃣ Mutación: eliminar categoría
+
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteCategory(id),
     onSuccess: () => {
@@ -91,7 +91,7 @@ const Categories: React.FC = () => {
     },
   });
 
-  // 4️⃣ Mutación: mover categoría (drag & drop)
+
   const moveMutation = useMutation({
     mutationFn: async ({
       childId,
@@ -126,12 +126,12 @@ const Categories: React.FC = () => {
     },
   });
 
-  // 🧩 Maneja el guardado de cambios desde el árbol
+
   const handleSaveChanges = (
     changes: { id: number; newParentId: number | null }[]
   ) => {
     console.log("Cambios recibidos:", changes);
-    // Ejecuta mutaciones individuales
+
     changes.forEach((change) =>
       moveMutation.mutate({
         childId: change.id,
@@ -331,7 +331,7 @@ const Categories: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* 🟢 DIALOG/MODAL PARA EL FORMULARIO (Componente Añadido) */}
+      {}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
           <DialogHeader>
@@ -343,12 +343,12 @@ const Categories: React.FC = () => {
             initialData={selectedCategory}
             onSuccess={handleFormClose} 
             onClose={handleFormClose}
-            categories={categories} // Aunque se hace query interna, es bueno tenerla por si acaso.
+            categories={categories}
           />
         </DialogContent>
       </Dialog>
       
-      {/* 🔴 DIALOG/MODAL DE CONFIRMACIÓN DE ELIMINACIÓN (Componente Añadido) */}
+      {}
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
           <DialogHeader>

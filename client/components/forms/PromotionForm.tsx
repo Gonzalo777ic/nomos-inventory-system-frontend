@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Promotion, PromotionPayload, PromotionService, PromotionTarget } from '../../api/services/promotionService.ts';
 import { useToast } from '../../hooks/use-toast.ts';
-import PromotionTargetForm from './PromotionTargetForm.tsx'; // <-- Importamos el sub-formulario
-// UI Components
+import PromotionTargetForm from './PromotionTargetForm.tsx';
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '../ui/dialog.tsx';
 import { Button } from '../ui/button.tsx';
 import { Input } from '../ui/input.tsx';
@@ -14,16 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form.tsx';
 import { Loader2, Plus, Pencil } from 'lucide-react';
 
-// Utilidad para formatear LocalDateTime a 'YYYY-MM-DDTHH:MM' para input datetime-local
+
 const formatLocalDateTime = (isoString: string | undefined): string => {
   if (!isoString) return '';
   const date = new Date(isoString);
   const offset = date.getTimezoneOffset() * 60000;
   const localIso = new Date(date.getTime() - offset).toISOString();
-  return localIso.substring(0, 16); // "YYYY-MM-DDTHH:MM"
+  return localIso.substring(0, 16);
 };
 
-// Esquema de validación para el formulario
+
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
   type: z.enum(['PORCENTAJE', 'MONTO_FIJO', 'TRES_POR_DOS']),
@@ -51,8 +51,8 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
   const [open, setOpen] = useState(false);
   const isEditing = !!initialData;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [targets, setTargets] = useState<PromotionTarget[]>([]); // Estado para los Targets
-  const [targetsLoading, setTargetsLoading] = useState(false); // Estado para la carga de Targets
+  const [targets, setTargets] = useState<PromotionTarget[]>([]);
+  const [targetsLoading, setTargetsLoading] = useState(false);
 
   const form = useForm<PromotionFormData>({
     resolver: zodResolver(formSchema),
@@ -70,7 +70,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
   
   const appliesToWatch = form.watch('appliesTo');
 
-  // --- Efecto para cargar los PromotionTargets al abrir el modal en modo edición ---
+
   useEffect(() => {
     if (open && isEditing && initialData.id) {
         setTargetsLoading(true);
@@ -82,21 +82,21 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
             })
             .finally(() => setTargetsLoading(false));
     } else if (open && !isEditing) {
-        // Limpiar targets al crear
+
         setTargets([]);
     }
   }, [open, isEditing, initialData]);
   
-  // Convertir el string de fecha/hora de HTML a formato ISO para el backend
+
   const dateStringToISO = (dateString: string) => {
     return new Date(dateString).toISOString();
   };
 
-  // --- Manejo del Submit con Targets ---
+
   const onSubmit = async (data: PromotionFormData) => {
     setIsSubmitting(true);
     
-    // 1. Validar Targets si aplica
+
     if (data.appliesTo !== 'SALE_TOTAL' && targets.length === 0) {
         toast({ title: "Validación Requerida", description: "Debe añadir al menos un Producto/Categoría objetivo.", variant: "destructive" });
         setIsSubmitting(false);
@@ -108,7 +108,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
         return;
     }
 
-    // 2. Crear Payload de Promoción
+
     const promoPayload: PromotionPayload = {
         ...data,
         startDate: dateStringToISO(data.startDate),
@@ -126,9 +126,9 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
         toast({ title: "Creado", description: `Promoción '${data.name}' creada.` });
       }
       
-      // 3. Si no aplica a SALE_TOTAL, actualizar los Targets
+
       if (data.appliesTo !== 'SALE_TOTAL') {
-          // Filtramos solo los campos necesarios para el payload de bulk update
+
           const targetsToSave = targets.map(t => ({ 
               promotionId: savedPromotion.id, 
               targetType: t.targetType, 
@@ -138,13 +138,13 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
           await PromotionService.bulkUpdateTargets(savedPromotion.id, targetsToSave);
           toast({ title: "Targets Guardados", description: "Objetivos de promoción actualizados con éxito.", });
       } else if (isEditing && data.appliesTo === 'SALE_TOTAL' && targets.length > 0) {
-          // Caso especial: Si cambia de PRODUCT/CATEGORY a SALE_TOTAL, limpiamos targets
+
           await PromotionService.bulkUpdateTargets(savedPromotion.id, []);
       }
 
       onSuccess();
       setOpen(false);
-      form.reset(data); // Resetea solo si fue exitoso y estamos creando
+      form.reset(data);
     } catch (e: any) {
       console.error("Error al guardar promoción o targets:", e);
       const message = e.response?.status === 409 
@@ -157,9 +157,9 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
     }
   };
 
-  // ... (defaultTrigger y el resto del return/render omitido por brevedad, solo se actualiza el contenido)
+
   
-  // El trigger por defecto (Botón de Creación o Ícono de Edición)
+
   const defaultTrigger = isEditing ? (
     <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary-dark">
         <Pencil className="h-4 w-4" />
@@ -184,7 +184,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
             
-            {/* ... (Campos Name, Type, DiscountValue - se mantienen igual) ... */}
+            {}
             <FormField
               control={form.control}
               name="name"
@@ -246,7 +246,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-                {/* FECHA DE INICIO */}
+                {}
                 <FormField
                     control={form.control}
                     name="startDate"
@@ -261,7 +261,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
                     )}
                 />
                 
-                {/* FECHA DE FIN */}
+                {}
                 <FormField
                     control={form.control}
                     name="endDate"
@@ -278,14 +278,14 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                {/* APLICA A... */}
+                {}
                 <FormField
                     control={form.control}
                     name="appliesTo"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Aplica a:</FormLabel>
-                            <Select onValueChange={(value) => { field.onChange(value); setTargets([]); }} defaultValue={field.value} disabled={isSubmitting}> {/* <-- Limpiar targets al cambiar */}
+                            <Select onValueChange={(value) => { field.onChange(value); setTargets([]); }} defaultValue={field.value} disabled={isSubmitting}> {}
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Seleccione el alcance" />
@@ -302,7 +302,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
                     )}
                 />
                 
-                {/* ESTADO ACTIVO (Sin cambios) */}
+                {}
                 <FormField
                     control={form.control}
                     name="isActive"
@@ -328,10 +328,10 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
                 />
             </div>
             
-            {/* --- SECCIÓN DE ASIGNACIÓN DE TARGETS --- */}
+            {}
             {(appliesToWatch === 'PRODUCT' || appliesToWatch === 'CATEGORY') && !targetsLoading && (
                 <PromotionTargetForm 
-                    promotionId={initialData?.id || 0} // 0 si es nueva, el ID real si es edición
+                    promotionId={initialData?.id || 0}
                     appliesTo={appliesToWatch}
                     targets={targets}
                     setTargets={setTargets}
@@ -344,7 +344,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ initialData, onSuccess, t
                     <span className="ml-2 text-sm text-gray-500">Cargando objetivos existentes...</span>
                 </div>
             )}
-            {/* -------------------------------------- */}
+            {}
 
             <DialogFooter className="pt-4">
               <DialogClose asChild>

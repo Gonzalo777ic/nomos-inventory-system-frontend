@@ -25,7 +25,7 @@ const UOM: React.FC = () => {
     const [uomToDeleteId, setUomToDeleteId] = useState<number | null>(null);
     const [uomToDeleteName, setUomToDeleteName] = useState<string>('');
 
-    // 1. Obtener la lista de Unidades de Medida
+
     const { 
         data: unitsOfMeasure = [], 
         isLoading, 
@@ -35,7 +35,7 @@ const UOM: React.FC = () => {
         queryFn: getUnitsOfMeasure,
     });
 
-    // 2. Mutación para la Eliminación
+
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteUnitOfMeasure(id),
         onSuccess: () => {
@@ -51,14 +51,14 @@ const UOM: React.FC = () => {
         }
     });
 
-    // Filtro de búsqueda
+
     const filteredUOMs = unitsOfMeasure.filter(uom =>
         uom.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        // Corregido: Usamos 'abbreviation'
+
         uom.abbreviation.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Handlers para el formulario
+
     const handleOpenForm = (uom: UnitOfMeasure | null = null) => {
         setSelectedUOM(uom);
         setIsFormOpen(true);
@@ -69,7 +69,7 @@ const UOM: React.FC = () => {
         setSelectedUOM(null);
     };
 
-    // Handlers para la eliminación
+
     const handleConfirmDelete = (uom: UnitOfMeasure) => {
         if (uom.id) {
             setUomToDeleteId(uom.id);
@@ -109,7 +109,7 @@ const UOM: React.FC = () => {
                         <div className="relative flex items-center w-full max-w-sm">
                             <Search className="absolute left-3 h-4 w-4 text-gray-400" />
                             <Input
-                                // Corregido: Buscar por nombre o abreviatura
+
                                 placeholder="Buscar por nombre o abreviatura..."
                                 className="pl-9 dark:bg-gray-800 dark:text-gray-100"
                                 value={searchTerm}
@@ -148,10 +148,10 @@ const UOM: React.FC = () => {
                             <TableHeader className="dark:bg-gray-800">
                                 <TableRow>
                                     <TableHead className="w-[100px] text-gray-600 dark:text-gray-400">ID</TableHead>
-                                    {/* Corregido: Título de columna 'Abreviatura' */}
+                                    {}
                                     <TableHead className="w-[150px] text-gray-600 dark:text-gray-400">Abreviatura</TableHead>
                                     <TableHead className="text-gray-600 dark:text-gray-400">Nombre</TableHead>
-                                    {/* Corregido: Eliminada la columna Descripción */}
+                                    {}
                                     <TableHead className="text-center w-[120px] text-gray-600 dark:text-gray-400">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -159,10 +159,10 @@ const UOM: React.FC = () => {
                                 {filteredUOMs.map((uom) => (
                                     <TableRow key={uom.id} className="dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/70">
                                         <TableCell className="font-mono text-xs text-gray-500 dark:text-gray-400">{uom.id}</TableCell> 
-                                        {/* Corregido: Mostramos 'abbreviation' */}
+                                        {}
                                         <TableCell className="font-semibold text-lg text-gray-900 dark:text-gray-100">{uom.abbreviation}</TableCell>
                                         <TableCell className="text-gray-800 dark:text-gray-200">{uom.name}</TableCell>
-                                        {/* Corregido: Eliminada la celda de descripción */}
+                                        {}
                                         <TableCell className="text-center">
                                             <div className="flex justify-center space-x-2">
                                                 <Button 
@@ -192,7 +192,7 @@ const UOM: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* Modal/Dialog de Creación/Edición */}
+            {}
             <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
                 <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
                     <DialogHeader>
@@ -202,13 +202,13 @@ const UOM: React.FC = () => {
                     </DialogHeader>
                     <UOMForm 
                         initialData={selectedUOM}
-                        onSuccess={() => { /* No necesita lógica extra */ }}
+                        onSuccess={() => {  }}
                         onClose={handleFormClose}
                     />
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de Confirmación de Eliminación */}
+            {}
             <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
                 <DialogContent className="sm:max-w-md dark:bg-gray-900">
                     <DialogHeader>

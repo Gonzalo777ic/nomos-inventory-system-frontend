@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-// 🔑 Aquí importamos el tipo Sale y SaleService del servicio de API
+
 import { Sale, SaleService } from '../api/services/saleService.ts'; 
 import SaleForm from '../components/forms/SaleForm.tsx';
 import { useToast } from '../hooks/use-toast.ts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-// Importaciones de UI
+
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Button } from '../components/ui/button';
@@ -20,13 +20,13 @@ const SalesPage: React.FC = () => {
         setLoading(true);
         console.log("[SalesPage] 🚀 Iniciando fetch de ventas...");
         try {
-            // Llama a GET /api/store/sales
+
             const data = await SaleService.getAll();
             setSales(data);
             console.log(`[SalesPage] ✅ Fetch exitoso. ${data.length} ventas encontradas.`);
         } catch (e) {
             console.error("Error fetching sales:", e);
-            // 🚨 LOG CLAVE: Muestra el error específico que no es un 500
+
             if (e.response && e.response.status === 405) {
                 console.error("[SalesPage] 🛑 ERROR 405: El endpoint /api/store/sales no permite el método GET. Revisar el SaleController de Spring Boot.");
                 toast({ title: "Error 405", description: "El servidor no permite listar ventas en esa URL (Method Not Allowed).", variant: "destructive" });
@@ -47,7 +47,7 @@ const SalesPage: React.FC = () => {
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(value);
     };
     
-    // Función para obtener el color del estado
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'COMPLETADA': return 'bg-green-100 text-green-700';
@@ -65,7 +65,7 @@ const SalesPage: React.FC = () => {
                     <CardTitle className="text-2xl font-bold flex items-center">
                         <DollarSign className="w-6 h-6 mr-2" /> Listado de Transacciones de Venta
                     </CardTitle>
-                    {/* El trigger de creación de venta */}
+                    {}
                     <SaleForm onSuccess={fetchSales} />
                 </CardHeader>
                 <CardContent>
@@ -110,7 +110,7 @@ const SalesPage: React.FC = () => {
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                {/* El initialData es de tipo Sale (de saleService.ts) */}
+                                                {}
                                                 <SaleForm initialData={sale} onSuccess={fetchSales} trigger={
                                                     <Button variant="ghost" size="icon">
                                                         <Edit className="h-4 w-4" />

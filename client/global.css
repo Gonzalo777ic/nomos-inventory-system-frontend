@@ -1,4 +1,4 @@
-/** @import must precede all other statements */
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
 
 @tailwind base;
@@ -21,8 +21,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Nomos brand: emerald/teal primary */
-    --primary: 161 94% 30%; /* emerald-600 */
+    
+    --primary: 161 94% 30%; 
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;

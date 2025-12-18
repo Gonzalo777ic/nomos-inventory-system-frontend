@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UnitOfMeasure, UnitOfMeasureSchema, UnitOfMeasureFormValues } from '../../types'; // Ajustar ruta de importación
+import { UnitOfMeasure, UnitOfMeasureSchema, UnitOfMeasureFormValues } from '../../types';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createUnitOfMeasure, updateUnitOfMeasure } from '../../api/services/unitOfMeasure'; // Ajustar ruta de importación
+import { createUnitOfMeasure, updateUnitOfMeasure } from '../../api/services/unitOfMeasure';
 import { 
     Form, 
     FormControl, 
@@ -16,7 +16,7 @@ import {
     FormLabel, 
     FormMessage 
 } from '../ui/form';
-// Eliminamos la importación de Textarea ya que 'description' fue removida.
+
 
 interface UOMFormProps {
     initialData?: UnitOfMeasure | null;
@@ -32,14 +32,14 @@ const UOMForm: React.FC<UOMFormProps> = ({ initialData, onSuccess, onClose }) =>
         resolver: zodResolver(UnitOfMeasureSchema),
         defaultValues: {
             name: initialData?.name || '',
-            // Corregido: Usamos 'abbreviation' en lugar de 'symbol'
+
             abbreviation: initialData?.abbreviation || '',
-            // Eliminado: description
+
         },
     });
 
     const mutation = useMutation({
-        // La validación ahora asegura que 'data' solo contiene 'name' y 'abbreviation'
+
         mutationFn: (data: UnitOfMeasureFormValues) => 
             isEditMode && initialData?.id
                 ? updateUnitOfMeasure(initialData.id, data)
@@ -84,7 +84,7 @@ const UOMForm: React.FC<UOMFormProps> = ({ initialData, onSuccess, onClose }) =>
 
                 <FormField
                     control={form.control}
-                    name="abbreviation" // Corregido: Usamos 'abbreviation'
+                    name="abbreviation"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Abreviatura (Símbolo)</FormLabel>
@@ -100,7 +100,7 @@ const UOMForm: React.FC<UOMFormProps> = ({ initialData, onSuccess, onClose }) =>
                     )}
                 />
 
-                {/* Eliminado el FormField para 'description' */}
+                {}
 
                 <Button 
                     type="submit" 

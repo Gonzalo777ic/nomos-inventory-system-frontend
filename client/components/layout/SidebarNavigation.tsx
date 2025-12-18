@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from "react-router-dom";
-import { SubMenu } from './SubMenu'; // Importamos el componente desplegable
+import { SubMenu } from './SubMenu';
 import { 
     Home, 
     Package, 
@@ -8,36 +8,36 @@ import {
     Truck, 
     Settings, 
     BarChart3,
-    // Íconos adicionales para las subcategorías
-    ShoppingCart, // Catálogo de Productos
-    Archive, // Inventario Físico (Lotes)
-    Users, // Proveedores / Clientes / Usuarios
-    ClipboardList, // Órdenes de Abastecimiento / Reportes / Registros
-    Tag, // Promociones, Precios, Categorías
-    CreditCard, // Cobranzas
-    RefreshCw, // Devoluciones
-    Map, // Guías de Remisión / Ubicación
-    PackageOpen, // Entregas / Delivery
-    ClipboardCheck, // Roles / Auditoría
-    Scale, // Unidades de Medida
-    Ruler, // Atributos
-    Percent, // Impuestos
-    Megaphone, // Anuncios
-    Clock, // Horarios
-    AlertTriangle, // Alertas
-    Briefcase, // 🎯 NUEVO ÍCONO PARA MARCAS
-    Warehouse, // 🎯 NUEVO ÍCONO PARA ALMACÉN
+
+    ShoppingCart,
+    Archive,
+    Users,
+    ClipboardList,
+    Tag,
+    CreditCard,
+    RefreshCw,
+    Map,
+    PackageOpen,
+    ClipboardCheck,
+    Scale,
+    Ruler,
+    Percent,
+    Megaphone,
+    Clock,
+    AlertTriangle,
+    Briefcase,
+    Warehouse,
     Wallet,
 } from 'lucide-react'; 
 
-// Definimos el tipo para las props de NavItem
+
 interface NavItemProps {
     to: string;
     label: string;
     icon: React.ElementType<any>; 
 }
 
-// Función para un NavItem simple (ej: Dashboard)
+
 function NavItem({ to, label, icon: IconComponent }: NavItemProps) {
     return (
         <NavLink
@@ -51,42 +51,42 @@ function NavItem({ to, label, icon: IconComponent }: NavItemProps) {
             }
             end
         >
-            {/* Renderizamos el componente de ícono */}
+            {}
             <IconComponent className="h-5 w-5" /> 
             <span>{label}</span>
         </NavLink>
     );
 }
 
-// Interfaz que usa SubMenu (ahora con un ícono para el hijo)
+
 interface SubMenuItem {
     to: string; 
     label: string; 
-    icon: React.ReactNode; // El ícono para la subcategoría
+    icon: React.ReactNode;
 }
 
-// Componente principal del menú lateral
+
 export const SidebarNavigation: React.FC = () => {
 
     return (
         <nav className="mt-6 space-y-2 text-sm">
             
-            {/* 1. INICIO */}
+            {}
             <NavItem to="/dashboard" label="Dashboard" icon={Home} />
             
-            {/* 2. INVENTARIO Y ABASTECIMIENTO (Inventory-Service) */}
+            {}
             <SubMenu label="Inventario" icon={<Package className="h-5 w-5" />}>
                 {[
                     { to: "/products", label: "Catálogo de Productos", icon: <ShoppingCart className="h-4 w-4" /> },
                     { to: "/inventory", label: "Inventario Físico (Lotes)", icon: <Archive className="h-4 w-4" /> },
-                    // 🎯 AÑADIDO: Gestión de Almacenes
+
                     { to: "/warehouses", label: "Almacenes y Ubicaciones", icon: <Warehouse className="h-4 w-4" /> }, 
                     { to: "/suppliers", label: "Proveedores", icon: <Users className="h-4 w-4" /> },
                     { to: "/purchases", label: "Órdenes de Abastecimiento", icon: <ClipboardList className="h-4 w-4" /> },
                 ] as SubMenuItem[]}
             </SubMenu>
 
-            {/* 3. VENTAS Y COBRANZAS (Store-Service) */}
+            {}
             <SubMenu label="Ventas & Caja" icon={<DollarSign className="h-5 w-5" />}>
                 {[
                     { to: "/sales", label: "Registro de Ventas", icon: <ClipboardList className="h-4 w-4" /> },
@@ -97,7 +97,7 @@ export const SidebarNavigation: React.FC = () => {
                 ] as SubMenuItem[]}
             </SubMenu>
 
-            {/* 4. LOGÍSTICA (Logistics-Service) */}
+            {}
             <SubMenu label="Logística & Envíos" icon={<Truck className="h-5 w-5" />}>
                 {[
                     { to: "/shipping-guides", label: "Guías de Remisión", icon: <Map className="h-4 w-4" /> },
@@ -106,12 +106,12 @@ export const SidebarNavigation: React.FC = () => {
                 ] as SubMenuItem[]}
             </SubMenu>
             
-            {/* 5. CONFIGURACIÓN MAESTRA (Auth/Inventory/Store - Tablas de Apoyo) */}
+            {}
             <SubMenu label="Maestros & Config" icon={<Settings className="h-5 w-5" />}>
                 {[
                     { to: "/users", label: "Usuarios y Roles", icon: <Users className="h-4 w-4" /> },
                     { to: "/clients", label: "Clientes", icon: <Users className="h-4 w-4" /> },
-                    // 🎯 NUEVO: Marcas (Brand)
+
                     { to: "/brands", label: "Marcas (Fabricantes)", icon: <Briefcase className="h-4 w-4" /> },
                     { to: "/categories", label: "Clasificación (Categorías)", icon: <Tag className="h-4 w-4" /> },
                     { to: "/uom", label: "Unidades de Medida", icon: <Scale className="h-4 w-4" /> },
@@ -122,7 +122,7 @@ export const SidebarNavigation: React.FC = () => {
                 ] as SubMenuItem[]}
             </SubMenu>
             
-            {/* 6. REPORTES Y SISTEMA (General) */}
+            {}
             <SubMenu label="Reportes & Sistema" icon={<BarChart3 className="h-5 w-5" />}>
                 {[
                     { to: "/reports", label: "Generador de Reportes", icon: <BarChart3 className="h-4 w-4" /> },

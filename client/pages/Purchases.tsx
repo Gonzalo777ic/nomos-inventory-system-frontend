@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PlusCircle, Loader2, Send, CheckCircle, Clock, Eye, Edit, XCircle } from 'lucide-react';
 
-// Componentes de UI
+
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,43 +10,43 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge'; 
 
-// Servicios y Tipos
+
 import { getPurchaseOrders, getPurchaseOrderById } from '@/api/services/purchase-order';
-// Importamos los tipos corregidos (asumiendo que los actualizaste en types/index.ts)
+
 import { PurchaseOrder, OrderStatus, Supplier } from '@/types/index'; 
 import PurchaseOrderForm from '@/components/forms/PurchaseOrderForm'; 
 
-// Importar servicio de proveedores (aunque ya no se usa directamente en la tabla)
+
 import { getSuppliers } from '@/api/services/supplier';
 
-// Tipo de Orden de Compra Mapeada para el Formulario
-// Si PurchaseOrder ya incluye supplier: Supplier y product: Product en los detalles, este tipo se simplifica.
-// El formulario (PurchaseOrderForm) espera una estructura con 'supplier' objeto y 'details' con 'product' objeto.
+
+
+
 type PurchaseOrderMappedForForm = PurchaseOrder; 
 
 
 const Purchases: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [activeTab, setActiveTab] = useState('active'); // active | closed
+  const [activeTab, setActiveTab] = useState('active');
   const [editingOrderId, setEditingOrderId] = useState<number | null>(null); 
   const [isReadOnlyMode, setIsReadOnlyMode] = useState(false); 
 
-  // Obtener la lista de órdenes de compra
+
   const { data: orders, isLoading: isLoadingOrders } = useQuery<PurchaseOrder[]>({
     queryKey: ['purchase-orders'],
     queryFn: getPurchaseOrders,
     staleTime: 60000, 
   });
   
-  // Obtener la lista de proveedores (para el formulario)
+
   const { data: suppliers } = useQuery<Supplier[]>({
       queryKey: ['suppliers'],
       queryFn: getSuppliers,
       staleTime: Infinity,
   });
 
-  // Obtener la Orden individual (raw) para edición o detalle
-  // Usamos el tipo PurchaseOrder corregido
+
+
   const { data: rawOrderForEditing, isLoading: isLoadingSingleOrder } = useQuery<PurchaseOrder | undefined>({
       queryKey: ['purchase-orders', editingOrderId],
       queryFn: () => editingOrderId ? getPurchaseOrderById(editingOrderId) : undefined, 
@@ -54,21 +54,21 @@ const Purchases: React.FC = () => {
       staleTime: 0, 
   });
 
-  // Mapeo de PurchaseOrder (API - que ahora ya tiene 'supplier' anidado) a PurchaseOrderMappedForForm
-  // Simplemente usamos la data tal cual, ya que el tipo PurchaseOrder ha sido corregido en types/index.ts
+
+
   const defaultPurchaseOrder: PurchaseOrderMappedForForm | undefined = useMemo(() => {
-      // TypeScript ya no debería quejarse si PurchaseOrder fue corregido
+
       if (!rawOrderForEditing || !rawOrderForEditing.supplier || !Array.isArray(rawOrderForEditing.details)) {
           return undefined;
       }
       
-      // La data ya está en el formato que espera el formulario gracias a la corrección del tipo base
+
       return rawOrderForEditing;
 
   }, [rawOrderForEditing]);
 
 
-  // Lógica de filtrado por estado (Usando los estados de Java)
+
   const filterOrders = (statusGroup: 'active' | 'closed') => {
     const validOrders = orders || [];
 
@@ -86,7 +86,7 @@ const Purchases: React.FC = () => {
   
   const currentOrders = filterOrders(activeTab as 'active' | 'closed');
 
-  // Mapeo de Estados para Badge
+
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
       case 'PENDIENTE':
@@ -120,13 +120,13 @@ const Purchases: React.FC = () => {
       setIsModalOpen(true);
   };
   
-  // Contenido del Modal (creación/edición/detalle)
+
   const ModalContent = useMemo(() => {
       if (!isModalOpen) return null;
 
       const isEditing = !!editingOrderId;
       
-      // 1. Mostrar Loader mientras se carga la orden individual
+
       if (isEditing && isLoadingSingleOrder) {
           return (
             <div className="p-8 text-center flex flex-col items-center justify-center min-h-[400px]">
@@ -136,7 +136,7 @@ const Purchases: React.FC = () => {
           );
       }
       
-      // 2. Mostrar Error si la data no pudo cargarse
+
       if (isEditing && !defaultPurchaseOrder && !isLoadingSingleOrder) {
          return (
              <div className="p-8 text-center text-red-500">
@@ -145,7 +145,7 @@ const Purchases: React.FC = () => {
          );
       }
 
-      // 3. Renderizar el formulario (o vista de detalle en modo readOnly)
+
       return (
         <PurchaseOrderForm 
             defaultPurchaseOrder={isEditing ? defaultPurchaseOrder : undefined} 
@@ -156,7 +156,7 @@ const Purchases: React.FC = () => {
   }, [isModalOpen, editingOrderId, isLoadingSingleOrder, defaultPurchaseOrder, isReadOnlyMode]);
 
 
-  // 4. ⚙️ Renderizado
+
   if (isLoadingOrders || !suppliers) {
        return (
           <div className="flex justify-center items-center h-full min-h-[500px] p-8">
@@ -193,14 +193,14 @@ const Purchases: React.FC = () => {
         </Dialog>
       </div>
 
-      {/* Listado de Órdenes */}
+      {}
       <Tabs defaultValue="active" onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="active">Activas ({filterOrders('active').length})</TabsTrigger>
           <TabsTrigger value="closed">Completadas/Canceladas ({filterOrders('closed').length})</TabsTrigger>
         </TabsList>
 
-        {/* Contenido de la Tabla */}
+        {}
         <TabsContent value={activeTab}>
           <Card>
             <CardHeader>
@@ -227,11 +227,11 @@ const Purchases: React.FC = () => {
                     </TableHeader>
                     <TableBody>
                       {currentOrders.map((order) => {
-                          // ✅ Ahora order.supplier es de tipo Supplier (gracias a la corrección en types/index.ts)
-                          // y el error TS2551 desaparece.
+
+
                           const supplierName = order.supplier?.name || `ID: ${order.supplier?.id || 'N/A'}`;
                           
-                          // Condición de edición: solo si está PENDIENTE
+
                           const isEditable = order.status === 'PENDIENTE';
 
                           return (
@@ -263,7 +263,7 @@ const Purchases: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="closed">
-             {/* El contenido de 'closed' se renderiza aquí */}
+             {}
         </TabsContent>
       </Tabs>
     </div>

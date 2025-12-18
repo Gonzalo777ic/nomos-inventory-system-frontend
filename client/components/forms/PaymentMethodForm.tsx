@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form.tsx';
 import { Loader2, Plus, Pencil } from 'lucide-react';
 
-// Esquema de validación para el formulario
+
 const formSchema = z.object({
   name: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }).max(50, { message: "El nombre no puede exceder los 50 caracteres." }),
   type: z.enum(['TARJETA', 'EFECTIVO', 'ELECTRÓNICO', 'OTRO'], {
@@ -22,7 +22,7 @@ const formSchema = z.object({
 
 type PaymentMethodFormData = z.infer<typeof formSchema>;
 
-// Tipos de las props: puede recibir datos iniciales y un trigger personalizado
+
 interface PaymentMethodFormProps {
   initialData?: PaymentMethodConfig;
   onSuccess: () => void;
@@ -48,27 +48,27 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ initialData, onSu
     setIsSubmitting(true);
     try {
       if (isEditing) {
-        // Modo Edición
+
         await PaymentMethodService.update(initialData.id, data as PaymentMethodPayload);
         toast({
           title: "Actualizado",
           description: `Método '${data.name}' actualizado con éxito.`,
         });
       } else {
-        // Modo Creación
+
         await PaymentMethodService.create(data as PaymentMethodPayload);
         toast({
           title: "Creado",
           description: `Método '${data.name}' creado con éxito.`,
         });
-        form.reset({ name: '', type: 'EFECTIVO' }); // Resetear formulario después de crear
+        form.reset({ name: '', type: 'EFECTIVO' });
       }
 
-      onSuccess(); // Refrescar la tabla padre
-      setOpen(false); // Cerrar el modal
+      onSuccess();
+      setOpen(false);
     } catch (e: any) {
       console.error("Error al guardar método de pago:", e);
-      // Asumimos que 409 es un error de duplicado (ej. nombre ya existe)
+
       const message = e.response?.status === 409 
         ? "El nombre del método de pago ya existe. Use un nombre diferente."
         : "Ocurrió un error al guardar. Verifique su conexión o permisos.";
@@ -83,7 +83,7 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ initialData, onSu
     }
   };
 
-  // El trigger por defecto (Botón de Creación o Ícono de Edición)
+
   const defaultTrigger = isEditing ? (
     <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary-dark">
         <Pencil className="h-4 w-4" />

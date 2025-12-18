@@ -31,7 +31,7 @@ export const createInventoryItem = async (itemData: Omit<InventoryItem, 'id' | '
  * @param itemData Los datos a modificar.
  */
 export const updateInventoryItem = async (id: number, itemData: Partial<Omit<InventoryItem, 'id' | 'entryDate'>>): Promise<InventoryItem> => {
-    // Nota: Usamos Omit para asegurar que no se envían campos de solo lectura como 'id' o 'entryDate' en el body.
+
     const response = await http.put<InventoryItem>(`${INVENTORY_API_BASE_URL}/${id}`, itemData);
     return response.data;
 };

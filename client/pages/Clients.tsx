@@ -2,33 +2,33 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table'; 
 import { Button } from '../components/ui/button'; 
-import { Loader2 } from 'lucide-react'; // Icono de carga
+import { Loader2 } from 'lucide-react';
 import { Client, ClientService } from '../api/services/client';
 import toast from 'react-hot-toast';
 
-// -----------------------------------------------------------
-// Componente de la tabla de clientes
-// -----------------------------------------------------------
+
+
+
 const ClientsPage: React.FC = () => {
-    // 🔑 Usamos useQuery para manejar el fetching, caching, loading y error state
+
     const { data: clients, isLoading, isError, error } = useQuery<Client[], Error>({
-        queryKey: ['clients'], // Clave única para el caché
-        queryFn: ClientService.getAll, // Función para obtener la lista de clientes      
-        staleTime: 60 * 1000, // 1 minuto
+        queryKey: ['clients'],
+        queryFn: ClientService.getAll,
+        staleTime: 60 * 1000,
     });
 
-    // Función auxiliar para manejar valores nulos/vacíos
+
     const formatValue = (value: string | number | null | undefined): string => {
-        // Verifica si el valor es null, undefined, o una cadena vacía/solo espacios
+
         if (value === null || typeof value === 'undefined' || (typeof value === 'string' && value.trim() === '')) {
             return "No definido";
         }
         return String(value);
     };
 
-    // Función placeholder para manejar el botón de detalle
+
     const handleViewDetails = (client: Client) => {
-        // 🎯 TO DO: Implementar la lógica para abrir el modal con los detalles de venta
+
         toast(`Abriendo detalles para: ${client.fullName}`, { icon: '🔍' });
         console.log("Detalles del cliente:", client);
     };
@@ -43,7 +43,7 @@ const ClientsPage: React.FC = () => {
     }
 
     if (isError) {
-        // Muestra un error más útil para el usuario final
+
         return (
             <div className="p-8 text-red-600 font-medium">
                 ❌ Error al cargar los clientes: {error?.message || "Error desconocido"}
@@ -52,9 +52,9 @@ const ClientsPage: React.FC = () => {
         );
     }
 
-    // -----------------------------------------------------------
-    // Renderizado de la tabla de clientes
-    // -----------------------------------------------------------
+
+
+
     return (
         <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">👥 Clientes Registrados</h1>
@@ -66,7 +66,7 @@ const ClientsPage: React.FC = () => {
                             <TableHead className="w-[80px]">ID</TableHead>
                             <TableHead className="w-[180px]">Nombre Completo</TableHead>
                             <TableHead>Email</TableHead>
-                            {/* Nuevas Columnas Añadidas */}
+                            {}
                             <TableHead className="text-center">Tipo Doc.</TableHead>
                             <TableHead>N° Documento</TableHead>
                             <TableHead>Teléfono</TableHead>
@@ -82,7 +82,7 @@ const ClientsPage: React.FC = () => {
                                     <TableCell className="font-medium">{formatValue(client.fullName)}</TableCell>
                                     <TableCell>{formatValue(client.email)}</TableCell>
                                     
-                                    {/* Celdas con manejo de "No definido" */}
+                                    {}
                                     <TableCell className="text-center text-sm">
                                         {formatValue(client.documentType)}
                                     </TableCell>
@@ -109,7 +109,7 @@ const ClientsPage: React.FC = () => {
                             ))
                         ) : (
                             <TableRow>
-                                {/* El colspan debe ajustarse a la cantidad total de columnas (8 ahora) */}
+                                {}
                                 <TableCell colSpan={8} className="h-24 text-center text-gray-500">
                                     No se encontraron clientes registrados.
                                 </TableCell>
