@@ -7,11 +7,11 @@ import {
     SaleCreationDTO, 
     SalePayload, 
     SaleService,
-    // Eliminamos SaleTypeRef temporalmente para manejar la estructura recibida (id/name)
+
 } from "../../api/services/saleService"; 
 import { useToast } from "../../hooks/use-toast";
 import { useReferenceData } from "../../hooks/useReferenceData";
-// Importaciones de UI
+
 import {
     Dialog,
     DialogContent,
@@ -42,7 +42,7 @@ import { Plus, Loader2 } from "lucide-react";
 
 import SaleDetailManager, { CartItemPayload } from "./SaleDetailManager"; 
 
-// --- ESQUEMAS DE ZOD ---
+
 const SaleTypeEnum = z.enum(["BOLETA", "FACTURA", "TICKET"]);
 const SaleStatusEnum = z.enum(["PENDIENTE", "COMPLETADA", "CANCELADA"]);
 
@@ -67,7 +67,7 @@ const formatLocalDateTime = (isoString: string | undefined): string => {
     const date = new Date(isoString);
     const offset = date.getTimezoneOffset() * 60000;
     const localIso = new Date(date.getTime() - offset).toISOString();
-    return localIso.substring(0, 16); // "YYYY-MM-DDTHH:MM"
+    return localIso.substring(0, 16);
 };
 
 const SaleForm: React.FC<SaleFormProps> = ({
@@ -131,7 +131,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 });
             }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [open, initialData, sellers, saleTypes, refLoading, form]); 
 
     const dialogTitle = isEditing
@@ -157,7 +157,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
             let resultSale: Sale;
             
             if (isEditing && initialData?.id) {
-                // Lógica de Edición de Cabecera
+
                 resultSale = { ...initialData, ...basePayload, id: initialData.id }; 
                 toast({
                     title: "Cabecera Actualizada",
@@ -165,18 +165,18 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 });
                 
             } else {
-                // Lógica de Creación COMPLETA
+
 
                 if (cartDetails.length === 0) {
                      throw new Error("La venta debe contener al menos un producto en el carrito.");
                 }
 
-                // 1. Mapear los detalles del carrito para ELIMINAR `tempId` y `tempKey`
+
                 const detailsPayload = cartDetails.map(detail => {
                     const { tempId, tempKey, ...cleanDetail } = detail;
                     
-                    // 🔑 CORRECCIÓN CLAVE: Convertir undefined a null para taxRateId y promotionId.
-                    // Esto evita que 'undefined' se envíe y fuerce un error de deserialización en Java.
+
+
                     return {
                         ...cleanDetail,
                         taxRateId: cleanDetail.taxRateId ?? null, 
@@ -186,7 +186,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 
                 console.log("[Details Payload] Detalles del Carrito (limpios y nulificados):", detailsPayload);
 
-                // 2. Crear el Payload de Creación Completo
+
                 const saleCreationPayload: SaleCreationDTO = {
                     ...basePayload,
                     details: detailsPayload,
@@ -194,7 +194,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 
                 console.log("[Final DTO] 📤 Enviando al Backend:", saleCreationPayload);
                 
-                // 3. LLAMADA REAL AL SERVICIO DE CREACIÓN COMPLETA
+
                 resultSale = await SaleService.createSaleWithDetails(saleCreationPayload) as Sale;
                 
                 toast({
@@ -249,9 +249,9 @@ const SaleForm: React.FC<SaleFormProps> = ({
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="grid gap-4 py-4"
                     >
-                        {/* --- 1. SECCIÓN DE CABECERA --- */}
+                        {}
                         <div className="grid grid-cols-2 gap-4 border-b pb-4">
-                            {/* Vendedor (Seller) */}
+                            {}
                             <FormField
                                 control={form.control}
                                 name="sellerId"
@@ -284,7 +284,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                 )}
                             />
 
-                            {/* Tipo de Comprobante (FIXED: Usa id y name del backend) */}
+                            {}
                             <FormField
                                 control={form.control}
                                 name="type"
@@ -314,7 +314,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                 )}
                             />
                             
-                            {/* Cliente (Optional) */}
+                            {}
                             <FormField
                                 control={form.control}
                                 name="clientId"
@@ -335,7 +335,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                                 <SelectItem value="NULL_CLIENT">
                                                     (Sin Cliente)
                                                 </SelectItem>
-                                                {/* Clientes */}
+                                                {}
                                                 {(clients as any[]).map((c) => (
                                                     <SelectItem key={c.id} value={String(c.id)}>
                                                         {c.name} ({c.documentNumber})
@@ -348,7 +348,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                 )}
                             />
 
-                            {/* Fecha de Venta */}
+                            {}
                             <FormField
                                 control={form.control}
                                 name="saleDate"
@@ -368,7 +368,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             />
                         </div>
                         
-                        {/* --- 2. SECCIÓN DE DETALLES (Carrito) --- */}
+                        {}
                         {!isEditing && (
                             <SaleDetailManager 
                                 details={cartDetails}

@@ -19,10 +19,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// Definición de las propiedades que espera el componente
+
 interface ImageUploaderProps {
   productId: number;
-  // Opcional: callback para notificar al padre sobre cambios en la imagen principal
+
   onUpdateProductImage?: (newImageUrl: string | undefined) => void;
 }
 
@@ -38,14 +38,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // ESTADOS CLAVE PARA EL PROCESO DE PREVISUALIZACIÓN UNIFICADO
-  const [imageUrlInput, setImageUrlInput] = useState(""); // Contiene la URL pegada en el input
-  const [localFile, setLocalFile] = useState<File | null>(null); // Contiene el File object local
-  const [pendingUrl, setPendingUrl] = useState<string | null>(null); // Contiene la URL de Internet lista para guardar
-  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null); // URL para mostrar en el <img src>
+
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [localFile, setLocalFile] = useState<File | null>(null);
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [urlPreviewError, setUrlPreviewError] = useState<string | null>(null);
 
-  // 1. Carga inicial de imágenes
+
   const loadImages = useCallback(async () => {
     if (!productId) return;
     setIsLoading(true);
@@ -68,7 +68,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     loadImages();
   }, [loadImages]);
 
-  // Limpiar previsualización y estados pendienes
+
   const clearPendingStates = () => {
     if (localPreviewUrl && localFile) URL.revokeObjectURL(localPreviewUrl);
     setLocalFile(null);
@@ -78,17 +78,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     setUrlPreviewError(null);
   };
 
-  // Función auxiliar para actualizar el estado después de una subida/cambio
+
   const updateImageState = (newImage: ProductImage) => {
     setImages((prev) => {
       let updatedImages: ProductImage[];
 
-      // Si la imagen nueva es la principal, desmarcamos las demás
+
       if (newImage.isDefault) {
         updatedImages = prev.map((img) => ({ ...img, isDefault: false }));
         updatedImages.push(newImage);
       } else {
-        // Previene duplicados si el backend no es idempotente o si la lógica es compleja
+
         if (prev.some((img) => img.id === newImage.id)) {
           updatedImages = prev.map((img) =>
             img.id === newImage.id ? newImage : img,
@@ -98,7 +98,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         }
       }
 
-      // @ts-ignore: Asumimos que el tipo ProductImage ya se corrigió para incluir sortOrder
+
       updatedImages.sort((a, b) => {
         if (a.isDefault && !b.isDefault) return -1;
         if (!a.isDefault && b.isDefault) return 1;
@@ -112,11 +112,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       return updatedImages;
     });
 
-    // Limpiar el estado de subida y previsualización
+
     clearPendingStates();
   };
 
-  // 2. Manejo de la subida de archivos locales
+
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -126,17 +126,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       return;
     }
 
-    // Limpiar URL pendiente si el usuario decide subir un archivo
+
     setPendingUrl(null);
     setImageUrlInput("");
     setUrlPreviewError(null);
 
-    // AÑADIR ARCHIVO A ESTADO LOCAL PARA PREVISUALIZACIÓN
+
     setLocalFile(file);
     setLocalPreviewUrl(URL.createObjectURL(file));
   };
 
-  // Función de subida real del archivo local
+
   const submitLocalFile = async () => {
     if (!localFile || isUploading) return;
 
@@ -155,26 +155,26 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // 3. Manejo de la URL de Internet (AHORA SOLO PARA PREVISUALIZACIÓN)
+
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     setImageUrlInput(url);
-    setLocalFile(null); // Limpiar local file si se usa URL
-    setPendingUrl(null); // Limpiar URL pendiente
+    setLocalFile(null);
+    setPendingUrl(null);
 
     if (url && url.match(/^https?:\/\/.+/)) {
-      // Validación básica
+
       if (url.length > 2048) {
         setUrlPreviewError("URL demasiado larga.");
         setLocalPreviewUrl(null);
         return;
       }
 
-      // Intentar precargar la imagen para previsualización
+
       const img = new window.Image();
       img.onload = () => {
         setLocalPreviewUrl(url);
-        setPendingUrl(url); // Establecer URL como pendiente de guardar
+        setPendingUrl(url);
         setUrlPreviewError(null);
       };
       img.onerror = () => {
@@ -184,7 +184,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           "No se pudo cargar la previsualización de la URL. Verifica que la URL sea pública y accesible.",
         );
       };
-      // Usamos un pequeño timeout para que la UI no se bloquee inmediatamente
+
       setTimeout(() => {
         img.src = url;
       }, 100);
@@ -195,7 +195,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // Función de subida real de la URL
+
   const submitUrl = async () => {
     if (!pendingUrl || isUploading) return;
 
@@ -216,7 +216,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // Función unificada para el botón de Guardar en la previsualización
+
   const handleSavePendingImage = () => {
     if (localFile) {
       submitLocalFile();
@@ -225,22 +225,22 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // Manejar el evento de arrastrar y soltar
+
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     handleFileUpload(e.dataTransfer.files);
   };
 
-  // 4. Establecer imagen como principal
+
   const handleSetDefault = async (imageId: number) => {
-    // Lógica de establecer como principal
+
     try {
       setIsLoading(true);
-      // La API solo necesita productId y imageId
+
       await setDefaultProductImage(productId, imageId);
       toast.success("Imagen principal actualizada.");
-      await loadImages(); // loadImages llama a onUpdateProductImage
+      await loadImages();
     } catch (error) {
       console.error("Error al establecer imagen principal:", error);
       toast.error("No se pudo establecer la imagen principal.");
@@ -249,14 +249,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // 5. Eliminar imagen
+
   const handleDeleteImage = async (imageId: number) => {
-    // Lógica de eliminar (omito detalles por ser externa a la corrección)
+
     try {
       setIsLoading(true);
       await deleteProductImage(productId, imageId);
       toast.success("Imagen eliminada correctamente.");
-      await loadImages(); // Recargar para refrescar la galería
+      await loadImages();
     } catch (error) {
       console.error("Error al eliminar imagen:", error);
       toast.error("No se pudo eliminar la imagen.");
@@ -273,7 +273,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     );
   }
 
-  // Determinar si el modo de previsualización debe estar activo
+
   const showPreviewMode = localFile || pendingUrl;
 
   return (
@@ -282,7 +282,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         Galería de Imágenes
       </h4>
 
-      {/* Subida por URL (Ahora solo para entrada de datos) */}
+      {}
       <form className="flex space-x-2">
         <div className="relative w-full">
           <input
@@ -295,10 +295,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           />
           <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         </div>
-        {/* 🛑 EL BOTÓN DE GUARDAR SE ELIMINA DE AQUÍ. LA ACCIÓN SE HACE EN LA PREVISUALIZACIÓN */}
+        {}
         <button
-          type="button" // Cambiado a type="button" para no enviar el formulario
-          disabled={true} // Deshabilitado porque el submit ahora es solo a través del panel central
+          type="button"
+          disabled={true}
           className="flex items-center justify-center p-2 bg-emerald-600 text-white font-semibold rounded-md shadow-md hover:bg-emerald-700 disabled:opacity-50 transition min-w-[100px]"
           title="Pegue la URL para previsualizar"
         >
@@ -306,7 +306,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         </button>
       </form>
 
-      {/* Mensaje de error de previsualización de URL */}
+      {}
       {urlPreviewError && (
         <div className="flex items-center text-sm text-red-500 bg-red-100 dark:bg-red-900/50 p-2 rounded-md">
           <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
@@ -320,9 +320,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
       </div>
 
-      {/* 🔑 ÁREA DE CARGA/PREVISUALIZACIÓN CENTRAL (UNIFICADA) */}
+      {}
       {showPreviewMode && localPreviewUrl ? (
-        // --- MODO PREVISUALIZACIÓN ---
+
         <div className="border-2 border-dashed border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-4 text-center animate-fadeIn">
           <div className="flex justify-center items-center h-48 w-full overflow-hidden mb-3">
             <img
@@ -330,7 +330,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               alt="Previsualización de imagen"
               className="max-h-full max-w-full object-contain rounded-lg shadow-lg"
               onError={(e) => {
-                // Fallback para el caso de previsualización de URL que falla después del load
+
                 if (pendingUrl) {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = `https://placehold.co/100x100/CCCCCC/333333?text=URL+No+Cargada`;
@@ -372,7 +372,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </div>
         </div>
       ) : (
-        // --- MODO DRAG & DROP ---
+
         <div
           className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-emerald-500 transition duration-150"
           onDragOver={handleDragOver}
@@ -394,7 +394,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         </div>
       )}
 
-      {/* Galería de Imágenes */}
+      {}
       {isLoading && (
         <div className="flex justify-center items-center h-20">
           <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
@@ -421,16 +421,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                   alt={`Imagen de Producto ${img.id}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    // Fallback
+
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = `https://placehold.co/100x100/CCCCCC/333333?text=ID+${img.id}`;
                   }}
                 />
               </div>
 
-              {/* Overlay de acciones */}
+              {}
               <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity space-x-2">
-                {/* Botón para establecer como principal */}
+                {}
                 <button
                   onClick={() => handleSetDefault(img.id)}
                   className={`p-2 rounded-full transition ${img.isDefault ? "bg-emerald-500 text-white" : "bg-white text-gray-800 hover:bg-emerald-100"}`}
@@ -447,7 +447,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                   )}
                 </button>
 
-                {/* Botón para eliminar */}
+                {}
                 <button
                   onClick={() => handleDeleteImage(img.id)}
                   className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
@@ -457,7 +457,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 </button>
               </div>
 
-              {/* Indicador de Principal (si es la principal) */}
+              {}
               {img.isDefault && (
                 <div className="absolute top-2 left-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center space-x-1">
                   <Star className="w-3 h-3 fill-current" />

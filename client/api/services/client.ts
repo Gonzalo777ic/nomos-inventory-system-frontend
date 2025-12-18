@@ -1,6 +1,6 @@
 import { httpAuth } from '../httpAuth';
 
-// ⚠️ Usamos la URL base del ClientController.
+
 const CLIENT_API_BASE_URL = 'http://localhost:8080/api/auth/clients'; 
 
 export interface Client {
@@ -8,13 +8,13 @@ export interface Client {
     auth0Id: string | null;
     email: string;
     fullName: string;
-    documentType: string | null; // Puede ser null si no se ha rellenado
-    documentNumber: string | null; // Puede ser null
-    phone: string | null; // Puede ser null
-    address: string | null; // Puede ser null
+    documentType: string | null;
+    documentNumber: string | null;
+    phone: string | null;
+    address: string | null;
 }
 
-// Interfaz para la respuesta del nuevo endpoint
+
 export interface DocumentTypeRef {
     key: string;
     description: string;

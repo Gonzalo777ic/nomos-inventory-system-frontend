@@ -8,7 +8,7 @@ import { Button } from '../components/ui/button.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table.tsx';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog.tsx';
 
-// Helper para formatear fechas del backend
+
 const formatDate = (isoString: string) => {
     if (!isoString) return 'N/A';
     const date = new Date(isoString);
@@ -101,7 +101,7 @@ const Promotions: React.FC = () => {
             <Tag className="h-8 w-8 text-primary" />
             Gestión de Promociones
         </h1>
-        {/* Botón de Creación */}
+        {}
         <PromotionForm onSuccess={fetchPromotions} /> 
       </div>
 
@@ -110,7 +110,7 @@ const Promotions: React.FC = () => {
           <CardTitle>Reglas de Descuento Configuradas</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* ... (Loading y Error) ... */}
+          {}
           {loading && (
             <div className="flex justify-center p-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -169,13 +169,13 @@ const Promotions: React.FC = () => {
                         </TableCell>
                         <TableCell className="flex justify-center space-x-2">
                           
-                          {/* Botón de Edición (Modal Form) */}
+                          {}
                           <PromotionForm 
                               initialData={promo} 
                               onSuccess={fetchPromotions}
                           />
                           
-                          {/* Botón de Eliminación (Alert Dialog) */}
+                          {}
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="destructive" size="icon" className="h-8 w-8">

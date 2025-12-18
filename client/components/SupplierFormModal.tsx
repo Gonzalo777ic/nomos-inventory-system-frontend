@@ -6,13 +6,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Loader2, Save } from 'lucide-react';
 
-// Componentes UI
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 
-// Tipos y Servicios
+
 import { Supplier, SupplierSchema } from '../types'; 
 import { createSupplier, updateSupplier } from '../api/services/supplier';
 
@@ -22,10 +22,10 @@ interface SupplierFormModalProps {
     supplierToEdit: Supplier | null;
 }
 
-// 1. Definimos el esquema del formulario (omitimos 'id' para crear/editar)
+
 const formSchema = SupplierSchema.omit({ id: true });
 
-// 2. Usamos la inferencia directa del esquema modificado para el tipo de valores del formulario.
+
 type SupplierFormValues = z.infer<typeof formSchema>;
 
 
@@ -33,7 +33,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({ isOpen, onClose, 
     const queryClient = useQueryClient();
     const isEditing = !!supplierToEdit;
     
-    // Los defaultValues deben ser del tipo SupplierFormValues
+
     const defaultFormValues: SupplierFormValues = {
         name: '',
         taxId: '',
@@ -44,15 +44,15 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({ isOpen, onClose, 
     };
     
     const form = useForm<SupplierFormValues>({
-        // El tipado del resolver y useForm están alineados.
+
         resolver: zodResolver(formSchema), 
         defaultValues: defaultFormValues,
     });
 
-    // Resetear el formulario cuando se abre o cambia el proveedor a editar
+
     useEffect(() => {
         if (isEditing && supplierToEdit) {
-            // Aseguramos que el objeto pasado a form.reset sea tratado como SupplierFormValues
+
             const resetValues: SupplierFormValues = {
                 name: supplierToEdit.name,
                 taxId: supplierToEdit.taxId,
@@ -69,7 +69,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({ isOpen, onClose, 
 
 
     const supplierMutation = useMutation({
-        // La función de mutación espera el tipo requerido
+
         mutationFn: (data: SupplierFormValues) => { 
             if (isEditing && supplierToEdit?.id) {
                 return updateSupplier(supplierToEdit.id, data);
@@ -88,8 +88,8 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({ isOpen, onClose, 
         },
     });
 
-    // CORRECCIÓN FINAL: Forzamos la aserción de tipo en la llamada a mutate.
-    // Esto le dice a TypeScript: "Confía en mí, Zod ya validó esta data para que coincida con SupplierFormValues."
+
+
     const handleSubmit = form.handleSubmit((data) => {
         supplierMutation.mutate(data as SupplierFormValues);
     });
@@ -102,7 +102,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({ isOpen, onClose, 
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="grid gap-4 py-4">
                     
-                    {/* Nombre y Contacto */}
+                    {}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label htmlFor="name">Compañía</Label>
@@ -116,7 +116,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({ isOpen, onClose, 
                         </div>
                     </div>
                     
-                    {/* ID Fiscal y Email */}
+                    {}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label htmlFor="taxId">RUC / ID Fiscal</Label>
@@ -130,7 +130,7 @@ const SupplierFormModal: React.FC<SupplierFormModalProps> = ({ isOpen, onClose, 
                         </div>
                     </div>
 
-                    {/* Teléfono y Dirección (completa) */}
+                    {}
                     <div className="space-y-1">
                         <Label htmlFor="phone">Teléfono</Label>
                         <Input id="phone" type="tel" {...form.register('phone')} />

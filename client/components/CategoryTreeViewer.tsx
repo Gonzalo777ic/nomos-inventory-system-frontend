@@ -1,4 +1,4 @@
-// CategoryTreeViewer.tsx
+
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import ReactFlow, {
   MiniMap,
@@ -25,11 +25,11 @@ interface SaveChange {
 }
 
 interface CategoryTreeProps {
-  treeData: Category[]; // raíz(s)
+  treeData: Category[];
   onSave: (changes: SaveChange[]) => void;
 }
 
-// -------------------- util helpers --------------------
+
 
 const deepCloneTree = (t: Category[]): Category[] => {
   return JSON.parse(JSON.stringify(t || []));
@@ -42,7 +42,7 @@ const ensureChildren = (tree: Category[]) => {
   }
 };
 
-// encuentra y extrae (mutando) el nodo con id
+
 const findAndRemoveNode = (tree: Category[], id: number): { node: Category | null; tree: Category[] } => {
   for (let i = 0; i < tree.length; i++) {
     const n = tree[i];
@@ -99,7 +99,7 @@ const buildParentMap = (tree: Category[], map = new Map<number, number | null>()
 };
 
 const isDescendant = (tree: Category[], ancestorId: number, targetId: number): boolean => {
-  // busca ancestorId
+
   const findNode = (nodes: Category[], id: number): Category | null => {
     for (const n of nodes) {
       if (n.id === id) return n;
@@ -123,7 +123,7 @@ const isDescendant = (tree: Category[], ancestorId: number, targetId: number): b
   return search(anc.children);
 };
 
-// -------------------- layout (D3) --------------------
+
 
 const layout = (treeData: Category[]): { nodes: FlowNode[]; edges: FlowEdge[] } => {
   if (!treeData || treeData.length === 0) return { nodes: [], edges: [] };
@@ -160,30 +160,30 @@ const layout = (treeData: Category[]): { nodes: FlowNode[]; edges: FlowEdge[] } 
   return { nodes, edges };
 };
 
-// -------------------- Componente --------------------
+
 
 const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) => {
-  // original snapshot (ref)
+
   const originalRef = useRef<Category[]>(deepCloneTree(treeData || []));
-  // workingTree editable localmente
+
   const [workingTree, setWorkingTree] = React.useState<Category[]>(() => {
     const t = deepCloneTree(treeData || []);
     ensureChildren(t);
     return t;
   });
 
-  // history stacks (snapshots)
+
   const undoStack = useRef<Category[][]>([]);
   const redoStack = useRef<Category[][]>([]);
 
-  // nodes/edges from workingTree (layout)
+
   const { nodes: layoutNodes, edges: layoutEdges } = useMemo(() => layout(workingTree), [workingTree]);
 
-  // initialize ReactFlow states empty and set via effect to avoid type/initial mismatch
+
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge[]>([]);
 
-  // sync from incoming prop changes (external save, etc.)
+
   useEffect(() => {
     originalRef.current = deepCloneTree(treeData || []);
     const clone = deepCloneTree(treeData || []);
@@ -191,23 +191,23 @@ const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) =
     setWorkingTree(clone);
   }, [treeData]);
 
-  // set nodes/edges whenever layoutNodes/layoutEdges change
+
   useEffect(() => {
     setNodes(layoutNodes);
     setEdges(layoutEdges);
   }, [layoutNodes, layoutEdges, setNodes, setEdges]);
 
-  // push undo snapshot
+
   const pushUndo = useCallback((snapshot: Category[]) => {
     undoStack.current.push(deepCloneTree(snapshot));
     if (undoStack.current.length > 50) undoStack.current.shift();
     redoStack.current = [];
   }, []);
 
-  // handle node drag stop: modify workingTree (not originalRef)
+
   const handleNodeDragStop = useCallback(
     (_event: any, node: any) => {
-      // hit-testing: find target under node center
+
       const dropTarget = nodes.find((n) => {
         const threshold = 50;
         return (
@@ -232,15 +232,15 @@ const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) =
           return;
         }
       } else {
-        newParentId = null; // root
+        newParentId = null;
       }
 
       if (newParentId === oldParent) return;
 
-      // snapshot for undo
+
       pushUndo(workingTree);
 
-      // clone, remove and insert
+
       const newTree = deepCloneTree(workingTree);
       ensureChildren(newTree);
       const { node: removed } = findAndRemoveNode(newTree, movedId);
@@ -251,7 +251,7 @@ const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) =
       removed.parent = null;
       const inserted = insertNodeUnderParent(newTree, removed, newParentId);
       if (!inserted) {
-        // fallback to root
+
         newTree.push(removed);
       }
 
@@ -260,7 +260,7 @@ const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) =
     [nodes, workingTree, pushUndo]
   );
 
-  // undo / redo
+
   const handleUndo = useCallback(() => {
     if (undoStack.current.length === 0) return;
     const last = undoStack.current.pop()!;
@@ -276,7 +276,7 @@ const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) =
   }, [workingTree]);
 
   const handleResetLayout = useCallback(() => {
-    // force recalculation and set nodes/edges by setting workingTree clone
+
     setWorkingTree((prev) => deepCloneTree(prev));
   }, []);
 
@@ -308,7 +308,7 @@ const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) =
       return;
     }
     onSave(changes);
-    // update original snapshot and clear history
+
     originalRef.current = deepCloneTree(workingTree);
     undoStack.current = [];
     redoStack.current = [];
@@ -318,10 +318,10 @@ const CategoryTreeViewer: React.FC<CategoryTreeProps> = ({ treeData, onSave }) =
   const canUndo = undoStack.current.length > 0;
   const canRedo = redoStack.current.length > 0;
 
-  // -------------------- render --------------------
+
   return (
     <Card className="shadow-lg h-[700px] w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 relative">
-      {/* Top action bar */}
+      {}
       <div style={{ position: "absolute", top: 10, left: 12, right: 12, zIndex: 40, display: "flex", alignItems: "center", gap: 8 }}>
         <button
           onClick={handleUndo}

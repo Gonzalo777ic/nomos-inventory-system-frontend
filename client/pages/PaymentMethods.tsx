@@ -22,7 +22,7 @@ const PaymentMethods: React.FC = () => {
       setMethods(data);
     } catch (e: any) {
       console.error("Error fetching payment methods:", e);
-      // Asumimos que 403 es error de permisos y 500 es problema de conexión/API
+
       const message = e.response?.status === 403 
         ? "No tienes permiso para ver esta configuración."
         : "El servicio no está disponible o hay un error de conexión (puerto 8083).";
@@ -45,7 +45,7 @@ const PaymentMethods: React.FC = () => {
         title: "Eliminado",
         description: `El método '${name}' ha sido eliminado.`,
       });
-      fetchMethods(); // Refrescar la lista
+      fetchMethods();
     } catch (e: any) {
       console.error("Error deleting payment method:", e);
       const message = e.response?.status === 403
@@ -71,7 +71,7 @@ const PaymentMethods: React.FC = () => {
             <Wallet className="h-8 w-8 text-primary" />
             Métodos de Pago
         </h1>
-        {/* Botón de Creación */}
+        {}
         <PaymentMethodForm onSuccess={fetchMethods} /> 
       </div>
 
@@ -118,13 +118,13 @@ const PaymentMethods: React.FC = () => {
                       </TableCell>
                       <TableCell className="flex justify-center space-x-2">
                         
-                        {/* Botón de Edición (Modal Form) */}
+                        {}
                         <PaymentMethodForm 
                             initialData={method} 
                             onSuccess={fetchMethods}
                         />
                         
-                        {/* Botón de Eliminación (Alert Dialog) */}
+                        {}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="destructive" size="icon" className="h-8 w-8">

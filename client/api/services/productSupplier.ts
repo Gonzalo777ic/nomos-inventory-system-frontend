@@ -1,5 +1,5 @@
 import { http } from '../http';
-import { ProductSupplierDTO } from '../../types'; // 🎯 Importamos la definición correcta de Product
+import { ProductSupplierDTO } from '../../types';
 
 
 const API_BASE_URL = '/inventory/product-suppliers';
@@ -15,17 +15,17 @@ const API_BASE_URL = '/inventory/product-suppliers';
  * @returns La relación ProductSupplier creada por el backend.
  */
 export const createProductSupplierRelation = async (relationData: ProductSupplierDTO): Promise<any> => {
-    // 🔑 LOG de depuración antes de enviar
+
     console.log("[ProductSupplier API] 🔗 Enviando relación POST:", relationData);
     
     try {
-        // El controller de Spring Boot (POST /api/inventory/product-suppliers) espera este DTO.
+
         const response = await http.post(API_BASE_URL, relationData);
         
         console.log("[ProductSupplier API] ✅ Relación creada con éxito:", response.data);
         return response.data;
     } catch (error) {
-        // Manejo de errores específicos del backend (ej: si la relación ya existe)
+
         console.error("[ProductSupplier API] 🚨 Error al crear relación ProductSupplier:", error);
         throw error;
     }

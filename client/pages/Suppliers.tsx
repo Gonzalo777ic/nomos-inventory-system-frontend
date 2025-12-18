@@ -5,14 +5,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { PlusCircle, Search, Loader2, Edit, Trash2, Building2, User, Mail } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth'; // Importación consistente
-import { Supplier } from '../types'; // Tipo del proveedor
+import { useAuth } from '../hooks/useAuth';
+import { Supplier } from '../types';
 import { toast } from 'sonner';
 
-// Importamos las funciones de la API
+
 import { getSuppliers, deleteSupplier } from '../api/services/supplier';
 
-// Importamos el modal del formulario
+
 import SupplierFormModal from '../components/SupplierFormModal'; 
 
 
@@ -21,25 +21,25 @@ import SupplierFormModal from '../components/SupplierFormModal';
  */
 function SuppliersPage() {
     const queryClient = useQueryClient();
-    // 1. Hook de autenticación
+
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [supplierToEdit, setSupplierToEdit] = useState<Supplier | null>(null);
 
-    // 2. Obtener la lista de proveedores (GET)
+
     const {
         data: suppliers,
         isLoading: isLoadingSuppliers,
         error: queryError,
     } = useQuery<Supplier[]>({
         queryKey: ['suppliers'],
-        queryFn: getSuppliers, // Función de API real
+        queryFn: getSuppliers,
         enabled: isAuthenticated && !isAuthLoading,
     });
 
-    // 3. Mutación para eliminación (DELETE)
+
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteSupplier(id),
         onSuccess: () => {
@@ -51,7 +51,7 @@ function SuppliersPage() {
         }
     });
 
-    // 4. Filtro de búsqueda (uso de useMemo para optimización)
+
     const filteredSuppliers = useMemo(() => {
         if (!suppliers) return [];
         const lowerCaseSearch = searchTerm.toLowerCase();
@@ -63,7 +63,7 @@ function SuppliersPage() {
         );
     }, [suppliers, searchTerm]);
 
-    // Handlers para el modal
+
     const handleAddSupplier = () => {
         setSupplierToEdit(null);
         setIsModalOpen(true);
@@ -80,13 +80,13 @@ function SuppliersPage() {
     };
 
     const handleDelete = (id: number, name: string) => {
-        // Mejorar esto con un modal de confirmación en un entorno real
+
         if (window.confirm(`¿Estás seguro de que quieres eliminar al proveedor "${name}"?`)) {
             deleteMutation.mutate(id);
         }
     };
 
-    // --- RENDERIZADO DE ESTADOS ---
+
 
     if (isAuthLoading) {
         return (
@@ -99,7 +99,7 @@ function SuppliersPage() {
     if (queryError) {
         const message = queryError instanceof Error ? queryError.message : "Un error desconocido ha ocurrido.";
         let errorMessage = `Error al cargar la lista de proveedores: ${message}`;
-        // Lógica de manejo de errores consistente con Inventory
+
         if (message.includes('403') || message.includes('Forbidden')) {
             errorMessage = "Acceso Denegado (403): Tu cuenta no tiene permiso para ver proveedores.";
         } else if (message.includes('401') || message.includes('Unauthorized')) {
@@ -218,7 +218,7 @@ function SuppliersPage() {
                 </CardContent>
             </Card>
 
-            {/* MODAL DE GESTIÓN (Añadir/Editar) */}
+            {}
             <SupplierFormModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}

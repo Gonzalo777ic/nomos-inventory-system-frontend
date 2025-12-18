@@ -1,22 +1,22 @@
-// client/api/services/internalUserService.ts
+
 
 import { httpAuth } from '../httpAuth'; 
 
 const AUTH_API_BASE_URL = 'http://localhost:8080/api/auth/users'; 
 const ROLES_API_BASE_URL = 'http://localhost:8080/api/auth/roles'; 
 
-// --- Definiciones de Tipos ---
+
 
 export interface InternalUser {
     id: number;
-    username: string; // Email
+    username: string;
     auth0Id: string | null;
-    firstName?: string; // Asumo que estos campos están en el DTO para usar en el nombre
+    firstName?: string;
     lastName?: string;
-    roles: string[]; // Nombres de los roles (ej: "ADMIN", "SELLER")
+    roles: string[];
 }
 
-// -----------------------------------------------------------
+
 
 export const InternalUserService = {
     /**
@@ -40,7 +40,7 @@ export const InternalUserService = {
             .filter(user => user.roles.includes(SELLER_ROLE_NAME))
             .map(user => ({
                 id: user.id,
-                // Combina nombre y apellido si están disponibles, sino usa el username
+
                 name: (user.firstName && user.lastName) 
                     ? `${user.firstName} ${user.lastName}` 
                     : user.username

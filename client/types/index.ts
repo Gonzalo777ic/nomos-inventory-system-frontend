@@ -4,59 +4,59 @@
  * ====================================================================
  */
 import { z } from 'zod';
-// 1. NUEVA ENTIDAD: Brand (Marca)
+
 export type Brand = {
   id: number;
-  name: string; // Nombre completo de la marca (Unique)
-  code?: string; // Código o abreviatura (Unique)
-  website?: string; // URL del sitio web del fabricante
-  logoUrl?: string; // URL del logo
+  name: string;
+  code?: string;
+  website?: string;
+  logoUrl?: string;
 };
 
-// 2. UnitOfMeasure (Unidad de Medida, ej: Unidad, Kg, Paquete)
+
 export type UnitOfMeasure = {
   id: number;
   name: string;
-  abbreviation: string; // Unique
+  abbreviation: string;
 };
 
-// 3. Category (Clasificación jerárquica)
+
 export type Category = {
   id: number;
   name: string;
   description?: string;
   parent?: Category | null; 
   
-  // AÑADIDO: Campo para almacenar subcategorías al mapear a formato de árbol
+
   children?: Category[]; 
 };
-// 4. Supplier (Proveedor)
+
 export type Supplier = {
   id: number;
   name: string;
-  taxId: string; // Unique
+  taxId: string;
   email: string;
   phone: string;
   address: string;
   contactName: string;
 };
 
-// 5. ProductAttribute (Ej: Talla, Color, Sabor)
+
 export type ProductAttribute = {
   id: number;
   name: string;
-  dataType: 'String' | 'Number' | 'Boolean'; // String, Number, Boolean
+  dataType: 'String' | 'Number' | 'Boolean';
 };
 
-// 6. ProductAttributeValue (Valores del atributo para un Producto)
+
 export type ProductAttributeValue = {
   id: number;
-  productId: number; // FK a Product
-  attributeId: number; // FK a ProductAttribute
-  value: string; // Ej: 'Rojo', 'Grande', '200ml'
+  productId: number;
+  attributeId: number;
+  value: string;
 };
 
-// 7. Warehouse (Almacén)
+
 export type Warehouse = {
     id: number;
     name: string;
@@ -75,79 +75,79 @@ export type Warehouse = {
 export type ProductImage = {
   id: number;
   productId: number;
-  imageUrl: string; // URL de la imagen en el storage (ej: S3, Firebase, etc.)
-  isDefault: boolean; // Indica si es la imagen principal del producto
-  // Nota: Podríamos añadir 'order' para el orden de las imágenes en una galería.
+  imageUrl: string;
+  isDefault: boolean;
+
   sortOrder: number;
 };
 
-// 8. Product (Definición maestra) - Actualizada con FKs numéricas
+
 export type Product = {
   id: number;
-  sku: string; // Unique
+  sku: string;
   name: string;
-  imageUrl?: string; // 🖼️ URL de la imagen del producto (Añadida)
+  imageUrl?: string;
 
   brandId: number; 
   categoryId: number; 
   unitOfMeasureId: number;
   
   
-  price: number; // Precio Base (Double en Java)
-  minStockThreshold: number; // (Integer en Java)
+  price: number;
+  minStockThreshold: number;
 };
 
 export type ProductSupplierDTO = {
-    // Claves Compuestas (obligatorias)
-    productId: number; // FK a Product
-    supplierId: number; // FK a Supplier
 
-    // Atributos obligatorios para la lógica de negocio (según tu modelo Java)
-    unitCost: number; // Double en Java -> number en TS
-    leadTimeDays: number; // Integer en Java -> number en TS
-    isPreferred: boolean; // Indica si es el proveedor principal
+    productId: number;
+    supplierId: number;
 
-    // Atributos de estado (obligatorios en tu modelo Java)
-    isActive: boolean; // Indica si la relación está activa
 
-    // Atributo opcional
-    supplierProductCode?: string | null; // Código del proveedor (opcional)
+    unitCost: number;
+    leadTimeDays: number;
+    isPreferred: boolean;
+
+
+    isActive: boolean;
+
+
+    supplierProductCode?: string | null;
 };
 
-// 8.1 ProductListItem (Extensión para la vista de lista)
-// Tipo utilizado en el frontend para mostrar la lista de productos con datos denormalizados.
+
+
 export interface ProductListItem extends Product {
-    // Campos denormalizados (traídos por el backend para la vista de lista)
+
     brandName: string;
     supplierName: string;
 
     categoryName: string; 
     unitOfMeasureName: string; 
     
-    // Campo calculado (Stock actual)
+
     currentStock?: number; 
 }
 
-// 9. InventoryItem (Lote de existencia física) - Actualizada a números
+
 export type InventoryItem = {
     id: number;
-    productId: number; // FK a Product
-    warehouseId: number; // FK a Warehouse
-    currentStock: number; // Integer
-    unitCost: number; // Double
+    productId: number;
+    warehouseId: number;
+    currentStock: number;
+    unitCost: number;
     lotNumber: string;
-    // Usamos string para el input de fecha (YYYY-MM-DD)
+
     expirationDate: string; 
     location: string;
-    entryDate: string; // Si el backend lo retorna, descomentar
+    entryDate: string;
 }
 
-// --- TIPOS DE BASE DE DATOS/API (ASUMIDOS) ---
 
-// 1. OrderStatus (Sincronizado con el Enum de Java)
+
+
 export type JavaOrderStatus = 'PENDIENTE' | 'RECIBIDO_PARCIAL' | 'COMPLETO' | 'CANCELADO';
 
-// Tipo que incluye los estados de la UI/Formulario
+
 export type OrderStatus = JavaOrderStatus | 'BORRADOR' | 'ENVIADA'; 
 
 export type PurchaseOrderDetail = {
@@ -160,12 +160,12 @@ export type PurchaseOrderDetail = {
 
 export type PurchaseOrder = {
     id: number;
-    // ❌ Antes: supplierId: number; 
-    // ✅ Ahora: Si el API de GET devuelve el objeto anidado 'supplier':
-    supplier: Supplier; // <-- ¡CLAVE! Se asume que trae el objeto completo
+
+
+    supplier: Supplier;
     
-    // Si necesitas el supplierId por separado para otras vistas, puedes dejarlo:
-    // supplierId: number; 
+
+
     
     orderDate: string; 
     deliveryDate: string; 
@@ -180,34 +180,34 @@ export type PurchaseOrder = {
 
 type IdPayload = { id: number };
 
-// 4. PurchaseOrderDetailPayload
+
 export type PurchaseOrderDetailPayload = {
     product: IdPayload; 
     quantity: number;
     unitCost: number;
-    // No necesita id, purchaseOrderId, ni productId
+
 }
 
 
-// 5. PurchaseOrderPayload (El status enviado debe ser de tipo JavaOrderStatus)
+
 export type PurchaseOrderPayload = {
     supplier: IdPayload; 
     orderDate: string;
     deliveryDate: string;
     totalAmount: number;
-    status: JavaOrderStatus; // ⭐ CLAVE: Solo enviamos los valores válidos de Java.
+    status: JavaOrderStatus;
     details: PurchaseOrderDetailPayload[]; 
 };
 
-// 12. InventoryMovement (Trazabilidad histórica de stock)
+
 export type InventoryMovement = {
     id: number;
-    inventoryItemId: number; // FK a InventoryItem
-    productId: number; // FK a Product
-    quantityChange: number; // Integer (+/-)
-    type: string; // MOVE_IN, MOVE_OUT, ADJUSTMENT
+    inventoryItemId: number;
+    productId: number;
+    quantityChange: number;
+    type: string;
     reason: string;
-    movementDate: string; // LocalDateTime
+    movementDate: string;
     referenceId: number;
     referenceService: string;
 }
@@ -218,31 +218,31 @@ export type InventoryMovement = {
  * ====================================================================
  */
 
-// 13. StoreSchedule (Horario de Atención Semanal Regular)
+
 export type StoreSchedule = {
     id: number;
     dayOfWeek: 'LUNES' | 'MARTES' | 'MIÉRCOLES' | 'JUEVES' | 'VIERNES' | 'SÁBADO' | 'DOMINGO' | string;
-    openTime: string; // LocalTime
-    closeTime: string; // LocalTime
+    openTime: string;
+    closeTime: string;
     isOpen: boolean; 
 }
 
-// 14. ClosureDate (Días Festivos o Cierres Programados)
+
 export type ClosureDate = {
     id: number;
-    closureDate: string; // LocalDate
+    closureDate: string;
     reason: string; 
     isFullDay: boolean;
-    closingTime?: string; // LocalTime (si es cierre parcial)
+    closingTime?: string;
 }
 
-// 15. Announcement (Mensajes en la Tienda Online)
+
 export type Announcement = {
     id: number;
     title: string;
     content: string;
-    startDate: string; // LocalDateTime
-    endDate: string; // LocalDateTime
+    startDate: string;
+    endDate: string;
     type: 'BANNER' | 'MODAL' | 'POPUP' | string;
     isActive: boolean;
 }
@@ -253,7 +253,7 @@ export type Announcement = {
  * ====================================================================
  */
 
-// Tipos originales que deben ser revisados o eliminados si ya no se usan
+
 export type Sale = {
     id: string;
     productId: string;
@@ -290,31 +290,31 @@ export const SupplierSchema = z.object({
 
 
 
-// Esquema de validación para la Unidad de Medida (UOM)
+
 export const UnitOfMeasureSchema = z.object({
     name: z.string().min(2, "El nombre de la unidad es requerido y debe tener al menos 2 caracteres.").max(50, "El nombre no puede exceder los 50 caracteres."),
-    // Corregido: Usamos 'abbreviation' en lugar de 'symbol'
+
     abbreviation: z.string().min(1, "La abreviatura es requerida.").max(10, "La abreviatura no puede exceder los 10 caracteres."),
-    // Eliminado: El campo 'description' no existe en la entidad conceptual
+
 });
 
-// Tipo derivado del esquema para uso en el formulario (sin el ID)
+
 export type UnitOfMeasureFormValues = z.infer<typeof UnitOfMeasureSchema>;
 
 
 export const BrandSchema = z.object({
-    // Nombre es requerido y debe ser único
+
     name: z.string().min(2, "El nombre de la marca es obligatorio.").max(150),
     
-    // Código es opcional
+
     code: z.string().max(20, "El código no puede exceder los 20 caracteres.").optional().nullable(),
     
-    // Website es opcional, pero si existe debe ser una URL válida
+
     website: z.string().max(255).url("Debe ser una URL válida (Ej: https://marca.com)").optional().nullable().or(z.literal('')),
     
-    // Logo URL es opcional, pero si existe debe ser una URL válida
+
     logoUrl: z.string().max(255).url("Debe ser una URL válida para la imagen").optional().nullable().or(z.literal('')),
 });
 
-// Tipo derivado del esquema para el formulario Brand (Omit<Brand, 'id'>)
+
 export type BrandFormValues = z.infer<typeof BrandSchema>;

@@ -4,19 +4,19 @@ import { Button } from '../ui/button.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select.tsx';
 import { Input } from '../ui/input.tsx';
 import { Plus, Trash2, Loader2, Package, Tag } from 'lucide-react';
-import { getProducts } from '../../api/services/products.ts'; // Servicio existente de productos
-import { getCategories } from '../../api/services/category.ts'; // Servicio ASUMIDO de categorías
-import { Product } from '../../types'; // El tipo Product (para obtener el nombre y ID)
-import { Category } from '../../types'; // El tipo Category (ASUMIDO)
+import { getProducts } from '../../api/services/products.ts';
+import { getCategories } from '../../api/services/category.ts';
+import { Product } from '../../types';
+import { Category } from '../../types';
 
-// --- Placeholder para Servicios de Consulta (Asumimos que existen) ---
-// NOTA: En una implementación real, estas listas vendrían de un servicio cacheado.
+
+
 interface ReferenceItem { 
     id: number; 
     name: string; 
 }
 
-// --- Hook Real para obtener Productos y Categorías desde la API ---
+
 const useReferenceData = () => {
     const [products, setProducts] = useState<ReferenceItem[]>([]);
     const [categories, setCategories] = useState<ReferenceItem[]>([]);
@@ -27,19 +27,19 @@ const useReferenceData = () => {
         setLoading(true);
         setError(null);
         try {
-            // 1. Obtener Productos
+
             const productData: Product[] = await getProducts();
             const simpleProducts: ReferenceItem[] = productData.map(p => ({ 
                 id: p.id, 
-                name: `${p.name} (SKU: ${p.sku})` // Usar SKU para mejor identificación
+                name: `${p.name} (SKU: ${p.sku})`
             }));
             setProducts(simpleProducts);
 
-            // 2. Obtener Categorías (Asumiendo que Category[] tiene id y name)
+
             const categoryData: Category[] = await getCategories();
             const simpleCategories: ReferenceItem[] = categoryData.map(c => ({ 
                 id: c.id, 
-                // Asumo que Category tiene un campo 'name'
+
                 name: (c as any).name || `Categoría ID: ${c.id}` 
             }));
             setCategories(simpleCategories);
@@ -58,7 +58,7 @@ const useReferenceData = () => {
 
     return { products, categories, loading, error };
 };
-// --- FIN Hook Real ---
+
 
 
 interface PromotionTargetFormProps {
@@ -70,7 +70,7 @@ interface PromotionTargetFormProps {
 
 const PromotionTargetForm: React.FC<PromotionTargetFormProps> = ({ promotionId, appliesTo, targets, setTargets }) => {
     
-    // Usamos el hook real
+
     const { products, categories, loading, error } = useReferenceData(); 
     
     const isProductTarget = appliesTo === 'PRODUCT';
@@ -78,7 +78,7 @@ const PromotionTargetForm: React.FC<PromotionTargetFormProps> = ({ promotionId, 
     const referenceName = isProductTarget ? 'Producto' : 'Categoría';
     const referenceIcon = isProductTarget ? <Package className="h-4 w-4 mr-2" /> : <Tag className="h-4 w-4 mr-2" />;
     
-    // Si la promoción aplica al total... (Lógica sin cambios)
+
     if (appliesTo === 'SALE_TOTAL') {
         return (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-sm text-blue-700 dark:text-blue-300">
@@ -104,7 +104,7 @@ const PromotionTargetForm: React.FC<PromotionTargetFormProps> = ({ promotionId, 
         );
     }
 
-    // --- Lógica de Manejo de Targets (Sin Cambios) ---
+
     const handleAddTarget = () => {
         setTargets(prev => [
             ...prev,
@@ -128,7 +128,7 @@ const PromotionTargetForm: React.FC<PromotionTargetFormProps> = ({ promotionId, 
         setTargets(newTargets);
     };
     
-    // ... (El resto del componente sigue igual)
+
 
     return (
         <div className="space-y-3">

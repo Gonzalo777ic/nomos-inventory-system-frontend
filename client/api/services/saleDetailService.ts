@@ -1,7 +1,7 @@
-import { httpStore } from "../httpStore"; // Asumo que usas httpStore como en saleService.ts
+import { httpStore } from "../httpStore";
 
 const BASE_URL = 'http://localhost:8083/api/store';
-const DETAIL_API_BASE_URL = `${BASE_URL}/saledetails`; // Usando la ruta base para consistencia
+const DETAIL_API_BASE_URL = `${BASE_URL}/saledetails`;
 
 
 /**

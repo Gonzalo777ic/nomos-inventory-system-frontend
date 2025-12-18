@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { Search, Loader2, PlusCircle, Pencil, Trash2, Ruler, AlertTriangle } from 'lucide-react'; // Iconos relevantes
+import { Search, Loader2, PlusCircle, Pencil, Trash2, Ruler, AlertTriangle } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
@@ -11,9 +11,9 @@ import {
 import { 
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
 } from '../components/ui/dialog';
-import { ProductAttribute } from '../types'; // Tipo de dato
-import { getProductAttributes, deleteProductAttribute } from '../api/services/product-attribute'; // Servicios API
-import ProductAttributeForm from '../components/forms/ProductAttributeForm'; // Formulario
+import { ProductAttribute } from '../types';
+import { getProductAttributes, deleteProductAttribute } from '../api/services/product-attribute';
+import ProductAttributeForm from '../components/forms/ProductAttributeForm';
 
 const Attributes: React.FC = () => {
     const queryClient = useQueryClient();
@@ -24,17 +24,17 @@ const Attributes: React.FC = () => {
     const [attributeToDeleteId, setAttributeToDeleteId] = useState<number | null>(null);
     const [attributeToDeleteName, setAttributeToDeleteName] = useState<string>('');
 
-    // 1. Obtener la lista de Atributos
+
     const { 
         data: attributes = [], 
         isLoading, 
         error 
     } = useQuery<ProductAttribute[]>({
-        queryKey: ['product-attributes'], // Key única para React Query
+        queryKey: ['product-attributes'],
         queryFn: getProductAttributes,
     });
 
-    // 2. Mutación para la Eliminación
+
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteProductAttribute(id),
         onSuccess: () => {
@@ -50,12 +50,12 @@ const Attributes: React.FC = () => {
         }
     });
 
-    // Filtro de búsqueda
+
     const filteredAttributes = attributes.filter(attr =>
         attr.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Handlers para el formulario
+
     const handleOpenForm = (attribute: ProductAttribute | null = null) => {
         setSelectedAttribute(attribute);
         setIsFormOpen(true);
@@ -66,7 +66,7 @@ const Attributes: React.FC = () => {
         setSelectedAttribute(null);
     };
 
-    // Handlers para la eliminación
+
     const handleConfirmDelete = (attribute: ProductAttribute) => {
         if (attribute.id) {
             setAttributeToDeleteId(attribute.id);
@@ -114,7 +114,7 @@ const Attributes: React.FC = () => {
                         </div>
                         <Button 
                             onClick={() => handleOpenForm(null)}
-                            className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700" // Color ajustado
+                            className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700"
                         >
                             <PlusCircle className="w-5 h-5" />
                             <span>Nuevo Atributo</span>
@@ -182,7 +182,7 @@ const Attributes: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* Modal/Dialog de Creación/Edición */}
+            {}
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
                 <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
                     <DialogHeader>
@@ -198,7 +198,7 @@ const Attributes: React.FC = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de Confirmación de Eliminación */}
+            {}
             <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
                 <DialogContent className="sm:max-w-md dark:bg-gray-900">
                     <DialogHeader>

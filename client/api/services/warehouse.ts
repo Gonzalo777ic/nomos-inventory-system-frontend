@@ -1,14 +1,14 @@
 import { http } from '../http';
 
-// Interfaz TypeScript basada en el modelo Warehouse de Spring Boot
+
 export interface Warehouse {
     id: number;
     name: string;
     locationAddress: string;
-    isMain: boolean; // Si es el almacén principal
+    isMain: boolean;
 }
 
-// Tipo para la creación/actualización (sin ID)
+
 export type WarehousePayload = Omit<Warehouse, 'id'>;
 
 const WAREHOUSE_API_BASE_URL = '/inventory/warehouses';

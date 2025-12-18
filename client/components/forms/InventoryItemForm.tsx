@@ -2,18 +2,18 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-// Rutas de UI corregidas (asumiendo que los componentes de UI están en 'components/ui')
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/components/ui/use-toast';
 import { InventoryItem } from '@/types';
-// Ruta de API corregida (asumiendo que los servicios están en 'api/services')
+
 import { createInventoryItem, updateInventoryItem } from '@/api/services/inventory-items'; 
 import { useMutation } from '@tanstack/react-query';
 
 
-// Esquema de validación con Zod (sin cambios)
+
 const inventoryItemSchema = z.object({
     productId: z.number().positive("El ID del producto es requerido."),
     currentStock: z.coerce.number().int().min(1, "El stock debe ser al menos 1."),
@@ -27,16 +27,16 @@ type InventoryItemFormValues = z.infer<typeof inventoryItemSchema>;
 
 interface InventoryItemFormProps {
     productId: number;
-    // 🎯 NUEVO: Agregamos warehouseId, ya que el error de TypeScript lo solicita.
+
     warehouseId: number; 
-    defaultItem?: InventoryItem; // Si se proporciona, es modo edición (para el lote individual)
+    defaultItem?: InventoryItem;
     onSuccess: () => void;
     onClose?: () => void;
 }
 
 const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ 
     productId, 
-    warehouseId, // 🎯 Desestructuramos el nuevo prop
+    warehouseId,
     defaultItem, 
     onSuccess, 
     onClose 
@@ -56,7 +56,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         },
     });
 
-    // 🎯 Configuración de la Mutación de React Query para CREAR
+
     const createMutation = useMutation({
         mutationFn: createInventoryItem,
         onSuccess: (item) => {
@@ -76,7 +76,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         },
     });
 
-    // 🎯 Configuración de la Mutación de React Query para EDITAR
+
     const updateMutation = useMutation({
         mutationFn: (data: { id: number, payload: any }) => updateInventoryItem(data.id, data.payload),
         onSuccess: (item) => {
@@ -96,17 +96,17 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         },
     });
 
-    // Asegura que el productId no cambie si el componente se reutiliza (sin cambios)
+
     useEffect(() => {
         form.setValue('productId', productId);
     }, [productId, form]);
 
     const onSubmit = (values: InventoryItemFormValues) => {
-        // CAMBIO CLAVE: Cambiamos la estructura del payload a plana
-        // para que coincida con lo que TypeScript espera de Omit<InventoryItem, ...>
+
+
         const payload = {
             productId: values.productId,
-            warehouseId: warehouseId, // Incluimos el warehouseId
+            warehouseId: warehouseId,
             currentStock: values.currentStock,
             unitCost: values.unitCost,
             lotNumber: values.lotNumber,
@@ -126,7 +126,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* ... (campos del formulario sin cambios) ... */}
+                {}
                 <FormField
                     control={form.control}
                     name="currentStock"

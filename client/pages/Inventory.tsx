@@ -9,7 +9,7 @@ import { getProductTotalStock } from '../api/services/inventory-items';
 import LotManagementModal from '../components/LotManagementModal'; 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { useAuth } from '../hooks/useAuth'; // Importación del hook de autenticación
+import { useAuth } from '../hooks/useAuth';
 import { Product } from '../types/index'; 
 
 
@@ -22,7 +22,7 @@ type ProductWithStock = Product & { totalStock: number; };
 function Inventory() {
   const queryClient = useQueryClient(); 
   
-  // CORRECCIÓN: Renombramos 'isLoading' a 'isAuthLoading' y eliminamos 'error: authError'
+
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth(); 
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,19 +31,19 @@ function Inventory() {
   const [productsWithStock, setProductsWithStock] = useState<ProductWithStock[]>([]);
   const [isStockLoading, setIsStockLoading] = useState(false);
   
-  // 1. Obtener la lista de productos
+
   const { 
     data: products, 
     isLoading: isLoadingProducts, 
-    error: queryError // Usaremos este error para mostrar fallas de API
+    error: queryError
   } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: getProducts,
-    // La consulta solo se ejecuta si la autenticación está lista
+
     enabled: isAuthenticated && !isAuthLoading, 
   });
 
-  // 2. Obtener el stock total por producto
+
   useEffect(() => {
     const productsArray = products || []; 
 
@@ -76,7 +76,7 @@ function Inventory() {
   }, [products, isLoadingProducts, isAuthenticated]); 
 
   
-  // Filtro de búsqueda
+
   const filteredProducts = productsWithStock.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
@@ -84,7 +84,7 @@ function Inventory() {
 
   const handleOpenLotManagement = (productId: number) => {
     setSelectedProductId(productId);
-    // Capturar el nombre del producto para el encabezado del modal
+
     const product = productsWithStock.find(p => Number(p.id) === productId);
     setSelectedProductName(product ? product.name : null);
   };
@@ -94,13 +94,13 @@ function Inventory() {
     setSelectedProductName(null);
   };
   
-  // Handler para forzar la actualización de la tabla principal
+
   const handleLotUpdate = () => {
-      // Invalida la query principal 'products', forzando el re-fetch de productos y el re-cálculo de stock
+
       queryClient.invalidateQueries({ queryKey: ['products'] }); 
   };
 
-  // Usamos solo queryError como fuente de error para la vista.
+
   const currentError = queryError; 
 
   if (isAuthLoading) {
@@ -199,7 +199,7 @@ function Inventory() {
             </CardContent>
         </Card>
 
-        {/* DIALOGO DE GESTIÓN DE LOTES (LotManagementModal) */}
+        {}
         <Dialog open={selectedProductId !== null} onOpenChange={handleCloseLotManagement}>
             <DialogContent className="sm:max-w-[800px]">
                 <DialogHeader>

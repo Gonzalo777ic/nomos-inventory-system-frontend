@@ -3,18 +3,18 @@ import path from "path";
 import { defineConfig, Plugin } from "vite";
 import { createServer } from "./server";
 
-// https://vitejs.dev/config/
+
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8081,
     cors: true,
     fs: {
-      // ⬇️ MODIFICACIÓN AQUÍ: Añadimos '..' para permitir el acceso a node_modules de pnpm
+
       allow: ["./client", "./shared", ".."],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
-    // Configuración del proxy para redirigir las llamadas a la API
+
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -33,11 +33,11 @@ export default defineConfig(({ mode }) => ({
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
-  test: { // <-- AÑADE ESTE BLOQUE DE CONFIGURACIÓN
+  test: {
     globals: true,
-    environment: 'jsdom', // <-- ESTO ES LO CRUCIAL
-    setupFiles: './setupTests.ts', // Opcional, si quieres configurar @testing-library/jest-dom
-    css: false, // Ignorar CSS para pruebas más rápidas
+    environment: 'jsdom',
+    setupFiles: './setupTests.ts',
+    css: false,
   }
 
 

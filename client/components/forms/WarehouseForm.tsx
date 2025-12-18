@@ -1,20 +1,20 @@
-// client/components/forms/WarehouseForm.tsx
+
 import React, { useEffect, useState, useMemo } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MapPin } from "lucide-react";
 
-// 💡 IMPORTACIONES REALES NECESARIAS
+
 import { useMutation, useQueryClient } from "@tanstack/react-query"; 
 import { createWarehouse as createWarehouseApi, updateWarehouse as updateWarehouseApi, WarehousePayload } from '@/api/services/warehouse'; 
 import { useToast } from '@/components/ui/use-toast'; 
 
-// ✅ IMPORTACIONES REALES DE UI (Necesitas importar todos los componentes usados)
+
 import { Input } from '@/components/ui/input'; 
-import { Button } from '@/components/ui/button'; // <--- Usamos el real
-import { Checkbox } from '@/components/ui/checkbox'; // <--- Asumimos que tienes un Checkbox real
-// Asumimos que estos están definidos en form.tsx (como en el ejemplo de InventoryItemForm)
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+
 import { 
     Form, 
     FormControl, 
@@ -25,11 +25,11 @@ import {
 } from '@/components/ui/form'; 
 
 
-// ---------------------------
-// TIPOS y ESQUEMA ZOD
-// ---------------------------
 
-// 7. Warehouse (Almacén)
+
+
+
+
 export type Warehouse = {
   id: number;
   name: string;
@@ -38,7 +38,7 @@ export type Warehouse = {
 };
 
 
-// Usamos Omit<Warehouse, 'id'> para la base y añadimos campos de formulario
+
 const warehouseSchema = z.object({
   name: z
     .string()
@@ -49,7 +49,7 @@ const warehouseSchema = z.object({
     .min(5, "La dirección de la ubicación es obligatoria.")
     .max(255),
   
-  // Transformar string vacío a null, opcional.
+
   houseNumber: z.union([z.string().nullable(), z.literal('')])
     .transform(e => (e === '' ? null : e))
     .optional(),
@@ -73,12 +73,12 @@ interface WarehouseFormProps {
   onSuccess: () => void;
 }
 
-// ---------------------------
-// GEOCODIFICACIÓN INVERSA (Nominatim) (SIN CAMBIOS)
-// ---------------------------
+
+
+
 
 const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-    // ... lógica de reverseGeocode (Sin cambios)
+
   const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
   try {
     const response = await fetch(url);
@@ -127,9 +127,9 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
 };
 
 
-// ---------------------------
-// MapPicker (Leaflet) (SIN CAMBIOS)
-// ---------------------------
+
+
+
 
 declare global {
   interface Window {
@@ -163,9 +163,9 @@ const MapPicker: React.FC<MapPickerProps> = ({
   const markerRef = React.useRef<any>(null); 
   const isGeocodingRef = React.useRef(false); 
 
-  // Cargar Leaflet dinámicamente
+
   useEffect(() => {
-    // ... Lógica de carga de Leaflet (Sin cambios)
+
     let mounted = true;
     const load = async () => {
       if ((window as any).L) {
@@ -209,7 +209,7 @@ const MapPicker: React.FC<MapPickerProps> = ({
     const container = document.getElementById(mapContainerId);
     if (!container) return;
 
-    // ... Lógica de inicialización del mapa (Sin cambios)
+
     const safeGetDomUtil = () => {
       try {
         return window.L?.DomUtil?.get
@@ -229,7 +229,7 @@ const MapPicker: React.FC<MapPickerProps> = ({
           (window as any).mapInstance = undefined;
         }
       } catch (e) {
-        // noop
+
       }
     }
 
@@ -312,7 +312,7 @@ const MapPicker: React.FC<MapPickerProps> = ({
         if ((window as any).mapInstance)
           (window as any).mapInstance = undefined;
       } catch (e) {
-        // noop
+
       }
     };
   }, [isMapLoaded, initialCenter, form, initialLat, initialLng, toast]); 
@@ -333,15 +333,15 @@ const MapPicker: React.FC<MapPickerProps> = ({
   );
 };
 
-// ---------------------------
-// Componente Principal WarehouseForm
-// ---------------------------
+
+
+
 
 const WarehouseForm: React.FC<WarehouseFormProps> = ({
   defaultWarehouse,
   onSuccess,
 }) => {
-  // @ts-ignore
+
   const { toast } = useToast();
   const queryClient = useQueryClient(); 
   const isEditing = !!defaultWarehouse;
@@ -366,7 +366,7 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({
   const locationAddressValue = form.watch("locationAddress");
 
 
-  // 🚀 CONEXIÓN REAL A LA API (Mutations sin cambios)
+
   const createMutation = useMutation({
     mutationFn: (data: WarehousePayload) => createWarehouseApi(data),
     onSuccess: () => {
@@ -413,7 +413,7 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({
     
     const finalAddress = `${values.locationAddress}${houseNumberPart}${floorPart}`;
 
-    // Usamos el tipo correcto para el payload
+
     const payload: Omit<Warehouse, 'id'> = {
       name: values.name,
       locationAddress: finalAddress, 
@@ -431,7 +431,7 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  // ✅ CARGA DE DATOS EN EDICIÓN (Sin cambios)
+
   useEffect(() => {
     if (defaultWarehouse) {
       const latMatch = defaultWarehouse.locationAddress.match(/Lat:(-?\d+\.\d+)/);
@@ -460,12 +460,12 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({
         isMain: false,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [defaultWarehouse]);
 
 
   return (
-    // ¡Eliminamos el bloque <style> ya que tus componentes reales manejan el estilo!
+
     <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
@@ -486,7 +486,7 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({
             )}
           />
           
-          {/* SECCIÓN DE UBICACIÓN */}
+          {}
           <div>
             <FormLabel className="flex items-center space-x-2 mb-2">
               <MapPin className="w-4 h-4 text-primary" />
@@ -535,9 +535,9 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({
               </FormItem>
             </div>
           </div>
-          {/* FIN SECCIÓN MAPA */}
+          {}
 
-          {/* DIRECCIÓN FÍSICA Y DETALLES */}
+          {}
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -604,14 +604,14 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({
               />
             </div>
           </div>
-          {/* CAMPO ISMAIN */}
+          {}
           <FormField
             control={form.control}
             name="isMain"
             render={({ field }) => (
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                 <FormControl>
-                  {/* El componente Checkbox real de shadcn-ui usa 'checked' y 'onCheckedChange' */}
+                  {}
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}

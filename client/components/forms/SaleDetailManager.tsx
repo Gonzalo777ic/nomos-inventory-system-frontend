@@ -16,13 +16,13 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "../../api/services/products";
 
-// 🔑 CORRECCIÓN: Permitir taxRateId como number o null si el backend lo devuelve así
+
 interface ProductReference {
     id: number;
     name: string;
     sku: string;
     price: number;
-    taxRateId: number | null; // Aceptar null si el fetch de productos lo permite
+    taxRateId: number | null;
 }
 
 export interface CartItemPayload extends SaleDetailPayload {
@@ -45,16 +45,16 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
     const [selectedProduct, setSelectedProduct] = useState<ProductReference | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // ✅ Cargar productos reales
+
     const { data: products = [], isLoading } = useQuery<ProductReference[]>({
         queryKey: ["products-for-sale"],
-        // Nota: El type cast 'as () => Promise<ProductReference[]>' es lo que genera el error 2352.
-        // Lo mantendremos hasta que se ajuste el tipo de retorno de getProducts.
+
+
         queryFn: getProducts as () => Promise<ProductReference[]>, 
         staleTime: 1000 * 60 * 10,
     });
 
-    // 🔍 Buscar producto por SKU o nombre
+
     const handleSearch = () => {
         if (!searchTerm.trim()) return;
 
@@ -89,11 +89,11 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
             return;
         }
         
-        // 🔑 CORRECCIÓN CLAVE: Asegurar que taxRateId sea un número positivo.
-        // Si el producto no tiene impuesto configurado (null o 0), asignamos un ID temporal (ej. 1).
+
+
         const effectiveTaxRateId = (selectedProduct.taxRateId && selectedProduct.taxRateId > 0) 
             ? selectedProduct.taxRateId 
-            : 1; // Asumiendo que TaxRate ID 1 es válido para pruebas
+            : 1;
 
         console.log(`[Detail Add] Usando TaxRate ID: ${effectiveTaxRateId}`);
 
@@ -103,9 +103,9 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
             unitPrice: selectedProduct.price,
             quantity: data.quantity,
             subtotal: selectedProduct.price * data.quantity,
-            taxRateId: effectiveTaxRateId, // Usamos el ID de impuesto seguro
+            taxRateId: effectiveTaxRateId,
             promotionId: null,
-            // Nota: Este error de TS (2741 sobre saleId) se ignora aquí, se resuelve en el mapeo de SaleForm
+
             tempKey: details.length > 0 ? details[details.length - 1].tempKey + 1 : 1,
         };
 
@@ -125,7 +125,7 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
 
     return (
         <div className="space-y-6">
-            {/* --- Búsqueda y Adición --- */}
+            {}
             <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-4">
                 <h4 className="font-medium">Añadir Producto</h4>
 
@@ -174,7 +174,7 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
                 )}
             </div>
 
-            {/* --- Tabla --- */}
+            {}
             <h4 className="font-medium pt-2 flex justify-between items-center">
                 Ítems en Carrito ({details.length})
                 <span className="text-xl font-bold text-green-700 flex items-center">

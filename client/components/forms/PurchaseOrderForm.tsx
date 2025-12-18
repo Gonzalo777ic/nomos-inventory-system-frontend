@@ -5,24 +5,24 @@ import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, PlusCircle, Trash2, Calendar, ShoppingCart, EyeOff } from "lucide-react";
 
-// 1. Importaciones de API y Tipos
+
 import { 
     PurchaseOrder, 
     PurchaseOrderPayload, 
     Supplier,
     Product,
-    JavaOrderStatus // Asegúrate que esta importación sea correcta
+    JavaOrderStatus
 } from '@/types/index';
 import { 
     createPurchaseOrder, 
     updatePurchaseOrder,
-    // ASUMIMOS que esta función existe en tu servicio de API:
-    deletePurchaseOrder // <-- Nuevo servicio para eliminar
+
+    deletePurchaseOrder
 } from '@/api/services/purchase-order';
 import { getSuppliers } from '@/api/services/supplier'; 
 import { getProducts } from '@/api/services/products'; 
 
-// Importaciones de UI
+
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,9 +31,9 @@ import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage 
 } from '@/components/ui/form'; 
 
-// --- ESQUEMA ZOD Y TIPOS LOCALES ---
 
-// Esquema Zod para el Detalle
+
+
 const detailSchema = z.object({
   productId: z.coerce.number({ required_error: "Producto es obligatorio" }).min(1, "Selecciona un producto"), 
   productName: z.string().optional(), 
@@ -44,7 +44,7 @@ const detailSchema = z.object({
     .min(0.01, "El costo unitario debe ser positivo"),
 });
 
-// Esquema Zod para la Cabecera de la OC
+
 export const purchaseOrderSchema = z.object({
   supplierId: z.coerce.number({ required_error: "Proveedor es obligatorio" }).min(1, "Selecciona un proveedor"),
   orderDate: z.string().nonempty("Fecha de Orden es obligatoria"),
@@ -61,7 +61,7 @@ interface PurchaseOrderFormProps {
   readOnly: boolean;
 }
 
-// ------------------------------------
+
 
 const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   defaultPurchaseOrder,
@@ -74,20 +74,20 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   const isEditing = !!defaultPurchaseOrder;
   const orderId = defaultPurchaseOrder?.id;
 
-  // --- LÓGICA DE CONTROL DE ESTADOS Y PERMISOS ---
-  // 1. Inmutabilidad: Proveedor y Fecha de Orden son inmutables una vez creados.
+
+
   const isImmutableField = isEditing; 
   
-  // 2. Control de estado: Solo se puede modificar si está PENDIENTE.
+
   const isStatusNonEditable = defaultPurchaseOrder && (defaultPurchaseOrder.status !== 'PENDIENTE');
 
-  // 3. Bloqueo General: Deshabilita toda la edición si es readOnly O si el estado no lo permite.
+
   const isDisabled = readOnly || isStatusNonEditable; 
 
-  // 4. Permiso de Mutación: Se permite Guardar/Eliminar solo si está en modo Edición, NO es readOnly, y está PENDIENTE.
+
   const canMutate = isEditing && !readOnly && !isStatusNonEditable;
   
-  // ⚡️ Llamadas a la API con useQuery para datos de selección
+
   const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery<Supplier[]>({
       queryKey: ['suppliers'],
       queryFn: getSuppliers,
@@ -98,7 +98,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       queryFn: getProducts,
   });
   
-  // Mapear los estados del enum de Java a la UI
+
   const javaStatuses: { value: JavaOrderStatus, label: string }[] = useMemo(() => ([
     { value: 'PENDIENTE', label: 'Pendiente' },
     { value: 'RECIBIDO_PARCIAL', label: 'Recibido Parcial' },
@@ -107,7 +107,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   ]), []);
 
 
-  // 📝 Configuración del Formulario (useForm)
+
   const form = useForm<PurchaseOrderFormValues>({
     resolver: zodResolver(purchaseOrderSchema as any),
     defaultValues: useMemo(() => {
@@ -132,7 +132,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     }, [defaultPurchaseOrder]),
   });
   
-  // Resetear el formulario al cambiar `defaultPurchaseOrder` (solo en edición)
+
   useEffect(() => {
       if (defaultPurchaseOrder) {
           const initialSupplierId = defaultPurchaseOrder.supplier.id || 0;
@@ -159,14 +159,14 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     name: "details",
   });
 
-  // Cálculo del Total (Solo en UI)
+
   const totalAmount = form.watch('details').reduce((sum, detail) => {
     const q = detail.quantity || 0;
     const c = detail.unitCost || 0;
     return sum + (q * c);
   }, 0);
   
-  // 🚀 Mutaciones (useMutation)
+
   const createMutation = useMutation({
       mutationFn: (data: PurchaseOrderPayload) => createPurchaseOrder(data),
       onSuccess: () => {
@@ -196,7 +196,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       }
   });
 
-  // --- Nueva Mutación de Eliminación ---
+
   const deleteMutation = useMutation({
       mutationFn: (id: number) => deletePurchaseOrder(id),
       onSuccess: () => {
@@ -217,7 +217,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
-  // Función de Eliminación
+
   const handleDelete = useCallback(() => {
       if (!orderId) return;
 
@@ -226,9 +226,9 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       }
   }, [orderId, deleteMutation]);
 
-  // 🎯 Función onSubmit
+
   const onSubmit = (values: PurchaseOrderFormValues) => {
-      // Si la orden ya no es editable por el estado, ignoramos el submit
+
       if (isEditing && isStatusNonEditable) {
         toast({ title: "Advertencia", description: "Esta orden ya no se puede modificar.", variant: "destructive" });
         return;
@@ -254,12 +254,12 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       if (isEditing && orderId) {
           updateMutation.mutate({ id: orderId, payload });
       } else {
-          // Al crear, el estado inicial siempre es PENDIENTE (asegurando consistencia)
+
           createMutation.mutate({ ...payload, status: 'PENDIENTE' }); 
       }
   };
   
-  // 🎨 Renderizado
+
   if (isLoadingSuppliers || isLoadingProducts) {
       return (
           <div className="flex justify-center items-center h-48">
@@ -269,7 +269,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       );
   }
   
-  // Mensajes de Encabezado
+
   const ReadOnlyHeader = readOnly && (
       <div className="p-3 mb-4 bg-blue-100 text-blue-700 border-l-4 border-blue-500 rounded-lg flex items-center">
         <EyeOff className="w-5 h-5 mr-2"/>
@@ -290,15 +290,15 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         
         {ReadOnlyHeader}
-        {StatusLockedHeader} {/* Mostrar advertencia si está bloqueada por status */}
+        {StatusLockedHeader} {}
 
-        {/* --- CABECERA (SUPPLIER, FECHAS) --- */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700">
           <div className="col-span-1 md:col-span-3">
               <h3 className="text-lg font-semibold flex items-center"><ShoppingCart className="w-5 h-5 mr-2"/> Información de la Orden</h3>
           </div>
           
-          {/* Campo Proveedor */}
+          {}
           <FormField
             control={form.control}
             name="supplierId"
@@ -308,7 +308,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 <Select 
                     onValueChange={(val) => field.onChange(Number(val))} 
                     value={field.value.toString()}
-                    // ⭐ BLOQUEADO si ya existe (es inmutable)
+
                     disabled={isImmutableField} 
                 >
                   <FormControl>
@@ -327,7 +327,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             )}
           />
 
-          {/* Campo Fecha de Orden */}
+          {}
           <FormField
             control={form.control}
             name="orderDate"
@@ -336,7 +336,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 <FormLabel>Fecha de Orden (Origen)</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    {/* ⭐ BLOQUEADO si ya existe (es inmutable) */}
+                    {}
                     <Input type="date" {...field} disabled={isImmutableField} /> 
                     <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                   </div>
@@ -346,7 +346,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             )}
           />
           
-          {/* Campo Fecha de Entrega */}
+          {}
           <FormField
             control={form.control}
             name="deliveryDate"
@@ -355,7 +355,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 <FormLabel>Fecha de Entrega Esperada</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    {/* Bloqueado por la lógica general (readOnly o Status Non Editable) */}
+                    {}
                     <Input type="date" {...field} disabled={isDisabled} /> 
                     <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                   </div>
@@ -365,7 +365,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             )}
           />
           
-          {/* Campo Status (Siempre visible si es edición o readOnly) */}
+          {}
           {isEditing && (
               <FormField
                 control={form.control}
@@ -376,7 +376,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     <Select 
                         onValueChange={field.onChange} 
                         value={field.value}
-                        // Bloqueado por la lógica general
+
                         disabled={isDisabled} 
                     >
                       <FormControl>
@@ -397,7 +397,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
           )}
         </div>
 
-        {/* --- DETALLES (LISTA DINÁMICA DE PRODUCTOS) --- */}
+        {}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center">
             <PlusCircle className="w-5 h-5 mr-2"/> Productos a Comprar ({fields.length})
@@ -409,7 +409,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 key={field.id} 
                 className="grid grid-cols-12 gap-2 p-3 border rounded-lg items-end relative"
               >
-                {/* Producto (Select) */}
+                {}
                 <FormField
                   control={form.control}
                   name={`details.${index}.productId`}
@@ -442,7 +442,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                   )}
                 />
 
-                {/* Cantidad */}
+                {}
                 <FormField
                   control={form.control}
                   name={`details.${index}.quantity`}
@@ -463,7 +463,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                   )}
                 />
 
-                {/* Costo Unitario */}
+                {}
                 <FormField
                   control={form.control}
                   name={`details.${index}.unitCost`}
@@ -485,14 +485,14 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                   )}
                 />
 
-                {/* Subtotal (Solo Lectura) */}
+                {}
                 <div className="col-span-12 md:col-span-1 flex items-center justify-end md:justify-start">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Total: {((form.watch(`details.${index}.quantity`) || 0) * (form.watch(`details.${index}.unitCost`) || 0)).toFixed(2)}
                     </p>
                 </div>
 
-                {/* Botón Eliminar */}
+                {}
                 {!isDisabled && (
                     <Button
                       type="button"
@@ -523,12 +523,12 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
           )}
         </div>
 
-        {/* --- TOTAL Y BOTONES DE ACCIÓN (Guardar/Eliminar) --- */}
+        {}
         <div className="flex justify-between items-center pt-4 border-t">
             <h4 className="text-xl font-bold">Total Estimado: $ {totalAmount.toFixed(2)}</h4>
             
             <div className="flex space-x-2"> 
-                {/* Botón Eliminar (Visible solo si se puede mutar) */}
+                {}
                 {canMutate && ( 
                     <Button 
                         type="button" 
@@ -545,7 +545,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     </Button>
                 )}
 
-                {/* Botón Guardar/Crear (Visible si no es solo lectura) */}
+                {}
                 {!readOnly && ( 
                     <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? (
@@ -560,7 +560,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             </div>
         </div>
         
-        {/* Botón de volver para el modo detalle */}
+        {}
         {readOnly && (
             <div className="flex justify-end">
                 <Button type="button" onClick={onSuccess} variant="secondary">

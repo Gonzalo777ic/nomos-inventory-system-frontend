@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-// FIX: Importamos el objeto z
+
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Brand } from '../../types'; 
@@ -19,8 +19,8 @@ import {
     FormMessage 
 } from '../ui/form';
 
-// Esquema de validación para la Marca
-// Los campos opcionales aceptan z.string().url().nullable().optional() para ser válidos.
+
+
 export const BrandSchema = z.object({
     name: z.string().min(2, "El nombre es obligatorio y debe tener al menos 2 caracteres.").max(100),
     code: z.string().max(10, "El código no debe exceder 10 caracteres.").nullable().optional().or(z.literal('')),
@@ -53,7 +53,7 @@ const BrandForm: React.FC<BrandFormProps> = ({ initialData, onSuccess, onClose }
 
     const mutation = useMutation({
         mutationFn: (data: BrandFormValues) => {
-            // Limpiamos los campos opcionales: '' o null se convierten a null.
+
             const cleanedData = {
                 ...data,
                 code: data.code || null,

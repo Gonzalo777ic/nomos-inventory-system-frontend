@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Trash2, Pencil } from 'lucide-react'; // 🛑 Añadimos Pencil (Editar)
+import { Loader2, Trash2, Pencil } from 'lucide-react';
 
-// Se asume que estos paths ya tienen la extensión .ts/.tsx corregida
+
 import { useToast } from '../hooks/use-toast.ts';
 import { TaxRate, TaxRateService } from '../api/services/taxRate.ts';
-// Asegúrate de que TaxRateForm.tsx es el componente reutilizable que definimos antes
+
 import TaxRateForm from '../components/forms/TaxRateForm.tsx'; 
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card.tsx';
 import { Button } from '../components/ui/button.tsx';
@@ -25,7 +25,7 @@ const Taxes: React.FC = () => {
       setRates(data);
     } catch (e) {
       console.error("Error fetching tax rates:", e);
-      // Mantener mensaje amigable para el usuario final
+
       setError("No tienes permiso o el servicio no está disponible (puerto 8083)."); 
       toast({
         title: "Error de Carga",
@@ -44,7 +44,7 @@ const Taxes: React.FC = () => {
         title: "Eliminada",
         description: `La tasa '${name}' ha sido eliminada.`,
       });
-      fetchRates(); // Refrescar la lista
+      fetchRates();
     } catch (e) {
       console.error("Error deleting tax rate:", e);
       toast({
@@ -63,7 +63,7 @@ const Taxes: React.FC = () => {
     <div className="p-4 md:p-8 dark:bg-gray-800 rounded-lg min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Tasas de Impuesto</h1>
-        {/* Usamos TaxRateForm en modo CREACIÓN (sin initialData) */}
+        {}
         <TaxRateForm onSuccess={fetchRates} /> 
       </div>
 
@@ -89,7 +89,7 @@ const Taxes: React.FC = () => {
                   <TableRow>
                     <TableHead>Nombre</TableHead>
                     <TableHead className="w-[100px]">Tasa</TableHead>
-                    <TableHead className="w-[100px] text-center">Acciones</TableHead> {/* Centramos Acciones */}
+                    <TableHead className="w-[100px] text-center">Acciones</TableHead> {}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -99,7 +99,7 @@ const Taxes: React.FC = () => {
                       <TableCell>{(rate.rate * 100).toFixed(2)}%</TableCell>
                       <TableCell className="flex justify-center space-x-2">
                         
-                        {/* 🛑 BOTÓN DE EDICIÓN (Usando el formulario reutilizable) 🛑 */}
+                        {}
                         <TaxRateForm 
                             initialData={rate} 
                             onSuccess={fetchRates}
@@ -110,7 +110,7 @@ const Taxes: React.FC = () => {
                             }
                         />
                         
-                        {/* 🛑 BOTÓN DE ELIMINACIÓN 🛑 */}
+                        {}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="destructive" size="icon" className="h-8 w-8">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ProductImage } from '../types'; // Importar el tipo ProductImage
-import { getProductImages } from '../api/services/productImages'; // Importar la función API real
+import { ProductImage } from '../types';
+import { getProductImages } from '../api/services/productImages';
 import { Loader2, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react'; 
 
 interface ProductImageCarouselProps {
@@ -18,25 +18,25 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
     const [images, setImages] = useState<ProductImage[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Carga de imágenes
+
     useEffect(() => {
         const loadImages = async () => {
             if (!productId) return;
             setIsLoading(true);
             try {
-                // 🔑 LLAMADA REAL A LA API (usando el servicio de ImageUploader)
+
                 const loadedImages = await getProductImages(productId);
                 
-                // Ordenar: principal primero, luego por sortOrder
+
                 const sortedImages = loadedImages.sort((a, b) => {
                     if (a.isDefault && !b.isDefault) return -1;
                     if (!a.isDefault && b.isDefault) return 1;
-                    // @ts-ignore: Asumimos que 'sortOrder' existe como en tu ImageUploader
+
                     return (a.sortOrder || 999) - (b.sortOrder || 999);
                 });
                 
                 setImages(sortedImages);
-                // La imagen principal será el índice 0 gracias al sort
+
                 setCurrentIndex(0); 
                 
             } catch (error) {
@@ -49,15 +49,15 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
         loadImages();
     }, [productId]);
     
-    // Estado para la imagen actual y el zoom
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [zoomPosition, setZoomPosition] = useState({ x: '50%', y: '50%' });
 
-    // Asegurarse de que currentImage no sea undefined si images está vacío
+
     const currentImage = images[currentIndex];
 
-    // Navegación
+
     const nextImage = useCallback(() => {
         if (images.length === 0) return;
         setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -68,7 +68,7 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
         setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
     }, [images.length]);
 
-    // 🔑 Lógica de Zoom "Lupa"
+
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!isHovered) return;
         const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -77,7 +77,7 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
         setZoomPosition({ x: `${x}%`, y: `${y}%` });
     };
 
-    // --- Renderizado ---
+
     
     if (isLoading) {
         return <div className="flex justify-center items-center h-full min-h-[300px]"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></div>;
@@ -96,14 +96,14 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
     return (
         <div className="flex flex-col h-full items-center space-y-4">
             
-            {/* 1. Contenedor Principal de la Imagen (con Zoom) */}
+            {}
             <div 
                 className="relative w-full aspect-square bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shadow-2xl"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 onMouseMove={handleMouseMove}
             >
-                {/* Capa de imagen normal (visible cuando no hay hover) */}
+                {}
                 <img 
                     src={currentImage.imageUrl} 
                     alt={`${productName} - Imagen ${currentIndex + 1}`}
@@ -115,12 +115,12 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
                     }}
                 />
                 
-                {/* 🔑 Capa de Zoom (Efecto Lupa) */}
+                {}
                 <div
                     className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
                     style={{
                         backgroundImage: `url(${currentImage.imageUrl})`,
-                        backgroundSize: '250%', // Zoom potente (250%)
+                        backgroundSize: '250%',
                         backgroundPosition: `${zoomPosition.x} ${zoomPosition.y}`,
                         backgroundRepeat: 'no-repeat',
                         backgroundColor: 'white', 
@@ -129,7 +129,7 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
                 >
                 </div>
                 
-                {/* 🔑 Botones de Navegación del Carrusel */}
+                {}
                 <button
                     onClick={prevImage}
                     className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full transition z-10 shadow-lg"
@@ -146,14 +146,14 @@ const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({ productName
                 </button>
             </div>
             
-            {/* 2. Galería de Miniaturas */}
+            {}
             <div className="flex space-x-3 overflow-x-auto w-full py-2 px-1">
                 {images.map((img, index) => (
                     <div
                         key={img.id}
                         className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 cursor-pointer transition-all duration-200 shadow-md ${
                             index === currentIndex
-                                ? 'border-emerald-500 ring-4 ring-emerald-200 dark:ring-emerald-700/50' // Resaltado
+                                ? 'border-emerald-500 ring-4 ring-emerald-200 dark:ring-emerald-700/50'
                                 : 'border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400'
                         }`}
                         onClick={() => setCurrentIndex(index)}

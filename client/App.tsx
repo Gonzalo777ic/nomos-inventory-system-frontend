@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/auth'; 
 import { Toaster } from 'react-hot-toast'; 
 
-// Importaciones de páginas y layout
+
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -20,7 +20,7 @@ import Suppliers from './pages/Suppliers';
 import NotFound from './pages/NotFound';
 import Layout from './components/layout/Layout';
 
-// Importaciones de NUEVAS páginas placeholder
+
 import Purchases from './pages/Purchases';
 import Quotations from './pages/Quotations';
 import Promotions from './pages/Promotions';
@@ -40,7 +40,7 @@ import Announcements from './pages/Announcements';
 import Movements from './pages/Movements';
 import Audit from './pages/Audit';
 import StoreSchedule from './pages/StoreSchedule';
-// 🎯 NUEVA IMPORTACIÓN: Warehouse
+
 import Warehouses from './pages/Warehouses'; 
 import PaymentMethods from './pages/PaymentMethods'; 
 
@@ -54,7 +54,7 @@ const LoadingScreen = () => (
 );
 
 
-// Componente que encapsula la lógica de sincronización
+
 const AuthSync = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, user, getAccessTokenSilently, isLoading, logout: auth0LogoutFunc } = useAuth0();
     const syncAuth = useAuthStore((state) => state.syncAuth);
@@ -97,13 +97,13 @@ const AppContent = () => {
                 <QueryClientProvider client={queryClient}>
                     <BrowserRouter>
                         <Routes>
-                            {/* RUTAS SIN LAYOUT */}
+                            {}
                             <Route path="/" element={<Index />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/404" element={<NotFound />} />
                             <Route path="*" element={<NotFound />} /> 
 
-                            {/* RUTAS DENTRO DEL LAYOUT (PROTEGIDAS) */}
+                            {}
                             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/inventory" element={<Inventory />} /> 
@@ -114,25 +114,25 @@ const AppContent = () => {
                                 <Route path="/suppliers" element={<Suppliers />} />
                                 <Route path="/app" element={<Dashboard />} /> 
                                 
-                                {/* --- RUTAS AÑADIDAS DEL SIDEBAR --- */}
+                                {}
                                 
-                                {/* Inventario y Abastecimiento */}
+                                {}
                                 <Route path="/purchases" element={<Purchases />} />
-                                {/* 🎯 NUEVA RUTA: Warehouse */}
+                                {}
                                 <Route path="/warehouses" element={<Warehouses />} />
                                 
-                                {/* Ventas y Caja */}
+                                {}
                                 <Route path="/quotations" element={<Quotations />} />
                                 <Route path="/promotions" element={<Promotions />} />
                                 <Route path="/collections" element={<Collections />} />
                                 <Route path="/returns" element={<Returns />} />
                                 
-                                {/* Logística y Envíos */}
+                                {}
                                 <Route path="/shipping-guides" element={<ShippingGuides />} />
                                 <Route path="/deliveries" element={<Deliveries />} />
                                 <Route path="/realtime-location" element={<RealtimeLocation />} />
                                 
-                                {/* Maestros y Configuración */}
+                                {}
                                 <Route path="/users" element={<Users />} />
                                 <Route path="/clients" element={<Clients />} />
                                 <Route path="/brands" element={<Brands />} />
@@ -143,7 +143,7 @@ const AppContent = () => {
                                 <Route path="/payment-methods" element={<PaymentMethods />} />
                                 <Route path="/announcements" element={<Announcements />} />
 
-                                {/* Reportes y Sistema */}
+                                {}
                                 <Route path="/movements" element={<Movements />} />
                                 <Route path="/audit" element={<Audit />} />
                                 <Route path="/store-schedule" element={<StoreSchedule />} />
@@ -158,7 +158,7 @@ const AppContent = () => {
 };
 
 
-// 🛑 Componente principal que envuelve la aplicación con Auth0Provider y Toaster
+
 const App = () => {
     const domain = import.meta.env.VITE_AUTH0_DOMAIN || 'AUTH0_DOMAIN_REDACTED'; 
     const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID || 'AUTH0_CLIENT_ID_REDACTED'; 

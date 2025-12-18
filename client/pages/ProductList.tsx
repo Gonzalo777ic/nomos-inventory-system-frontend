@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-// Importamos Eye para el botón de ver detalle
+
 import { Plus, Search, Pencil, Trash2, Loader2, X, Eye } from 'lucide-react'; 
 import ProductForm from './ProductForm'; 
-// AÑADIR IMPORTACIÓN DEL MODAL DE DETALLE
+
 import ProductDetailModal from '../components/ProductDetailModal';
 import { Product, ProductListItem } from '../types/index'; 
 import { getProducts, deleteProduct } from '../api/services/products'; 
@@ -19,22 +19,22 @@ type ProductListWithStock = ProductListItem & { currentStock: number; };
 const ProductList: React.FC = () => {
     const queryClient = useQueryClient();
     
-    // --- ESTADOS DEL FORMULARIO DE EDICIÓN/CREACIÓN ---
+
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
 
-    // --- ESTADOS DEL MODAL DE DETALLE (NUEVOS) ---
+
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [productDetail, setProductDetail] = useState<ProductListItem | null>(null);
 
-    // --- ESTADOS DE ELIMINACIÓN ---
+
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [productToDeleteId, setProductToDeleteId] = useState<number | null>(null);
     const [productToDeleteName, setProductToDeleteName] = useState<string>(''); 
     
     const [searchTerm, setSearchTerm] = useState('');
 
-    // 1. Obtener la lista base de productos
+
     const { 
         data: products = [], 
         isLoading: isLoadingProducts, 
@@ -45,7 +45,7 @@ const ProductList: React.FC = () => {
         queryFn: getProducts as () => Promise<ProductListItem[]>,
     });
     
-    // 2. Obtener el stock total por producto
+
     const stockQueries = useQueries({
         queries: products.map(product => ({
             queryKey: ['productStock', product.id],
@@ -55,7 +55,7 @@ const ProductList: React.FC = () => {
         })),
     });
 
-    // 3. Combinar los datos de productos y stock
+
     const productListWithStock: ProductListWithStock[] = useMemo(() => {
         return products.map((product, index) => {
             const stockQueryResult = stockQueries[index];
@@ -70,14 +70,14 @@ const ProductList: React.FC = () => {
 
     const isStockLoading = stockQueries.some(query => query.isLoading);
 
-    // Filtrado
+
     const filteredProducts = productListWithStock.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.brandName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Función de mutación para eliminación
+
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteProduct(id),
         onSuccess: () => {
@@ -101,13 +101,13 @@ const ProductList: React.FC = () => {
     };
 
     const handleOpenForm = (product: ProductListItem | null = null) => {
-        // Al abrir el form, necesitamos el objeto Product para prellenar, 
-        // ProductListItem tiene los FKs y la data enriquecida (que el form necesita).
+
+
         setSelectedProduct(product as Product | null); 
         setIsFormOpen(true);
     };
 
-    // --- NUEVA FUNCIÓN PARA ABRIR MODAL DE DETALLE ---
+
     const handleOpenDetailModal = (product: ProductListItem) => {
         setProductDetail(product);
         setIsDetailModalOpen(true);
@@ -144,9 +144,9 @@ const ProductList: React.FC = () => {
     return (
         <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"> 
             
-            {/* Modal/Sheet de Creación/Edición de Producto */}
+            {}
             {isFormOpen && (
-                // Usar el componente ProductForm directamente sin el div wrapper aquí si ya maneja el backdrop y posición
+
                 <ProductForm 
                     isOpen={isFormOpen}
                     onClose={() => setIsFormOpen(false)}
@@ -155,18 +155,18 @@ const ProductList: React.FC = () => {
                 />
             )}
             
-            {/* Modal de Detalle (NUEVO) */}
+            {}
             <ProductDetailModal
                 isOpen={isDetailModalOpen}
                 onClose={() => {
                     setIsDetailModalOpen(false);
                     setProductDetail(null);
                 }}
-                // ProductListItem es un superconjunto de Product, por eso lo podemos pasar.
+
                 product={productDetail} 
             />
 
-            {/* Modal de Confirmación de Eliminación */}
+            {}
             {isDeleteConfirmOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
@@ -187,7 +187,7 @@ const ProductList: React.FC = () => {
                             </Button>
                             <Button
                                 onClick={handleDeleteExecute}
-                                // Aquí puedes usar el variant="destructive" de Shadcn/UI
+
                                 className="bg-red-600 hover:bg-red-700"
                                 disabled={deleteMutation.isPending}
                             >
@@ -199,7 +199,7 @@ const ProductList: React.FC = () => {
                 </div>
             )}
             
-            {/* Encabezado y Acciones */}
+            {}
             <div className="flex justify-between items-center pb-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Catálogo de Productos</h1>
                 <div className="flex space-x-4">
@@ -222,7 +222,7 @@ const ProductList: React.FC = () => {
                 </div>
             </div>
 
-            {/* Tabla de Productos */}
+            {}
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl overflow-hidden">
                 <Table>
                     <TableHeader>
@@ -236,7 +236,7 @@ const ProductList: React.FC = () => {
                             <TableHead className="text-right text-gray-600 dark:text-gray-400">Precio</TableHead>
                             <TableHead className="text-center w-[120px] text-gray-600 dark:text-gray-400">Stock</TableHead>
                             <TableHead className="text-gray-600 dark:text-gray-400">Proveedor</TableHead>
-                            <TableHead className="text-center w-[150px] text-gray-600 dark:text-gray-400">Acciones</TableHead> {/* AUMENTAMOS ESPACIO */}
+                            <TableHead className="text-center w-[150px] text-gray-600 dark:text-gray-400">Acciones</TableHead> {}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -278,9 +278,9 @@ const ProductList: React.FC = () => {
                                     </TableCell> 
                                     <TableCell className="text-gray-700 dark:text-gray-300">{product.supplierName}</TableCell>
                                     <TableCell className="text-center">
-                                        <div className="flex justify-center space-x-1"> {/* Reducimos el espacio a 'space-x-1' */}
+                                        <div className="flex justify-center space-x-1"> {}
                                             
-                                            {/* BOTÓN VER DETALLE (NUEVO) */}
+                                            {}
                                             <Button 
                                                 variant="ghost" 
                                                 size="icon"
@@ -291,7 +291,7 @@ const ProductList: React.FC = () => {
                                                 <Eye className="w-4 h-4" />
                                             </Button>
                                             
-                                            {/* BOTÓN EDITAR */}
+                                            {}
                                             <Button 
                                                 variant="ghost" 
                                                 size="icon"
@@ -302,7 +302,7 @@ const ProductList: React.FC = () => {
                                                 <Pencil className="w-4 h-4" />
                                             </Button>
                                             
-                                            {/* BOTÓN ELIMINAR */}
+                                            {}
                                             <Button 
                                                 variant="ghost" 
                                                 size="icon"

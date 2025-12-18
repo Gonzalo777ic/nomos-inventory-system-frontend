@@ -12,11 +12,11 @@ import {
     Dialog, DialogContent, DialogHeader, DialogTitle, 
     DialogFooter 
 } from '../components/ui/dialog';
-// Importamos Brand desde la ruta de tipos
+
 import { Brand } from '../types'; 
-// Importamos los servicios de API
+
 import { getBrands, deleteBrand } from '../api/services/brand'; 
-// Importamos el formulario de marca
+
 import BrandForm from '../components/forms/BrandForm'; 
 
 const Brands: React.FC = () => {
@@ -28,7 +28,7 @@ const Brands: React.FC = () => {
     const [brandToDeleteId, setBrandToDeleteId] = useState<number | null>(null);
     const [brandToDeleteName, setBrandToDeleteName] = useState<string>('');
 
-    // 1. Obtener la lista de Marcas
+
     const { 
         data: brands = [], 
         isLoading, 
@@ -38,7 +38,7 @@ const Brands: React.FC = () => {
         queryFn: getBrands,
     });
 
-    // 2. Mutación para la Eliminación
+
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteBrand(id),
         onSuccess: () => {
@@ -54,13 +54,13 @@ const Brands: React.FC = () => {
         }
     });
 
-    // Filtro de búsqueda
+
     const filteredBrands = brands.filter(brand =>
         brand.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         (brand.code && brand.code.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    // Handlers para el formulario
+
     const handleOpenForm = (brand: Brand | null = null) => {
         setSelectedBrand(brand);
         setIsFormOpen(true);
@@ -69,11 +69,11 @@ const Brands: React.FC = () => {
     const handleFormClose = () => {
         setIsFormOpen(false);
         setSelectedBrand(null);
-        // Opcional: Refrescar la tabla al cerrar si es necesario
+
         queryClient.invalidateQueries({ queryKey: ['brands'] });
     };
 
-    // Handlers para la eliminación
+
     const handleConfirmDelete = (brand: Brand) => {
         if (brand.id) {
             setBrandToDeleteId(brand.id);
@@ -88,7 +88,7 @@ const Brands: React.FC = () => {
         }
     };
 
-    // --- Manejo de Errores y Carga ---
+
     if (error) {
         const message = error instanceof Error ? error.message : "Error desconocido.";
         let errorMessage = `Error al cargar las marcas: ${message}`;
@@ -148,7 +148,7 @@ const Brands: React.FC = () => {
                             )}
                         </div>
                     ) : (
-                        // TABLA DE MARCAS
+
                         <Table>
                             <TableHeader className="dark:bg-gray-800">
                                 <TableRow>
@@ -208,7 +208,7 @@ const Brands: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* Modal/Dialog de Creación/Edición */}
+            {}
             <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
                 <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
                     <DialogHeader>
@@ -216,7 +216,7 @@ const Brands: React.FC = () => {
                             {selectedBrand ? 'Editar Marca' : 'Crear Nueva Marca'}
                         </DialogTitle>
                     </DialogHeader>
-                    {/* Asegúrate de que BrandForm se actualice si seleccionaste un Brand, aunque onSuccess ya maneja el cierre. */}
+                    {}
                     <BrandForm 
                         initialData={selectedBrand}
                         onSuccess={handleFormClose}
@@ -225,7 +225,7 @@ const Brands: React.FC = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de Confirmación de Eliminación */}
+            {}
             <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
                 <DialogContent className="sm:max-w-md dark:bg-gray-900">
                     <DialogHeader>
