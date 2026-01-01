@@ -11,10 +11,10 @@ const API_BASE_URL = '/inventory/product-images';
 export const getProductImages = async (productId: number): Promise<ProductImage[]> => {
     try {
         const response = await http.get<ProductImage[]>(`${API_BASE_URL}/product/${productId}`);
-        console.log(`[ProductImages API] 📥 Imágenes recibidas para Producto ${productId}:`, response.data);
+        console.log(`[ProductImages API]  Imágenes recibidas para Producto ${productId}:`, response.data);
         return response.data;
     } catch (error) {
-        console.error(`[ProductImages API] 🚨 Error al obtener imágenes para Producto ${productId}:`, error);
+        console.error(`[ProductImages API]  Error al obtener imágenes para Producto ${productId}:`, error);
         throw error;
     }
 };
@@ -35,14 +35,14 @@ export const uploadProductImage = async (productId: number, file: File): Promise
         },
     });
     
-    console.log(`[ProductImages API] ✅ Imagen cargada para Producto ${productId}:`, response.data);
+    console.log(`[ProductImages API]  Imagen cargada para Producto ${productId}:`, response.data);
     return response.data;
 };
 
 
 export const deleteProductImage = async (imageId: number): Promise<void> => {
     await http.delete(`${API_BASE_URL}/${imageId}`);
-    console.log(`[ProductImages API] ✅ Imagen ID ${imageId} eliminada con éxito.`);
+    console.log(`[ProductImages API]  Imagen ID ${imageId} eliminada con éxito.`);
 };
 
 
@@ -50,7 +50,7 @@ export const setDefaultProductImage = async (imageId: number): Promise<ProductIm
 
 
     const response = await http.patch<ProductImage>(`${API_BASE_URL}/${imageId}/set-default`);
-    console.log(`[ProductImages API] ✅ Imagen ID ${imageId} establecida como principal.`);
+    console.log(`[ProductImages API]  Imagen ID ${imageId} establecida como principal.`);
     return response.data;
 };
 
@@ -67,6 +67,6 @@ export const addProductImageFromUrl = async (productId: number, imageUrl: string
         productId,
         imageUrl,
     });
-    console.log(`[ProductImages API] ✅ URL de imagen guardada para Producto ${productId}:`, response.data);
+    console.log(`[ProductImages API]  URL de imagen guardada para Producto ${productId}:`, response.data);
     return response.data;
 };

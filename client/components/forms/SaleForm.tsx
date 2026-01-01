@@ -192,7 +192,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                     details: detailsPayload,
                 };
                 
-                console.log("[Final DTO] 📤 Enviando al Backend:", saleCreationPayload);
+                console.log("[Final DTO]  Enviando al Backend:", saleCreationPayload);
                 
 
                 resultSale = await SaleService.createSaleWithDetails(saleCreationPayload) as Sale;
@@ -211,7 +211,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
             const errorDetail = e.response?.data?.message || e.message || "Ocurrió un error desconocido.";
             
             if (e.response && e.response.status === 400) {
-                console.error("🚨 ERROR 400: Payload incorrecto. La causa más probable es que el Tax Rate ID (ID de Impuesto) no sea válido o sea nulo, y el backend lo requiere. Verifica la validación en el SaleController.java.");
+                console.error(" ERROR 400: Payload incorrecto. La causa más probable es que el Tax Rate ID (ID de Impuesto) no sea válido o sea nulo, y el backend lo requiere. Verifica la validación en el SaleController.java.");
             }
             
             toast({

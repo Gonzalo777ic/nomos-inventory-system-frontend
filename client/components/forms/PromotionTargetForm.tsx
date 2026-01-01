@@ -99,7 +99,7 @@ const PromotionTargetForm: React.FC<PromotionTargetFormProps> = ({ promotionId, 
     if (error) {
         return (
             <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-lg text-sm text-red-700 dark:text-red-300">
-                ⚠️ **Error de API:** {error}
+                ️ **Error de API:** {error}
             </div>
         );
     }

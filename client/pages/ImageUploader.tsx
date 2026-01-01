@@ -57,7 +57,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         onUpdateProductImage(mainImage?.imageUrl);
       }
     } catch (error) {
-      console.error("🚨 Error al cargar las imágenes:", error);
+      console.error(" Error al cargar las imágenes:", error);
       toast.info("Imágenes cargadas, pero podría haber un problema de red.");
     } finally {
       setIsLoading(false);
@@ -141,14 +141,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (!localFile || isUploading) return;
 
     setIsUploading(true);
-    console.log(`[ImageUploader] 📤 Subiendo archivo local: ${localFile.name}`);
+    console.log(`[ImageUploader]  Subiendo archivo local: ${localFile.name}`);
 
     try {
       const newImage = await uploadProductImage(productId, localFile);
       updateImageState(newImage);
       toast.success("Imagen subida con éxito.");
     } catch (error) {
-      console.error("🚨 Error en la subida:", error);
+      console.error(" Error en la subida:", error);
       toast.error("Error al subir la imagen. Verifica el backend.");
     } finally {
       setIsUploading(false);
@@ -200,14 +200,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (!pendingUrl || isUploading) return;
 
     setIsUploading(true);
-    console.log(`[ImageUploader] 🌐 Guardando imagen desde URL: ${pendingUrl}`);
+    console.log(`[ImageUploader]  Guardando imagen desde URL: ${pendingUrl}`);
 
     try {
       const newImage = await addProductImageFromUrl(productId, pendingUrl);
       updateImageState(newImage);
       toast.success("URL de imagen guardada con éxito.");
     } catch (error) {
-      console.error("🚨 Error al guardar URL:", error);
+      console.error(" Error al guardar URL:", error);
       toast.error(
         "Error al guardar la URL. (Revisa el backend para detalles).",
       );

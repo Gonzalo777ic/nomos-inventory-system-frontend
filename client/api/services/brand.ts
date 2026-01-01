@@ -3,12 +3,6 @@ import { Brand } from '../../types';
 
 const API_BASE_URL = '/masters/brands';
 
-/**
- * Servicio de API para gestionar las operaciones CRUD de la entidad Brand (Marca).
- */
-
-
-
 export const getBrands = async (): Promise<Brand[]> => {
     const response = await http.get<Brand[]>(API_BASE_URL);
     return response.data;

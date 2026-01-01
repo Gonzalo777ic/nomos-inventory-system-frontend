@@ -81,13 +81,13 @@ const getAuthToken = useCallback(async (): Promise<AuthTokenResult | undefined> 
           const base64 = payload.replace(/-/g, '+').replace(/_/g, '/'); 
           const decodedPayload = JSON.parse(atob(base64)); 
           
-          console.log(`👤 Usuario: ${user?.name || user?.nickname || 'N/A'}`);
-          console.log(`🆔 Sub (UserID): ${user?.sub}`);
+          console.log(` Usuario: ${user?.name || user?.nickname || 'N/A'}`);
+          console.log(` Sub (UserID): ${user?.sub}`);
 
           if (roles && roles.length > 0) {
-              console.log(`✅ Roles (Claim '${roleClaim}'):`, roles); 
+              console.log(` Roles (Claim '${roleClaim}'):`, roles); 
           } else {
-              console.warn(`❌ Rol no encontrado o vacío.`);
+              console.warn(` Rol no encontrado o vacío.`);
           }
           console.log("Payload Decodificado (Claims):", decodedPayload);
 
@@ -133,7 +133,7 @@ const getAuthToken = useCallback(async (): Promise<AuthTokenResult | undefined> 
                 };
 
                 try {
-                    console.log("🚀 Sincronizando usuario a backend local...");
+                    console.log(" Sincronizando usuario a backend local...");
                     const response = await fetch('http://localhost:8080/api/auth/auth0-upsert', {
                         method: 'POST',
                         headers: {
@@ -144,16 +144,16 @@ const getAuthToken = useCallback(async (): Promise<AuthTokenResult | undefined> 
 
                     if (!response.ok) {
                         const errorBody = await response.text();
-                        console.error('❌ Sync failed. Response:', response.status, errorBody);
+                        console.error(' Sync failed. Response:', response.status, errorBody);
                         throw new Error('Sincronización fallida al backend local.');
                     }
-                    console.log('✅ Usuario sincronizado con éxito vía frontend.');
+                    console.log(' Usuario sincronizado con éxito vía frontend.');
                     
 
                     isSyncedRef.current = true; 
 
                 } catch (error) {
-                    console.error('❌ Error al llamar al backend de sincronización:', error);
+                    console.error(' Error al llamar al backend de sincronización:', error);
                 }
             };
             

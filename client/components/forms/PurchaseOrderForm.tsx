@@ -280,7 +280,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   const StatusLockedHeader = isEditing && isStatusNonEditable && !readOnly && (
       <div className="p-3 mb-4 bg-red-100 text-red-700 border-l-4 border-red-500 rounded-lg flex items-center">
         <EyeOff className="w-5 h-5 mr-2"/>
-        <p className="font-medium">⚠️ Esta orden se encuentra en estado **{defaultPurchaseOrder.status}** y ya no puede ser modificada.</p>
+        <p className="font-medium">️ Esta orden se encuentra en estado **{defaultPurchaseOrder.status}** y ya no puede ser modificada.</p>
       </div>
   );
 

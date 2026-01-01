@@ -29,7 +29,7 @@ const ClientsPage: React.FC = () => {
 
     const handleViewDetails = (client: Client) => {
 
-        toast(`Abriendo detalles para: ${client.fullName}`, { icon: '🔍' });
+        toast(`Abriendo detalles para: ${client.fullName}`, { icon: '' });
         console.log("Detalles del cliente:", client);
     };
 
@@ -46,7 +46,7 @@ const ClientsPage: React.FC = () => {
 
         return (
             <div className="p-8 text-red-600 font-medium">
-                ❌ Error al cargar los clientes: {error?.message || "Error desconocido"}
+                 Error al cargar los clientes: {error?.message || "Error desconocido"}
                 <p className="text-sm text-gray-500">Asegúrate de tener el rol ROLE_ADMIN.</p>
             </div>
         );
@@ -57,7 +57,7 @@ const ClientsPage: React.FC = () => {
 
     return (
         <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">👥 Clientes Registrados</h1>
+            <h1 className="text-3xl font-bold mb-6"> Clientes Registrados</h1>
             
             <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
                 <Table className="min-w-full">
