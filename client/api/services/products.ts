@@ -15,12 +15,12 @@ export const getProducts = async (): Promise<Product[]> => {
         const response = await http.get<Product[]>(API_BASE_URL);
         
 
-        console.log("[Products API] 📥 Data recibida de /inventory/products:", response.data);
+        console.log("[Products API]  Data recibida de /inventory/products:", response.data);
         
         return response.data;
     } catch (error) {
 
-        console.error("[Products API] 🚨 Error al obtener productos:", error);
+        console.error("[Products API]  Error al obtener productos:", error);
         throw error;
     }
 };

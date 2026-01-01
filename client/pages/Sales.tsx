@@ -18,24 +18,24 @@ const SalesPage: React.FC = () => {
 
     const fetchSales = async () => {
         setLoading(true);
-        console.log("[SalesPage] 🚀 Iniciando fetch de ventas...");
+        console.log("[SalesPage]  Iniciando fetch de ventas...");
         try {
 
             const data = await SaleService.getAll();
             setSales(data);
-            console.log(`[SalesPage] ✅ Fetch exitoso. ${data.length} ventas encontradas.`);
+            console.log(`[SalesPage]  Fetch exitoso. ${data.length} ventas encontradas.`);
         } catch (e) {
             console.error("Error fetching sales:", e);
 
             if (e.response && e.response.status === 405) {
-                console.error("[SalesPage] 🛑 ERROR 405: El endpoint /api/store/sales no permite el método GET. Revisar el SaleController de Spring Boot.");
+                console.error("[SalesPage]  ERROR 405: El endpoint /api/store/sales no permite el método GET. Revisar el SaleController de Spring Boot.");
                 toast({ title: "Error 405", description: "El servidor no permite listar ventas en esa URL (Method Not Allowed).", variant: "destructive" });
             } else {
                 toast({ title: "Error", description: "No se pudieron cargar las ventas desde el servidor.", variant: "destructive" });
             }
         } finally {
             setLoading(false);
-            console.log("[SalesPage] ⌛ Fetch finalizado.");
+            console.log("[SalesPage]  Fetch finalizado.");
         }
     };
 

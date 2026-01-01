@@ -68,8 +68,8 @@ const Categories: React.FC = () => {
 
   useEffect(() => {
     if (categories.length > 0) {
-      console.log("📋 Lista plana:", categories);
-      console.log("🌳 Estructura en árbol:", treeData);
+      console.log(" Lista plana:", categories);
+      console.log(" Estructura en árbol:", treeData);
     }
   }, [categories, treeData]);
 

@@ -16,17 +16,17 @@ const API_BASE_URL = '/inventory/product-suppliers';
  */
 export const createProductSupplierRelation = async (relationData: ProductSupplierDTO): Promise<any> => {
 
-    console.log("[ProductSupplier API] 🔗 Enviando relación POST:", relationData);
+    console.log("[ProductSupplier API]  Enviando relación POST:", relationData);
     
     try {
 
         const response = await http.post(API_BASE_URL, relationData);
         
-        console.log("[ProductSupplier API] ✅ Relación creada con éxito:", response.data);
+        console.log("[ProductSupplier API]  Relación creada con éxito:", response.data);
         return response.data;
     } catch (error) {
 
-        console.error("[ProductSupplier API] 🚨 Error al crear relación ProductSupplier:", error);
+        console.error("[ProductSupplier API]  Error al crear relación ProductSupplier:", error);
         throw error;
     }
 };

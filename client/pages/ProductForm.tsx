@@ -48,7 +48,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
     useEffect(() => {
         const loadMasterData = async () => {
             setIsDataLoading(true);
-            console.log("[ProductForm] ⌛ Iniciando carga de datos maestros...");
+            console.log("[ProductForm]  Iniciando carga de datos maestros...");
             try {
                 const [loadedBrands, loadedCategories, loadedSuppliers, loadedUnits] = await Promise.all([
                     getBrands(),
@@ -67,9 +67,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                     
                     if (preferredSupplier) {
                         initialPreferredSupplierId = preferredSupplier.id;
-                        console.log(`[ProductForm] 🟢 Proveedor Preferido encontrado por Nombre: ID ${preferredSupplier.id}`);
+                        console.log(`[ProductForm]  Proveedor Preferido encontrado por Nombre: ID ${preferredSupplier.id}`);
                     } else if (initialSupplierName) {
-                        console.warn(`[ProductForm] 🟡 Advertencia: Proveedor '${initialSupplierName}' de initialData no encontrado en la lista maestra.`);
+                        console.warn(`[ProductForm]  Advertencia: Proveedor '${initialSupplierName}' de initialData no encontrado en la lista maestra.`);
                     }
                 }
                 
@@ -92,14 +92,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                     imageUrl: (initialData as any)?.imageUrl || undefined,
                 });
                 
-                console.log(`[ProductForm] ✅ Carga exitosa. Marcas: ${loadedBrands.length}, Categorías: ${loadedCategories.length}, Proveedores: ${loadedSuppliers.length}, UoM: ${loadedUnits.length}`);
+                console.log(`[ProductForm]  Carga exitosa. Marcas: ${loadedBrands.length}, Categorías: ${loadedCategories.length}, Proveedores: ${loadedSuppliers.length}, UoM: ${loadedUnits.length}`);
                 
             } catch (error) {
-                console.error("[ProductForm] 🚨 Error al cargar datos maestros:", error);
+                console.error("[ProductForm]  Error al cargar datos maestros:", error);
                 toast.error("Error al cargar datos maestros para el formulario.");
             } finally {
                 setIsDataLoading(false);
-                console.log("[ProductForm] 🏁 Carga de datos maestros finalizada.");
+                console.log("[ProductForm]  Carga de datos maestros finalizada.");
             }
         };
 
@@ -130,7 +130,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
     useEffect(() => {
         const loadMasterData = async () => {
             setIsDataLoading(true);
-            console.log("[ProductForm] ⌛ Iniciando carga de datos maestros...");
+            console.log("[ProductForm]  Iniciando carga de datos maestros...");
             try {
                 const [loadedBrands, loadedCategories, loadedSuppliers, loadedUnits] = await Promise.all([
                     getBrands(),
@@ -145,14 +145,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                     suppliers: loadedSuppliers,
                     unitsOfMeasure: loadedUnits,
                 });
-                console.log(`[ProductForm] ✅ Carga exitosa. Marcas: ${loadedBrands.length}, Categorías: ${loadedCategories.length}, Proveedores: ${loadedSuppliers.length}, UoM: ${loadedUnits.length}`);
+                console.log(`[ProductForm]  Carga exitosa. Marcas: ${loadedBrands.length}, Categorías: ${loadedCategories.length}, Proveedores: ${loadedSuppliers.length}, UoM: ${loadedUnits.length}`);
                 
             } catch (error) {
-                console.error("[ProductForm] 🚨 Error al cargar datos maestros:", error);
+                console.error("[ProductForm]  Error al cargar datos maestros:", error);
                 toast.error("Error al cargar datos maestros para el formulario.");
             } finally {
                 setIsDataLoading(false);
-                console.log("[ProductForm] 🏁 Carga de datos maestros finalizada.");
+                console.log("[ProductForm]  Carga de datos maestros finalizada.");
             }
         };
 
@@ -196,7 +196,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
         const minStockThresholdValue = parseInt(formData.minStockThreshold.toString(), 10);
         const preferredSupplierId = formData.preferredSupplierId as number | '';
         
-        console.log("[ProductForm] 🔍 Validando y parseando datos...");
+        console.log("[ProductForm]  Validando y parseando datos...");
         
         if (
             isNaN(priceValue) || priceValue <= 0 || 
@@ -205,7 +205,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
             formData.unitOfMeasureId === '' ||
             preferredSupplierId === ''
         ) {
-            console.error("[ProductForm] ❌ Error de validación en Frontend. Faltan campos, precio inválido o Proveedor Preferido no seleccionado.");
+            console.error("[ProductForm]  Error de validación en Frontend. Faltan campos, precio inválido o Proveedor Preferido no seleccionado.");
             toast.error('Por favor, completa todos los campos requeridos, incluyendo el Proveedor Preferido.');
             setIsLoading(false);
             return;
@@ -223,7 +223,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                 minStockThreshold: minStockThresholdValue,
             };
             
-            console.log(`[ProductForm] 📤 Paso 1: Enviando DTO de Producto:`, productData);
+            console.log(`[ProductForm]  Paso 1: Enviando DTO de Producto:`, productData);
             
             let resultProduct: Product;
             const supplierId = preferredSupplierId as number;
@@ -242,7 +242,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                     isActive: true,
                 });
                 
-                console.log(`[ProductForm] ✅ Producto ID ${resultProduct.id} actualizado y relación de proveedor POST intentada.`);
+                console.log(`[ProductForm]  Producto ID ${resultProduct.id} actualizado y relación de proveedor POST intentada.`);
                 toast.success(`Producto "${resultProduct.name}" actualizado con éxito.`);
             } else {
                 resultProduct = await createProduct(productData);
@@ -258,14 +258,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                 });
 
                  setCurrentProductId(resultProduct.id);
-                console.log(`[ProductForm] ✅ Nuevo producto ID ${resultProduct.id} creado y relación de proveedor establecida.`);
+                console.log(`[ProductForm]  Nuevo producto ID ${resultProduct.id} creado y relación de proveedor establecida.`);
                 toast.success(`Producto "${resultProduct.name}" creado con éxito.`);
             }
 
             onSubmit(resultProduct);
 
         } catch (error) {
-            console.error('[ProductForm] 🚨 Error al guardar/actualizar producto o su relación:', error);
+            console.error('[ProductForm]  Error al guardar/actualizar producto o su relación:', error);
             
             const axiosError = error as any;
             const status = axiosError.response?.status;
@@ -283,7 +283,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
             
         } finally {
             setIsLoading(false);
-            console.log("[ProductForm] 🏁 Envío finalizado.");
+            console.log("[ProductForm]  Envío finalizado.");
         }
     };
     

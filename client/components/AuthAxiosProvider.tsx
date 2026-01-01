@@ -25,7 +25,7 @@ const AuthAxiosProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
                 if (!config.headers.Authorization) {
                     config.headers.Authorization = `Bearer ${token}`;
-                    console.log(`[AXIOS] 🔑 Adjuntando Token JWT a: ${config.url}`);
+                    console.log(`[AXIOS]  Adjuntando Token JWT a: ${config.url}`);
                 }
                 return config;
             };
@@ -43,7 +43,7 @@ const AuthAxiosProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             return () => {
                 http.interceptors.request.eject(interceptorIdHttp);
                 httpStore.interceptors.request.eject(interceptorIdHttpStore);
-                console.log("[AXIOS] 🧹 Interceptores removidos.");
+                console.log("[AXIOS]  Interceptores removidos.");
             };
         }
         
