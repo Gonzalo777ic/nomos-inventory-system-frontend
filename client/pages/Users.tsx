@@ -40,7 +40,7 @@ const Users: React.FC = () => {
         if (upperRole.includes('ADMIN')) return 'destructive';
         if (upperRole.includes('SELLER')) return 'default';
         if (upperRole.includes('INVENTORY')) return 'secondary';
-        
+        if (upperRole.includes('SUPPLIER')) return 'default'; 
 
         if (upperRole.includes('DELIVERY')) return 'outline'; 
 
@@ -60,6 +60,10 @@ const Users: React.FC = () => {
 
         if (upperRole.includes('CLIENT')) {
              return "bg-green-100 text-green-800 hover:bg-green-200 border-green-300";
+        }
+
+        if (upperRole.includes('SUPPLIER')) {
+             return "bg-zinc-800 text-white hover:bg-zinc-900 border-zinc-950";
         }
 
         return "";
