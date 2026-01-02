@@ -1,36 +1,29 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-
-type Auth0LogoutFunction = (options?: { logoutParams?: { returnTo?: string } }) => void;
-
+type Auth0LogoutFunction = (options?: {
+  logoutParams?: { returnTo?: string };
+}) => void;
 
 interface AuthState {
+  token: string | null;
 
-  token: string | null; 
+  user: any | null;
 
-  user: any | null; 
+  isAuthReady: boolean;
 
-  isAuthReady: boolean; 
-
-  isAuthenticated: boolean; 
-  
+  isAuthenticated: boolean;
 
   auth0LogoutFn: Auth0LogoutFunction | null;
 
-
-  
-
-  syncAuth: (isAuthenticated: boolean, user: any | undefined) => void; 
+  syncAuth: (isAuthenticated: boolean, user: any | undefined) => void;
 
   setToken: (token: string) => void;
-  
 
   setIsAuthReady: (isReady: boolean) => void;
 
   setUser: (user: any | null) => void;
 
   setLogoutFunction: (fn: Auth0LogoutFunction) => void;
-
 
   logout: () => void;
 }
@@ -42,12 +35,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthReady: false,
   auth0LogoutFn: null,
 
-
   syncAuth: (isAuthenticated, user) => {
-    set({ 
-      isAuthenticated, 
-      user: user || null, 
-      isAuthReady: true 
+    set({
+      isAuthenticated,
+      user: user || null,
+      isAuthReady: true,
     });
   },
 
@@ -55,41 +47,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ token });
   },
 
-
   setIsAuthReady: (isReady) => {
     set({ isAuthReady: isReady });
   },
 
-
   setUser: (user) => {
     set({ user: user });
   },
-  
 
   setLogoutFunction: (fn) => {
     set({ auth0LogoutFn: fn });
   },
 
-
   logout: () => {
-
     const auth0Logout = get().auth0LogoutFn;
     if (auth0Logout) {
       auth0Logout({
         logoutParams: {
-          returnTo: window.location.origin
-        }
+          returnTo: window.location.origin,
+        },
       });
 
-      set({ 
-        isAuthenticated: false, 
-        user: null, 
+      set({
+        isAuthenticated: false,
+        user: null,
         token: null,
-        isAuthReady: true
+        isAuthReady: true,
       });
     } else {
       console.error("Auth0 logout function not initialized in store.");
     }
   },
-
 }));
