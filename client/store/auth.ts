@@ -8,7 +8,7 @@ interface AuthState {
   token: string | null;
 
   user: any | null;
-
+  supplierId: number | null;
   isAuthReady: boolean;
 
   isAuthenticated: boolean;
@@ -31,14 +31,18 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   user: null,
+  supplierId: null,
   token: null,
   isAuthReady: false,
   auth0LogoutFn: null,
 
   syncAuth: (isAuthenticated, user) => {
+    const supplierId = user?.["https://nomosstore.com/supplier_id"] || null;
+
     set({
       isAuthenticated,
       user: user || null,
+      supplierId: supplierId ? Number(supplierId) : null,
       isAuthReady: true,
     });
   },
