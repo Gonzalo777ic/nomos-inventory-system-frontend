@@ -1,12 +1,14 @@
-/// <reference types="vite/client" />
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import AuthAxiosProvider from './components/AuthAxiosProvider';
 import ProtectedRoute from './components/ProtectedRoute';
-import { useAuthStore } from './store/auth'; 
 import { Toaster } from 'react-hot-toast'; 
+
+import { useAuth } from './hooks/useAuth';
+
 
 import Index from './pages/Index';
 import Login from './pages/Login';
@@ -45,27 +47,17 @@ const queryClient = new QueryClient();
 
 const LoadingScreen = () => (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="text-xl font-medium text-emerald-600 dark:text-emerald-400">Cargando aplicación...</div>
+        <div className="text-xl font-medium text-emerald-600 dark:text-emerald-400 animate-pulse">
+            Iniciando sesión...
+        </div>
     </div>
 );
 
+/**
+ * AuthSync: Ejecuta el hook de autenticación en la raíz para que la sesión sea global.
+ */
 const AuthSync = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated, user, getAccessTokenSilently, isLoading, logout: auth0LogoutFunc } = useAuth0();
-    const syncAuth = useAuthStore((state) => state.syncAuth);
-    const setAuth0Logout = useAuthStore((state) => state.setLogoutFunction); 
-    
-    useEffect(() => {
-        if (!isLoading) {
-            setAuth0Logout(auth0LogoutFunc);
-            syncAuth(isAuthenticated, user); 
-            if (isAuthenticated) {
-                getAccessTokenSilently()
-                    .then(token => useAuthStore.getState().setToken(token))
-                    .catch(err => console.error("Error al obtener el token:", err));
-            }
-        }
-    }, [isAuthenticated, isLoading, user, getAccessTokenSilently, syncAuth, auth0LogoutFunc, setAuth0Logout]);
-
+    useAuth(); 
     return <>{children}</>;
 };
 
@@ -74,9 +66,6 @@ const AppContent = () => {
 
     if (isLoading) return <LoadingScreen />;
     if (error) return <div className="p-8 text-red-600 font-bold">Error de Autenticación: {error.message}</div>;
-
-    const ADMIN_ONLY = ['ROLE_ADMIN'];
-    const SALES_ROLES = ['ROLE_ADMIN', 'ROLE_SELLER'];
 
     return (
         <AuthSync> 
@@ -87,7 +76,7 @@ const AppContent = () => {
                             <Route path="/" element={<Index />} />
                             <Route path="/login" element={<Login />} />
                             
-                            {/* Grupo Protegido Principal */}
+                            {/* Grupo Protegido Principal: Layout común para trabajadores */}
                             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/products" element={<Products />} /> 
@@ -96,7 +85,7 @@ const AppContent = () => {
                                 <Route path="/store-schedule" element={<StoreSchedule />} />
                                 <Route path="/shipping-guides" element={<ShippingGuides />} />
 
-                                {/* Solo Inventario */}
+                                {/* Solo Inventario y Gestión Interna */}
                                 <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_INVENTORY_MANAGER']} />}>
                                     <Route path="/inventory" element={<Inventory />} />
                                     <Route path="/warehouses" element={<Warehouses />} />
@@ -104,8 +93,8 @@ const AppContent = () => {
                                     <Route path="/movements" element={<Movements />} />
                                 </Route>
 
-                                {/* Solo Ventas */}
-                                <Route element={<ProtectedRoute allowedRoles={SALES_ROLES} />}>
+                                {/* Solo Ventas y Cotizaciones */}
+                                <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SELLER']} />}>
                                     <Route path="/sales" element={<Sales />} />
                                     <Route path="/quotations" element={<Quotations />} />
                                     <Route path="/promotions" element={<Promotions />} />
@@ -113,8 +102,8 @@ const AppContent = () => {
                                     <Route path="/returns" element={<Returns />} />
                                 </Route>
 
-                                {/* Solo Admin */}
-                                <Route element={<ProtectedRoute allowedRoles={ADMIN_ONLY} />}>
+                                {/* Solo Administración Maestra */}
+                                <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
                                     <Route path="/users" element={<Users />} />
                                     <Route path="/clients" element={<Clients />} />
                                     <Route path="/brands" element={<Brands />} />
@@ -143,7 +132,7 @@ const AppContent = () => {
 };
 
 const App = () => {
-    // 🔑 import.meta.env ahora será reconocido por la referencia al inicio del archivo
+
     const domain = import.meta.env.VITE_AUTH0_DOMAIN || 'AUTH0_DOMAIN_REDACTED'; 
     const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID || 'AUTH0_CLIENT_ID_REDACTED'; 
     const audience = import.meta.env.VITE_AUTH0_AUDIENCE || 'https://nomos.inventory.api'; 

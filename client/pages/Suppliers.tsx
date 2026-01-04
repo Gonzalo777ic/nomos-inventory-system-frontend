@@ -1,33 +1,33 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { PlusCircle, Search, Loader2, Edit, Trash2, Building2, User, Mail } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card.tsx';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table.tsx';
+import { Input } from '../components/ui/input.tsx';
+import { Button } from '../components/ui/button.tsx';
+import { PlusCircle, Search, Loader2, Edit, Trash2, Building2, User, Mail, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth.tsx';
 import { Supplier } from '../types';
 import { toast } from 'sonner';
 
-
-import { getSuppliers, deleteSupplier } from '../api/services/supplier';
-
-
-import SupplierFormModal from '../components/SupplierFormModal'; 
-
+import { getSuppliers, deleteSupplier } from '../api/services/supplier.ts';
+import SupplierFormModal from '../components/SupplierFormModal.tsx'; 
+import SupplierUsersManager from '../components/SupplierUsersManager.tsx'; 
 
 /**
  * SuppliersPage: Componente principal para la gestión de proveedores (CRUD).
+ * Incluye la gestión de accesos de usuarios vinculados.
  */
 function SuppliersPage() {
     const queryClient = useQueryClient();
-
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [supplierToEdit, setSupplierToEdit] = useState<Supplier | null>(null);
 
+
+    const [isUserManagerOpen, setIsUserManagerOpen] = useState(false);
+    const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
     const {
         data: suppliers,
@@ -38,7 +38,6 @@ function SuppliersPage() {
         queryFn: getSuppliers,
         enabled: isAuthenticated && !isAuthLoading,
     });
-
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteSupplier(id),
@@ -51,7 +50,6 @@ function SuppliersPage() {
         }
     });
 
-
     const filteredSuppliers = useMemo(() => {
         if (!suppliers) return [];
         const lowerCaseSearch = searchTerm.toLowerCase();
@@ -63,7 +61,6 @@ function SuppliersPage() {
         );
     }, [suppliers, searchTerm]);
 
-
     const handleAddSupplier = () => {
         setSupplierToEdit(null);
         setIsModalOpen(true);
@@ -74,19 +71,21 @@ function SuppliersPage() {
         setIsModalOpen(true);
     };
 
+    const handleManageUsers = (supplier: Supplier) => {
+        setSelectedSupplier(supplier);
+        setIsUserManagerOpen(true);
+    };
+
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setSupplierToEdit(null);
     };
 
     const handleDelete = (id: number, name: string) => {
-
         if (window.confirm(`¿Estás seguro de que quieres eliminar al proveedor "${name}"?`)) {
             deleteMutation.mutate(id);
         }
     };
-
-
 
     if (isAuthLoading) {
         return (
@@ -98,18 +97,9 @@ function SuppliersPage() {
 
     if (queryError) {
         const message = queryError instanceof Error ? queryError.message : "Un error desconocido ha ocurrido.";
-        let errorMessage = `Error al cargar la lista de proveedores: ${message}`;
-
-        if (message.includes('403') || message.includes('Forbidden')) {
-            errorMessage = "Acceso Denegado (403): Tu cuenta no tiene permiso para ver proveedores.";
-        } else if (message.includes('401') || message.includes('Unauthorized')) {
-            errorMessage = "No Autorizado (401): Por favor, inicia sesión de nuevo.";
-        }
-
         return (
-            <Card className="p-6 m-4 shadow-lg">
-                <p className="text-red-500 font-semibold">{errorMessage}</p>
-                <p className="text-sm text-gray-500 mt-2">Asegúrate de que la API está disponible y que tu cuenta tiene los permisos correctos.</p>
+            <Card className="p-6 m-4 shadow-lg text-center">
+                <p className="text-red-500 font-semibold">Error al cargar proveedores: {message}</p>
             </Card>
         );
     }
@@ -129,7 +119,7 @@ function SuppliersPage() {
                         <div className="relative flex items-center w-full max-w-xs">
                             <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Buscar por nombre, RUC o contacto..."
+                                placeholder="Buscar por nombre, RUC..."
                                 className="pl-9"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -144,20 +134,19 @@ function SuppliersPage() {
                 <CardContent className="p-0">
                     {isLoadingSuppliers ? (
                         <div className="flex items-center justify-center p-8 text-sm text-gray-500">
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando lista de proveedores...
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando proveedores...
                         </div>
                     ) : noSuppliers ? (
                         <div className="text-center p-12 space-y-4">
                             <Building2 className="w-16 h-16 mx-auto text-gray-400" />
                             <h2 className="text-2xl font-semibold">No hay proveedores registrados.</h2>
-                            <p className="text-muted-foreground">Utiliza el botón "Nuevo Proveedor" para comenzar.</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[150px]">ID Fiscal (RUC)</TableHead>
+                                        <TableHead className="w-[150px]">RUC / ID Fiscal</TableHead>
                                         <TableHead>Compañía</TableHead>
                                         <TableHead>Contacto</TableHead>
                                         <TableHead className="hidden sm:table-cell">Email</TableHead>
@@ -169,16 +158,32 @@ function SuppliersPage() {
                                         <TableRow key={supplier.id}>
                                             <TableCell className="font-medium">{supplier.taxId}</TableCell>
                                             <TableCell className="font-semibold">{supplier.name}</TableCell>
-                                            <TableCell className="flex items-center space-x-1">
-                                                <User className="w-4 h-4 text-green-500" />
-                                                <span>{supplier.contactName}</span>
+                                            <TableCell>
+                                                <div className="flex items-center space-x-1">
+                                                    <User className="w-4 h-4 text-green-500" />
+                                                    <span>{supplier.contactName}</span>
+                                                </div>
                                             </TableCell>
-                                            <TableCell className="hidden sm:table-cell text-muted-foreground flex items-center space-x-1">
-                                                <Mail className="w-4 h-4 text-red-500" />
-                                                <span>{supplier.email}</span>
+                                            <TableCell className="hidden sm:table-cell">
+                                                <div className="flex items-center space-x-1 text-muted-foreground">
+                                                    <Mail className="w-4 h-4 text-red-500" />
+                                                    <span>{supplier.email}</span>
+                                                </div>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <div className="flex justify-center space-x-2">
+                                                <div className="flex justify-center space-x-1">
+                                                    {/* Botón Gestión de Usuarios */}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        title="Gestionar Accesos"
+                                                        className="text-indigo-600 hover:bg-indigo-50"
+                                                        onClick={() => handleManageUsers(supplier)}
+                                                    >
+                                                        <ShieldCheck className="w-4 h-4" />
+                                                    </Button>
+
+                                                    {/* Botón Editar */}
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -187,6 +192,8 @@ function SuppliersPage() {
                                                     >
                                                         <Edit className="w-4 h-4 text-blue-500" />
                                                     </Button>
+
+                                                    {/* Botón Eliminar */}
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -204,13 +211,6 @@ function SuppliersPage() {
                                             </TableCell>
                                         </TableRow>
                                     ))}
-                                     {filteredSuppliers.length === 0 && suppliers && suppliers.length > 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
-                                                No se encontraron proveedores que coincidan con la búsqueda.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
                                 </TableBody>
                             </Table>
                         </div>
@@ -218,12 +218,24 @@ function SuppliersPage() {
                 </CardContent>
             </Card>
 
-            {}
+            {/* Modales */}
             <SupplierFormModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 supplierToEdit={supplierToEdit}
             />
+
+            {selectedSupplier && (
+                <SupplierUsersManager 
+                    isOpen={isUserManagerOpen}
+                    onClose={() => {
+                        setIsUserManagerOpen(false);
+                        setSelectedSupplier(null);
+                    }}
+                    supplierId={selectedSupplier.id}
+                    supplierName={selectedSupplier.name}
+                />
+            )}
         </div>
     );
 }

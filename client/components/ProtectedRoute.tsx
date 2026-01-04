@@ -14,7 +14,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   const user = useAuthStore((state) => state.user);
   const isAuthReady = useAuthStore((state) => state.isAuthReady);
 
-  // 1. Mientras Auth0 se inicializa, mostramos pantalla de carga
+
   if (!isAuthReady) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -23,17 +23,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     );
   }
 
-  // 2. Si NO está autenticado, mandamos a login (Caso base)
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // 3. Si está autenticado, verificamos roles
+
   const userRoles: string[] = (user as any)?.[ROLE_CLAIM_KEY] || [];
   const isStaff = userRoles.some((role) => role !== "ROLE_CLIENT");
 
-  // 🔑 CORRECCIÓN CRUCIAL: Si está autenticado pero NO tiene roles de staff, 
-  // mostramos un error en lugar de redirigir a /login para evitar el bucle infinito.
+
+
   if (!isStaff) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 p-4">
@@ -52,11 +52,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     );
   }
 
-  // 4. Verificación granular por roles permitidos (para rutas específicas)
+
   if (allowedRoles && allowedRoles.length > 0) {
     const hasPermission = allowedRoles.some(role => userRoles.includes(role));
     if (!hasPermission) {
-      // Si no tiene permiso específico, lo mandamos al dashboard (que es Staff)
+
       return <Navigate to="/dashboard" replace />;
     }
   }
