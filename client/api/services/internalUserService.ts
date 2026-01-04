@@ -1,11 +1,7 @@
-
-
 import { httpAuth } from '../httpAuth'; 
 
 const AUTH_API_BASE_URL = 'http://localhost:8080/api/auth/users'; 
 const ROLES_API_BASE_URL = 'http://localhost:8080/api/auth/roles'; 
-
-
 
 export interface InternalUser {
     id: number;
@@ -14,9 +10,8 @@ export interface InternalUser {
     firstName?: string;
     lastName?: string;
     roles: string[];
+    supplierId: number | null; 
 }
-
-
 
 export const InternalUserService = {
     /**
@@ -29,8 +24,17 @@ export const InternalUserService = {
     },
 
     /**
+     * Vincular o desvincular un usuario a un proveedor.
+     * PATCH /api/auth/users/{userId}/supplier?supplierId=X
+     */
+    updateSupplierAssignment: async (userId: number, supplierId: number | null): Promise<void> => {
+        await httpAuth.patch(`${AUTH_API_BASE_URL}/${userId}/supplier`, null, {
+            params: { supplierId }
+        });
+    },
+
+    /**
      * Obtiene solo los usuarios con el rol de Vendedor.
-     * Reutiliza getAll y filtra en el frontend.
      */
     getSellers: async (): Promise<Array<{ id: number; name: string }>> => {
         const users = await InternalUserService.getAll();
@@ -40,7 +44,6 @@ export const InternalUserService = {
             .filter(user => user.roles.includes(SELLER_ROLE_NAME))
             .map(user => ({
                 id: user.id,
-
                 name: (user.firstName && user.lastName) 
                     ? `${user.firstName} ${user.lastName}` 
                     : user.username
@@ -49,7 +52,6 @@ export const InternalUserService = {
 
     /**
      * Obtener la lista de roles disponibles.
-     * GET /api/auth/roles 
      */
     getAvailableRoles: async (): Promise<string[]> => {
         const response = await httpAuth.get<string[]>(ROLES_API_BASE_URL); 
