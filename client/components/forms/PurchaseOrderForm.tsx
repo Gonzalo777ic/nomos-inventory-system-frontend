@@ -3,25 +3,22 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, PlusCircle, Trash2, Calendar, ShoppingCart, EyeOff } from "lucide-react";
-
+import { Loader2, PlusCircle, Trash2, Calendar, ShoppingCart, EyeOff, Lock } from "lucide-react";
 
 import { 
     PurchaseOrder, 
     PurchaseOrderPayload, 
     Supplier,
     Product,
-    JavaOrderStatus
+    OrderStatus
 } from '@/types/index';
 import { 
     createPurchaseOrder, 
     updatePurchaseOrder,
-
     deletePurchaseOrder
 } from '@/api/services/purchase-order';
 import { getSuppliers } from '@/api/services/supplier'; 
 import { getProducts } from '@/api/services/products'; 
-
 
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -32,24 +29,18 @@ import {
 } from '@/components/ui/form'; 
 
 
-
-
 const detailSchema = z.object({
   productId: z.coerce.number({ required_error: "Producto es obligatorio" }).min(1, "Selecciona un producto"), 
   productName: z.string().optional(), 
-  quantity: z.coerce.number()
-    .min(1, "La cantidad debe ser al menos 1")
-    .int("La cantidad debe ser un número entero"),
-  unitCost: z.coerce.number()
-    .min(0.01, "El costo unitario debe ser positivo"),
+  quantity: z.coerce.number().min(1, "La cantidad debe ser al menos 1").int(),
+  unitCost: z.coerce.number().min(0.01, "El costo unitario debe ser positivo"),
 });
 
-
 export const purchaseOrderSchema = z.object({
-  supplierId: z.coerce.number({ required_error: "Proveedor es obligatorio" }).min(1, "Selecciona un proveedor"),
+  supplierId: z.coerce.number().min(1, "Selecciona un proveedor"),
   orderDate: z.string().nonempty("Fecha de Orden es obligatoria"),
   deliveryDate: z.string().nonempty("Fecha de Entrega es obligatoria"), 
-  status: z.enum(['PENDIENTE', 'RECIBIDO_PARCIAL', 'COMPLETO', 'CANCELADO'] as const), 
+  status: z.enum(['BORRADOR', 'PENDIENTE', 'CONFIRMADO', 'RECHAZADO', 'COMPLETO', 'CANCELADO'] as const), 
   details: z.array(detailSchema).min(1, "La orden debe tener al menos un producto."),
 });
 
@@ -60,8 +51,6 @@ interface PurchaseOrderFormProps {
   onSuccess: () => void;
   readOnly: boolean;
 }
-
-
 
 const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   defaultPurchaseOrder,
@@ -76,10 +65,8 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
 
 
-  const isImmutableField = isEditing; 
-  
-
-  const isStatusNonEditable = defaultPurchaseOrder && (defaultPurchaseOrder.status !== 'PENDIENTE');
+  const isStatusNonEditable = defaultPurchaseOrder && 
+    !['BORRADOR', 'PENDIENTE'].includes(defaultPurchaseOrder.status);
 
 
   const isDisabled = readOnly || isStatusNonEditable; 
@@ -99,14 +86,14 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   });
   
 
-  const javaStatuses: { value: JavaOrderStatus, label: string }[] = useMemo(() => ([
-    { value: 'PENDIENTE', label: 'Pendiente' },
-    { value: 'RECIBIDO_PARCIAL', label: 'Recibido Parcial' },
+  const javaStatuses: { value: OrderStatus, label: string }[] = useMemo(() => ([
+    { value: 'BORRADOR', label: 'Borrador' },
+    { value: 'PENDIENTE', label: 'Pendiente (Enviado)' },
+    { value: 'CONFIRMADO', label: 'Confirmado' },
+    { value: 'RECHAZADO', label: 'Rechazado' },
     { value: 'COMPLETO', label: 'Completo' },
     { value: 'CANCELADO', label: 'Cancelado' },
   ]), []);
-
-
 
   const form = useForm<PurchaseOrderFormValues>({
     resolver: zodResolver(purchaseOrderSchema as any),
@@ -126,7 +113,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             supplierId: initialSupplierId,
             orderDate: defaultPurchaseOrder?.orderDate || new Date().toISOString().split('T')[0],
             deliveryDate: defaultPurchaseOrder?.deliveryDate || '',
-            status: (defaultPurchaseOrder?.status || 'PENDIENTE') as z.infer<typeof purchaseOrderSchema>['status'],
+            status: (defaultPurchaseOrder?.status || 'BORRADOR'),
             details: mappedDetails,
         };
     }, [defaultPurchaseOrder]),
@@ -147,18 +134,16 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
               supplierId: initialSupplierId,
               orderDate: defaultPurchaseOrder.orderDate,
               deliveryDate: defaultPurchaseOrder.deliveryDate,
-              status: defaultPurchaseOrder.status as z.infer<typeof purchaseOrderSchema>['status'],
+              status: defaultPurchaseOrder.status,
               details: mappedDetails,
           });
       }
   }, [defaultPurchaseOrder, form]);
 
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "details",
   });
-
 
   const totalAmount = form.watch('details').reduce((sum, detail) => {
     const q = detail.quantity || 0;
@@ -170,83 +155,67 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   const createMutation = useMutation({
       mutationFn: (data: PurchaseOrderPayload) => createPurchaseOrder(data),
       onSuccess: () => {
-          toast({ title: "Éxito", description: "Orden de Compra creada.", variant: "default" });
+          toast({ title: "Éxito", description: "Orden creada en Borrador.", variant: "default" });
           queryClient.invalidateQueries({ queryKey: ['purchase-orders'] }); 
           onSuccess();
       },
-      onError: (error) => {
-          console.error(error);
-          const errorMessage = (error as any)?.response?.data?.message || "Fallo al crear la Orden de Compra.";
-          toast({ title: "Error de Creación", description: errorMessage, variant: "destructive" });
+      onError: (error: any) => {
+          const msg = error?.response?.data?.message || "Error al crear orden";
+          toast({ title: "Error", description: msg, variant: "destructive" });
       }
   });
 
   const updateMutation = useMutation({
       mutationFn: (data: { id: number, payload: PurchaseOrderPayload }) => updatePurchaseOrder(data.id, data.payload),
       onSuccess: () => {
-          toast({ title: "Éxito", description: "Orden de Compra actualizada.", variant: "default" });
+          toast({ title: "Éxito", description: "Cambios guardados.", variant: "default" });
           queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
-          queryClient.invalidateQueries({ queryKey: ['purchase-orders', orderId] });
           onSuccess();
       },
-      onError: (error) => {
-          console.error(error);
-          const errorMessage = (error as any)?.response?.data?.message || "Fallo al actualizar la Orden de Compra.";
-          toast({ title: "Error de Actualización", description: errorMessage, variant: "destructive" });
+      onError: (error: any) => {
+          const msg = error?.response?.data?.message || "Error al guardar cambios";
+          toast({ title: "Error", description: msg, variant: "destructive" });
       }
   });
-
 
   const deleteMutation = useMutation({
       mutationFn: (id: number) => deletePurchaseOrder(id),
       onSuccess: () => {
-          toast({ title: "Éxito", description: "Orden de Compra eliminada.", variant: "default" });
+          toast({ title: "Eliminado", description: "La orden ha sido eliminada.", variant: "default" });
           queryClient.invalidateQueries({ queryKey: ['purchase-orders'] }); 
           onSuccess();
       },
-      onError: (error) => {
-          console.error(error);
-          const errorMessage = (error as any)?.response?.data?.message || "Fallo al eliminar la Orden de Compra.";
-          toast({ 
-              title: "Error de Eliminación", 
-              description: errorMessage, 
-              variant: "destructive" 
-          });
+      onError: (error: any) => {
+          toast({ title: "Error", description: "No se pudo eliminar la orden.", variant: "destructive" });
       }
   });
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
-
   const handleDelete = useCallback(() => {
       if (!orderId) return;
-
-      if (window.confirm(`¿Está seguro de que desea eliminar la Orden de Compra OC-${orderId}? Esta acción es irreversible y solo es posible si el estado es PENDIENTE.`)) {
+      if (window.confirm(`¿Eliminar definitivamente la orden OC-${orderId}?`)) {
           deleteMutation.mutate(orderId);
       }
   }, [orderId, deleteMutation]);
 
-
   const onSubmit = (values: PurchaseOrderFormValues) => {
-
       if (isEditing && isStatusNonEditable) {
-        toast({ title: "Advertencia", description: "Esta orden ya no se puede modificar.", variant: "destructive" });
+        toast({ title: "Acción Bloqueada", description: "Esta orden ya fue procesada y no se puede editar.", variant: "destructive" });
         return;
       }
       
-      const detailPayloads = values.details.map(detail => {
-          return {
-              product: { id: detail.productId }, 
-              quantity: detail.quantity,
-              unitCost: detail.unitCost, 
-          }
-      });
+      const detailPayloads = values.details.map(detail => ({
+          product: { id: detail.productId }, 
+          quantity: detail.quantity,
+          unitCost: detail.unitCost, 
+      }));
 
       const payload: PurchaseOrderPayload = {
           supplier: { id: values.supplierId }, 
           orderDate: values.orderDate,
           deliveryDate: values.deliveryDate,
-          status: values.status as JavaOrderStatus, 
+          status: values.status,
           totalAmount: totalAmount, 
           details: detailPayloads
       };
@@ -254,12 +223,10 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
       if (isEditing && orderId) {
           updateMutation.mutate({ id: orderId, payload });
       } else {
-
-          createMutation.mutate({ ...payload, status: 'PENDIENTE' }); 
+          createMutation.mutate(payload); 
       }
   };
   
-
   if (isLoadingSuppliers || isLoadingProducts) {
       return (
           <div className="flex justify-center items-center h-48">
@@ -270,35 +237,30 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
   }
   
 
-  const ReadOnlyHeader = readOnly && (
-      <div className="p-3 mb-4 bg-blue-100 text-blue-700 border-l-4 border-blue-500 rounded-lg flex items-center">
-        <EyeOff className="w-5 h-5 mr-2"/>
-        <p className="font-medium">Esta es una vista de **Detalle** de la Orden de Compra. Los campos están deshabilitados.</p>
+  const LockedHeader = isEditing && isStatusNonEditable && (
+      <div className="p-3 mb-4 bg-amber-100 text-amber-800 border-l-4 border-amber-500 rounded-r-lg flex items-center shadow-sm">
+        <Lock className="w-5 h-5 mr-2"/>
+        <div>
+            <p className="font-bold">Modo Solo Lectura</p>
+            <p className="text-sm">Esta orden está en estado **{defaultPurchaseOrder?.status}**. Para modificar cantidades, debes cancelarla y crear una nueva.</p>
+        </div>
       </div>
   );
-  
-  const StatusLockedHeader = isEditing && isStatusNonEditable && !readOnly && (
-      <div className="p-3 mb-4 bg-red-100 text-red-700 border-l-4 border-red-500 rounded-lg flex items-center">
-        <EyeOff className="w-5 h-5 mr-2"/>
-        <p className="font-medium">️ Esta orden se encuentra en estado **{defaultPurchaseOrder.status}** y ya no puede ser modificada.</p>
-      </div>
-  );
-
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         
-        {ReadOnlyHeader}
-        {StatusLockedHeader} {}
+        {LockedHeader}
 
         {}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700">
-          <div className="col-span-1 md:col-span-3">
-              <h3 className="text-lg font-semibold flex items-center"><ShoppingCart className="w-5 h-5 mr-2"/> Información de la Orden</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+          <div className="col-span-1 md:col-span-2">
+              <h3 className="text-lg font-semibold flex items-center text-gray-700 dark:text-gray-200">
+                  <ShoppingCart className="w-5 h-5 mr-2"/> Información General
+              </h3>
           </div>
           
-          {}
           <FormField
             control={form.control}
             name="supplierId"
@@ -307,9 +269,8 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 <FormLabel>Proveedor</FormLabel>
                 <Select 
                     onValueChange={(val) => field.onChange(Number(val))} 
-                    value={field.value.toString()}
-
-                    disabled={isImmutableField} 
+                    value={field.value ? field.value.toString() : undefined}
+                    disabled={isDisabled} 
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -327,43 +288,41 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             )}
           />
 
-          {}
-          <FormField
-            control={form.control}
-            name="orderDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de Orden (Origen)</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    {}
-                    <Input type="date" {...field} disabled={isImmutableField} /> 
-                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          {}
-          <FormField
-            control={form.control}
-            name="deliveryDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de Entrega Esperada</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    {}
-                    <Input type="date" {...field} disabled={isDisabled} /> 
-                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="orderDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha Emisión</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input type="date" {...field} disabled={isDisabled} /> 
+                        <Calendar className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="deliveryDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha Entrega</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input type="date" {...field} disabled={isDisabled} /> 
+                        <Calendar className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+          </div>
           
           {}
           {isEditing && (
@@ -372,16 +331,11 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value}
-
-                        disabled={isDisabled} 
-                    >
+                    <FormLabel>Estado Actual</FormLabel>
+                    <Select value={field.value} disabled={true}>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el estado" />
+                        <SelectTrigger className="bg-gray-100 dark:bg-gray-800">
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -390,7 +344,6 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -399,22 +352,34 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
         {}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center">
-            <PlusCircle className="w-5 h-5 mr-2"/> Productos a Comprar ({fields.length})
-          </h3>
+          <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold flex items-center text-gray-700 dark:text-gray-200">
+                <PlusCircle className="w-5 h-5 mr-2"/> Detalle de Productos ({fields.length})
+              </h3>
+              {!isDisabled && ( 
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => append({ productId: 0, productName: '', quantity: 1, unitCost: 0.01 })}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Agregar Item
+                </Button>
+              )}
+          </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {fields.map((field, index) => (
               <div 
                 key={field.id} 
-                className="grid grid-cols-12 gap-2 p-3 border rounded-lg items-end relative"
+                className="grid grid-cols-12 gap-3 p-4 border rounded-lg items-end bg-white dark:bg-gray-900 shadow-sm relative group"
               >
-                {}
                 <FormField
                   control={form.control}
                   name={`details.${index}.productId`}
                   render={({ field: detailField }) => (
-                    <FormItem className="col-span-6 md:col-span-5">
+                    <FormItem className="col-span-5">
                       <FormLabel className={index === 0 ? "block" : "sr-only"}>Producto</FormLabel>
                       <Select 
                         onValueChange={(val) => {
@@ -423,12 +388,12 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                           form.setValue(`details.${index}.productName`, selectedProduct?.name || '');
                           detailField.onChange(id);
                         }} 
-                        value={detailField.value.toString()}
+                        value={detailField.value ? detailField.value.toString() : undefined}
                         disabled={isDisabled} 
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona producto" />
+                            <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -442,20 +407,20 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                   )}
                 />
 
-                {}
                 <FormField
                   control={form.control}
                   name={`details.${index}.quantity`}
                   render={({ field: detailField }) => (
-                    <FormItem className="col-span-3 md:col-span-2">
-                      <FormLabel className={index === 0 ? "block" : "sr-only"}>Cantidad</FormLabel>
+                    <FormItem className="col-span-2">
+                      <FormLabel className={index === 0 ? "block" : "sr-only"}>Cant.</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
-                          placeholder="Cantidad" 
+                          min="1"
                           {...detailField} 
                           onChange={(e) => detailField.onChange(e.target.valueAsNumber)}
                           disabled={isDisabled} 
+                          className="text-center"
                         />
                       </FormControl>
                       <FormMessage />
@@ -463,93 +428,81 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                   )}
                 />
 
-                {}
                 <FormField
                   control={form.control}
                   name={`details.${index}.unitCost`}
                   render={({ field: detailField }) => (
-                    <FormItem className="col-span-3 md:col-span-3">
-                      <FormLabel className={index === 0 ? "block" : "sr-only"}>Costo Unitario</FormLabel>
+                    <FormItem className="col-span-3">
+                      <FormLabel className={index === 0 ? "block" : "sr-only"}>Costo Unit.</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          placeholder="Costo" 
-                          {...detailField} 
-                          onChange={(e) => detailField.onChange(e.target.valueAsNumber)}
-                          disabled={isDisabled} 
-                        />
+                        <div className="relative">
+                            <span className="absolute left-3 top-2.5 text-gray-400">$</span>
+                            <Input 
+                              type="number" 
+                              step="0.01" 
+                              {...detailField} 
+                              onChange={(e) => detailField.onChange(e.target.valueAsNumber)}
+                              disabled={isDisabled} 
+                              className="pl-6"
+                            />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {}
-                <div className="col-span-12 md:col-span-1 flex items-center justify-end md:justify-start">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Total: {((form.watch(`details.${index}.quantity`) || 0) * (form.watch(`details.${index}.unitCost`) || 0)).toFixed(2)}
-                    </p>
+                <div className="col-span-2 flex flex-col items-end justify-center h-10">
+                    {index === 0 && <span className="text-sm font-medium text-gray-500 mb-2">Subtotal</span>}
+                    <span className="font-bold text-gray-700 dark:text-gray-300">
+                        $ {((form.watch(`details.${index}.quantity`) || 0) * (form.watch(`details.${index}.unitCost`) || 0)).toFixed(2)}
+                    </span>
                 </div>
 
-                {}
                 {!isDisabled && (
                     <Button
                       type="button"
                       onClick={() => remove(index)}
                       variant="ghost" 
                       size="icon" 
-                      className="col-span-1 w-8 h-8 absolute top-0 right-0 m-1 text-red-500 hover:bg-red-50"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 opacity-0 group-hover:opacity-100 transition-opacity"
                       disabled={fields.length === 1 && !isEditing}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                 )}
               </div>
             ))}
           </div>
-
-          {!isDisabled && ( 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => append({ productId: 0, productName: '', quantity: 1, unitCost: 0.01 })}
-            >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Añadir Producto
-            </Button>
-          )}
         </div>
 
         {}
-        <div className="flex justify-between items-center pt-4 border-t">
-            <h4 className="text-xl font-bold">Total Estimado: $ {totalAmount.toFixed(2)}</h4>
+        <div className="flex flex-col sm:flex-row justify-between items-center pt-6 border-t mt-6 bg-gray-50 dark:bg-gray-800/30 -mx-6 -mb-6 p-6 rounded-b-lg">
+            <div>
+                <span className="text-sm text-gray-500 uppercase font-bold tracking-wider">Total Estimado</span>
+                <div className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">
+                    $ {totalAmount.toFixed(2)}
+                </div>
+            </div>
             
-            <div className="flex space-x-2"> 
-                {}
+            <div className="flex gap-3 mt-4 sm:mt-0"> 
                 {canMutate && ( 
                     <Button 
                         type="button" 
                         onClick={handleDelete} 
-                        variant="destructive"
+                        variant="outline"
+                        className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                         disabled={isSubmitting}
                     >
-                        {deleteMutation.isPending ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <Trash2 className="mr-2 h-4 w-4" />
-                        )}
-                        Eliminar
+                        {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                        Eliminar Orden
                     </Button>
                 )}
 
-                {}
-                {!readOnly && ( 
-                    <Button type="submit" disabled={isSubmitting}>
+                {!readOnly && !isDisabled && ( 
+                    <Button type="submit" disabled={isSubmitting} className="min-w-[140px]">
                       {isSubmitting ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       ) : isEditing ? (
                         "Guardar Cambios"
                       ) : (
@@ -557,17 +510,14 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                       )}
                     </Button>
                 )}
+                
+                {(readOnly || isDisabled) && (
+                    <Button type="button" onClick={onSuccess} variant="secondary">
+                        Cerrar
+                    </Button>
+                )}
             </div>
         </div>
-        
-        {}
-        {readOnly && (
-            <div className="flex justify-end">
-                <Button type="button" onClick={onSuccess} variant="secondary">
-                    Cerrar Detalle
-                </Button>
-            </div>
-        )}
 
       </form>
     </Form>

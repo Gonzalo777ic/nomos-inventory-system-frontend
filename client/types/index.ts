@@ -145,10 +145,9 @@ export type InventoryItem = {
 
 
 
-export type JavaOrderStatus = 'PENDIENTE' | 'RECIBIDO_PARCIAL' | 'COMPLETO' | 'CANCELADO';
 
 
-export type OrderStatus = JavaOrderStatus | 'BORRADOR' | 'ENVIADA'; 
+export type OrderStatus = 'BORRADOR' | 'PENDIENTE' | 'CONFIRMADO' | 'RECHAZADO' | 'COMPLETO' | 'CANCELADO';
 
 export type PurchaseOrderDetail = {
     id: number;
@@ -160,20 +159,13 @@ export type PurchaseOrderDetail = {
 
 export type PurchaseOrder = {
     id: number;
-
-
     supplier: Supplier;
-    
-
-
-    
     orderDate: string; 
     deliveryDate: string; 
     totalAmount: number;
-    status: JavaOrderStatus; 
+    status: OrderStatus; 
     details: PurchaseOrderDetail[]; 
 }
-
 /**
  * TIPOS DE PAYLOAD (API REQUEST - Solución para relaciones ManyToOne)
  */
@@ -195,7 +187,8 @@ export type PurchaseOrderPayload = {
     orderDate: string;
     deliveryDate: string;
     totalAmount: number;
-    status: JavaOrderStatus;
+
+    status: OrderStatus;
     details: PurchaseOrderDetailPayload[]; 
 };
 
@@ -274,6 +267,7 @@ export type User = {
     email: string;
     name?: string;
     role?: "admin" | "seller";
+    supplierId?: number;
 };
 
 

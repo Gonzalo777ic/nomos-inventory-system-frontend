@@ -172,7 +172,7 @@ function SuppliersPage() {
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <div className="flex justify-center space-x-1">
-                                                    {/* Botón Gestión de Usuarios */}
+                                                    {}
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -183,7 +183,7 @@ function SuppliersPage() {
                                                         <ShieldCheck className="w-4 h-4" />
                                                     </Button>
 
-                                                    {/* Botón Editar */}
+                                                    {}
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -193,7 +193,7 @@ function SuppliersPage() {
                                                         <Edit className="w-4 h-4 text-blue-500" />
                                                     </Button>
 
-                                                    {/* Botón Eliminar */}
+                                                    {}
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -218,7 +218,7 @@ function SuppliersPage() {
                 </CardContent>
             </Card>
 
-            {/* Modales */}
+            {}
             <SupplierFormModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
