@@ -76,7 +76,7 @@ const AppContent = () => {
                             <Route path="/" element={<Index />} />
                             <Route path="/login" element={<Login />} />
                             
-                            {/* Grupo Protegido Principal: Layout común para trabajadores */}
+                            {}
                             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/products" element={<Products />} /> 
@@ -85,7 +85,7 @@ const AppContent = () => {
                                 <Route path="/store-schedule" element={<StoreSchedule />} />
                                 <Route path="/shipping-guides" element={<ShippingGuides />} />
 
-                                {/* Solo Inventario y Gestión Interna */}
+                                {}
                                 <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_INVENTORY_MANAGER']} />}>
                                     <Route path="/inventory" element={<Inventory />} />
                                     <Route path="/warehouses" element={<Warehouses />} />
@@ -93,7 +93,7 @@ const AppContent = () => {
                                     <Route path="/movements" element={<Movements />} />
                                 </Route>
 
-                                {/* Solo Ventas y Cotizaciones */}
+                                {}
                                 <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SELLER']} />}>
                                     <Route path="/sales" element={<Sales />} />
                                     <Route path="/quotations" element={<Quotations />} />
@@ -102,7 +102,7 @@ const AppContent = () => {
                                     <Route path="/returns" element={<Returns />} />
                                 </Route>
 
-                                {/* Solo Administración Maestra */}
+                                {}
                                 <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
                                     <Route path="/users" element={<Users />} />
                                     <Route path="/clients" element={<Clients />} />

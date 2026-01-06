@@ -22,7 +22,7 @@ export const SidebarNavigation: React.FC = () => {
         <nav className="mt-6 space-y-2 text-sm">
             <NavItem to="/dashboard" label="Dashboard" icon={Home} />
             
-            {/* Inventario: Filtrado dinámico según rol */}
+            {}
             <SubMenu label="Inventario" icon={<Package className="h-5 w-5" />}>
                 {[
                     { to: "/products", label: "Catálogo de Productos", icon: <ShoppingCart className="h-4 w-4" /> },
@@ -35,7 +35,7 @@ export const SidebarNavigation: React.FC = () => {
                 ]}
             </SubMenu>
 
-            {/* Ventas: Totalmente oculto para Proveedores */}
+            {}
             {!isSupplier && (
                 <SubMenu label="Ventas & Caja" icon={<DollarSign className="h-5 w-5" />}>
                     {[
@@ -48,7 +48,7 @@ export const SidebarNavigation: React.FC = () => {
                 </SubMenu>
             )}
 
-            {/* Logística: Los proveedores solo ven sus Guías */}
+            {}
             <SubMenu label="Logística & Envíos" icon={<Truck className="h-5 w-5" />}>
                 {[
                     { to: "/shipping-guides", label: "Guías de Remisión", icon: <Map className="h-4 w-4" /> },
@@ -59,7 +59,7 @@ export const SidebarNavigation: React.FC = () => {
                 ]}
             </SubMenu>
             
-            {/* Maestros: Solo Administradores */}
+            {}
             {isAdmin && (
                 <SubMenu label="Maestros & Config" icon={<Settings className="h-5 w-5" />}>
                     {[
@@ -76,7 +76,7 @@ export const SidebarNavigation: React.FC = () => {
                 </SubMenu>
             )}
             
-            {/* Reportes y Sistema: Filtrado por rol */}
+            {}
             <SubMenu label="Reportes & Sistema" icon={<BarChart3 className="h-5 w-5" />}>
                 {[
                     { to: "/alerts", label: "Alertas de Stock", icon: <AlertTriangle className="h-4 w-4" /> },
