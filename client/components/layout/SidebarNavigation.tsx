@@ -8,7 +8,6 @@ import {
     PackageOpen, Scale, Ruler, Percent, Megaphone, Clock, AlertTriangle, 
     Briefcase, Warehouse, Wallet, ClipboardCheck
 } from 'lucide-react'; 
-
 const ROLE_CLAIM_KEY = "https://nomosstore.com/roles";
 
 export const SidebarNavigation: React.FC = () => {
@@ -36,17 +35,19 @@ export const SidebarNavigation: React.FC = () => {
             </SubMenu>
 
             {}
-            {!isSupplier && (
+            
                 <SubMenu label="Ventas & Caja" icon={<DollarSign className="h-5 w-5" />}>
                     {[
-                        { to: "/sales", label: "Registro de Ventas", icon: <ClipboardList className="h-4 w-4" /> },
                         { to: "/quotations", label: "Cotizaciones", icon: <Tag className="h-4 w-4" /> },
-                        { to: "/promotions", label: "Promociones y Ofertas", icon: <Tag className="h-4 w-4" /> },
-                        { to: "/collections", label: "Gestión de Cobranzas", icon: <CreditCard className="h-4 w-4" /> },
-                        { to: "/returns", label: "Gestión de Devoluciones", icon: <RefreshCw className="h-4 w-4" /> },
+                        ...(!isSupplier ? [
+                            { to: "/sales", label: "Registro de Ventas", icon: <ClipboardList className="h-4 w-4" /> },
+                            { to: "/promotions", label: "Promociones y Ofertas", icon: <Tag className="h-4 w-4" /> },
+                            { to: "/collections", label: "Gestión de Cobranzas", icon: <CreditCard className="h-4 w-4" /> },
+                            { to: "/returns", label: "Gestión de Devoluciones", icon: <RefreshCw className="h-4 w-4" /> },
+                    ] : [])
                     ]}
                 </SubMenu>
-            )}
+            
 
             {}
             <SubMenu label="Logística & Envíos" icon={<Truck className="h-5 w-5" />}>

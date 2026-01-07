@@ -466,7 +466,7 @@ const Purchases: React.FC = () => {
                              <TableCell>OC-{order.id}</TableCell>
                              <TableCell>{order.supplier?.name}</TableCell>
                              <TableCell>{order.orderDate}</TableCell>
-                             <TableCell>${order.totalAmount.toFixed(2)}</TableCell>
+                             <TableCell>${(order.totalAmount ?? 0).toFixed(2)}</TableCell>
                              <TableCell>{getStatusBadge(order.status)}</TableCell>
                              <TableCell className="text-right">
                                 <Button variant="ghost" size="sm" onClick={() => handleEditOrView(order.id, false)}>
