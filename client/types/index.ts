@@ -6,3 +6,4 @@ export * from "./inventory/masters";
 export * from "./inventory/products";
 export * from "./inventory/stock";
 export * from "./inventory/orders";
+export * from "./inventory/quotations";
