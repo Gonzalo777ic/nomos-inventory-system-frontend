@@ -1,75 +1,49 @@
 import { httpStore } from "../httpStore";
-import { SaleDetailPayload } from "./saleDetailService";
 
-const API_BASE_URL = '/api/store/sales';
-const BASE_URL = 'http://localhost:8083/api/store';
-const SALES_URL = `${BASE_URL}/sales`;
+import { Sale, SalePayload, SaleCreationDTO, SaleTypeRef } from "../../types/store";
 
 
-
-export interface Sale {
-    id: number;
-    clientId: number | null;
-    saleDate: string;
-    type: 'BOLETA' | 'FACTURA' | string;
-    totalAmount: number;
-    totalDiscount: number;
-    status: 'COMPLETADA' | 'PENDIENTE' | 'CANCELADA' | string;
-    sellerId: number;
-}
-
-
-
-export interface SalePayload {
-    clientId: number | null; 
-    saleDate: string; 
-    type: string;
-    sellerId: number;
-}
-
-
-export interface SaleTypeRef {
-    key: string;
-    description: string;
-}
-
-
-export interface SaleCreationDTO extends SalePayload {
-
-    details: Omit<SaleDetailPayload, 'tempId'>[]; 
-}
-
+const SALES_URL = 'http://localhost:8083/api/store/sales';
 
 export const SaleService = {
     
+    /**
+     * Obtener todas las ventas.
+     * Soporta filtrado automático por rol en el backend.
+     */
     getAll: async (): Promise<Sale[]> => {
         const response = await httpStore.get<Sale[]>(SALES_URL);
         return response.data;
     },
 
-    
+    /**
+     * Obtener una venta por ID con sus detalles y cobranzas.
+     */
     getById: async (id: number): Promise<Sale> => {
         const response = await httpStore.get<Sale>(`${SALES_URL}/${id}`);
         return response.data;
     },
 
-    
+    /**
+     * Crear una venta completa (Cabecera + Detalles).
+     * Este es el método principal de registro de ventas.
+     */
     createSaleWithDetails: async (data: SaleCreationDTO): Promise<Sale> => {
-
         const response = await httpStore.post<Sale>(SALES_URL, data);
         return response.data;
     },
 
-    /** 3. Crear una nueva venta (POST)
-     * Se mantiene por si se usa en otro flujo, pero se recomienda usar createSaleWithDetails para ventas nuevas.
+    /** * Método legacy/alternativo para crear venta simple.
+     * Se recomienda usar createSaleWithDetails.
      */
     create: async (data: SalePayload): Promise<Sale> => {
-
         const response = await httpStore.post<Sale>(SALES_URL, data);
         return response.data;
     },
 
-    
+    /**
+     * Actualizar solo el estado de la venta (Ej: CANCELAR).
+     */
     updateStatus: async (id: number, newStatus: string): Promise<Sale> => {
         const response = await httpStore.put<Sale>(`${SALES_URL}/${id}/status`, newStatus, {
              headers: { 'Content-Type': 'text/plain' }
@@ -78,7 +52,7 @@ export const SaleService = {
     },
 
     /**
-     * Obtener los tipos de comprobante de venta desde el backend.
+     * Obtener los tipos de comprobante disponibles (Boleta, Factura, etc.)
      * GET /api/store/sales/types
      */
     getSaleTypes: async (): Promise<SaleTypeRef[]> => {
