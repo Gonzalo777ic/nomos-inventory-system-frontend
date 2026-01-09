@@ -4,7 +4,8 @@ import { ClientService, Client, DocumentTypeRef } from '../api/services/client';
 
 
 import { InternalUserService, InternalUser } from '../api/services/internalUserService.ts'; 
-import { SaleService, SaleTypeRef } from '../api/services/saleService';
+import { SaleService} from '../api/services/saleService';
+import { SaleTypeRef } from '../types/store';
 
 
 /**
