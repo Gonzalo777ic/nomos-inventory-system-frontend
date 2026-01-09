@@ -1,36 +1,9 @@
 import { httpStore } from "../httpStore";
+// Importamos los tipos desde el store centralizado
+import { SaleDetail, SaleDetailPayload } from "../../types/store";
 
 const BASE_URL = 'http://localhost:8083/api/store';
 const DETAIL_API_BASE_URL = `${BASE_URL}/saledetails`;
-
-
-/**
- * Interfaz que representa un ítem (detalle) de una venta.
- * Coincide con la entidad SaleDetail del backend.
- */
-export interface SaleDetail {
-    id: number;
-    saleId: number;
-    productId: number;
-    unitPrice: number;
-    quantity: number;
-    subtotal: number;
-    taxRateId: number;
-    promotionId: number | null;
-}
-
-/**
- * Payload para crear o modificar un detalle de venta.
- */
-export interface SaleDetailPayload {
-    saleId: number;
-    productId: number;
-    unitPrice: number;
-    quantity: number;
-    subtotal: number;
-    taxRateId: number;
-    promotionId: number | null;
-}
 
 export const SaleDetailService = {
 
@@ -44,8 +17,9 @@ export const SaleDetailService = {
     },
 
     /**
-     * Añade un nuevo detalle (ítem/producto) a una venta.
+     * Añade un nuevo detalle (ítem/producto) a una venta YA EXISTENTE.
      * POST /api/store/saledetails
+     * Nota: Para ventas nuevas, usar SaleService.createSaleWithDetails
      */
     addDetail: async (detailPayload: SaleDetailPayload): Promise<SaleDetail> => {
         const response = await httpStore.post<SaleDetail>(DETAIL_API_BASE_URL, detailPayload);

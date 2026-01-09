@@ -3,20 +3,12 @@ import { Category } from '../../types';
 
 const API_BASE_URL = '/inventory/categories'; 
 
-/**
- * Tipo de datos que la API de Spring Boot espera para la creación/actualización.
- * Nota: El backend espera 'parent: { id: number } | null' para la relación recursiva.
- */
+
 interface CategoryPayload {
     name: string;
     description: string | null;
     parent: { id: number } | null;
 }
-
-/**
- * Servicio de API para gestionar las operaciones CRUD de la entidad Category (Clasificación).
- */
-
 
 export const getCategories = async (): Promise<Category[]> => {
     const response = await http.get<Category[]>(API_BASE_URL);

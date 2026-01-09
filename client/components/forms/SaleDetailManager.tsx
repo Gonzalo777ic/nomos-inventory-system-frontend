@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Search, Plus, Trash2, DollarSign } from "lucide-react";
-import { SaleDetailPayload } from "../../api/services/saleDetailService";
+import { SaleDetailPayload } from "../../types/store";
 import { useToast } from "../../hooks/use-toast";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";

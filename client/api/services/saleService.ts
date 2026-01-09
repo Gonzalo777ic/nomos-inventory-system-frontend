@@ -58,5 +58,9 @@ export const SaleService = {
     getSaleTypes: async (): Promise<SaleTypeRef[]> => {
         const response = await httpStore.get<SaleTypeRef[]>(`${SALES_URL}/types`);
         return response.data;
+    },
+
+    cancelSale: async (id: number): Promise<void> => {
+        await httpStore.patch(`/store/sales/${id}/cancel`);
     }
 };

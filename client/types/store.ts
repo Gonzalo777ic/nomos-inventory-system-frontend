@@ -1,3 +1,7 @@
+import { Collection } from "./inventory/collections"; 
+
+// --- HORARIOS Y CONFIGURACIÓN ---
+
 export type StoreSchedule = {
     id: number;
     dayOfWeek: 'LUNES' | 'MARTES' | 'MIÉRCOLES' | 'JUEVES' | 'VIERNES' | 'SÁBADO' | 'DOMINGO' | string;
@@ -24,8 +28,6 @@ export type Announcement = {
     isActive: boolean;
 };
 
-
-
 export type Alert = {
     id: string;
     productId: string;
@@ -33,36 +35,42 @@ export type Alert = {
     createdAt: string;
 };
 
-
-
 export interface PaymentMethodConfig {
   id: number;
   name: string;
   type: string;
 }
 
-
 export type PaymentMethodPayload = Omit<PaymentMethodConfig, 'id'>;
 
+// --- VENTAS Y DETALLES ---
 
-
-
-
-import { Collection } from "./inventory/collections"; 
-
-
-
-export interface Sale {
+/**
+ * Interfaz que representa un ítem (detalle) de una venta ya registrada en BD.
+ */
+export interface SaleDetail {
     id: number;
-    clientId: number | null;
-    saleDate: string;
-    type: 'BOLETA' | 'FACTURA' | 'TICKET' | string;
-    totalAmount: number;
-    totalDiscount: number;
-    status: 'COMPLETADA' | 'PENDIENTE' | 'CANCELADA' | 'PAGADO' | string;
-    sellerId: number;
+    saleId: number;
+    productId: number;
+    unitPrice: number;
+    quantity: number;
+    subtotal: number;
+    taxRateId: number;
+    promotionId: number | null;
+}
 
-    collections?: Collection[]; 
+/**
+ * Payload base para crear o modificar un detalle.
+ */
+export interface SaleDetailPayload {
+    saleId?: number; // Opcional porque al crear una venta nueva, aún no existe el saleId
+    productId: number;
+    unitPrice: number;
+    quantity: number;
+    subtotal: number;
+    taxRateId: number;
+    promotionId?: number | null;
+    tempId?: string; // Para manejo en frontend antes de guardar
 }
 
 export interface SaleTypeRef {
@@ -70,32 +78,45 @@ export interface SaleTypeRef {
     description: string;
 }
 
-
-
-/**
- * Payload para el detalle de la venta (Producto individual)
- */
-export interface SaleDetailPayload {
-    productId: number;
-    unitPrice: number;
-    quantity: number;
-    subtotal: number;
-    taxRateId: number;
-    promotionId?: number | null;
-    tempId?: string;
-}
-
 export interface SalePayload {
     clientId: number | null; 
     saleDate: string; 
     type: string;
     sellerId: number;
+    paymentCondition: 'CONTADO' | 'CREDITO';
+    creditDays?: number;
+    dueDate?: string;
 }
 
 /**
- * DTO Completo para crear la venta con sus detalles
+ * Interfaz principal de Venta (Lectura desde BD)
+ */
+export interface Sale {
+    id: number;
+    clientId: number | null;
+    saleDate: string; // ISO String
+    type: 'BOLETA' | 'FACTURA' | 'TICKET' | string;
+    
+    // Campos Financieros
+    paymentCondition: 'CONTADO' | 'CREDITO';
+    dueDate?: string;     // Fecha de vencimiento
+    creditDays: number;
+    
+    // Totales y Estado
+    totalAmount: number;
+    totalDiscount: number;
+    status: 'COMPLETADA' | 'PENDIENTE' | 'CANCELADA' | 'PAGADO' | 'EMITIDA' | string;
+    sellerId: number;
+    
+    // Relaciones
+    details?: SaleDetail[];       // Lista de productos
+    collections?: Collection[];   // Lista de pagos/cobranzas
+}
+
+/**
+ * DTO Completo para crear la venta con sus detalles en una sola transacción
  */
 export interface SaleCreationDTO extends SalePayload {
-
-    details: Omit<SaleDetailPayload, 'tempId'>[]; 
+    // Usamos el payload pero aseguramos que la lista no tenga saleId (se genera en back)
+    details: Omit<SaleDetailPayload, 'saleId' | 'tempId'>[]; 
 }
