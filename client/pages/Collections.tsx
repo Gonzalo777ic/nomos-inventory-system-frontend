@@ -20,18 +20,18 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch"; 
 import { Label } from "@/components/ui/label";  
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Opcional para UX
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { SaleService } from "@/api/services/saleService"; 
 import { PaymentRegistrationForm } from "@/components/forms/PaymentRegistrationForm";
-import { Sale } from "@/types/store"; // Ajusta la ruta a donde tengas tu interfaz Sale
+import { Sale } from "@/types/store";
 import { Collection, SaleWithBalance } from "@/types/inventory/collections";
 
 const Collections: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedSale, setSelectedSale] = useState<SaleWithBalance | null>(null);
     
-    // Estado para controlar historial (Pagados vs Pendientes)
+
     const [showHistory, setShowHistory] = useState(false);
 
     const { data: sales = [], isLoading } = useQuery<Sale[]>({
@@ -50,16 +50,16 @@ const Collections: React.FC = () => {
             const paidAmount = (sale.collections || []).reduce((sum: number, c: Collection) => sum + c.amount, 0);
             const balance = sale.totalAmount - paidAmount;
             
-            // --- LÓGICA DE VENCIMIENTO DINÁMICA ---
+
             const saleDate = new Date(sale.saleDate);
             const dueDate = new Date(saleDate);
             
-            // ✅ USAMOS EL VALOR DEL BACKEND (creditDays)
-            // Si es null o undefined, asumimos 0 (Contado)
+
+
             const daysToCredit = sale.creditDays || 0;
             dueDate.setDate(saleDate.getDate() + daysToCredit);
             
-            // Es vencido si hay deuda Y hoy es mayor que la fecha límite
+
             const isOverdue = balance > 0.01 && today > dueDate;
 
             if (balance > 0.01) {
@@ -73,15 +73,15 @@ const Collections: React.FC = () => {
                 }
             });
 
-            // Agregamos dueDate al objeto para mostrarlo en la tabla si queremos
+
             return { ...sale, paidAmount, balance, isOverdue, dueDateStr: dueDate.toLocaleDateString() };
         });
 
-        // --- FILTRADO ---
+
         const filtered = enrichedSales.filter(s => {
             const hasDebt = s.balance > 0.01;
             
-            // Si showHistory es false, ocultamos los pagados (balance 0)
+
             const passesHistoryFilter = showHistory || hasDebt;
 
             const matchesSearch = searchTerm === "" || 
@@ -91,7 +91,7 @@ const Collections: React.FC = () => {
             return passesHistoryFilter && matchesSearch;
         });
 
-        // Ordenamos: Primero los que deben (Vencidos arriba), luego los pagados al final
+
         const sorted = filtered.sort((a, b) => b.balance - a.balance);
 
         return { 
@@ -108,7 +108,7 @@ const Collections: React.FC = () => {
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Cobranzas</h1>
             </div>
 
-            {/* --- KPIs --- */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -144,13 +144,13 @@ const Collections: React.FC = () => {
                 </Card>
             </div>
 
-            {/* --- CONTROLES Y TABLA --- */}
+            {}
             <Card>
                 <CardHeader className="flex flex-row justify-between items-center">
                     <CardTitle>Cartera de Clientes</CardTitle>
                     
                     <div className="flex items-center gap-4">
-                        {/* TOGGLE HISTORIAL */}
+                        {}
                         <div className="flex items-center space-x-2 border p-2 rounded-md bg-slate-50 dark:bg-slate-900">
                             <Switch 
                                 id="history-mode" 
@@ -181,7 +181,7 @@ const Collections: React.FC = () => {
                                 <TableHead>Venta #</TableHead>
                                 <TableHead>Fecha Venta</TableHead>
                                 <TableHead>Cliente ID</TableHead>
-                                <TableHead>Vencimiento</TableHead> {/* Columna útil */}
+                                <TableHead>Vencimiento</TableHead> {}
                                 <TableHead>Progreso Pago</TableHead>
                                 <TableHead className="text-right">Total</TableHead>
                                 <TableHead className="text-right">Saldo</TableHead>
@@ -207,7 +207,7 @@ const Collections: React.FC = () => {
                                         <TableCell>{new Date(sale.saleDate).toLocaleDateString()}</TableCell>
                                         <TableCell>{sale.clientId || 'Anónimo'}</TableCell>
                                         
-                                        {/* Columna Vencimiento con Icono si hay crédito */}
+                                        {}
                                         <TableCell>
                                             <div className="flex items-center gap-1 text-xs">
                                                 {sale.creditDays > 0 && <CalendarClock className="w-3 h-3 text-blue-500"/>}

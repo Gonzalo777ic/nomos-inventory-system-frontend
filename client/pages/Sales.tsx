@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge'; 
-import { Eye, Loader2, DollarSign, Calendar, Clock } from 'lucide-react'; // Cambié Edit por Eye
+import { Eye, Loader2, DollarSign, Calendar, Clock } from 'lucide-react';
 
 const SalesPage: React.FC = () => {
     const [sales, setSales] = useState<Sale[]>([]);
@@ -61,7 +61,7 @@ const SalesPage: React.FC = () => {
                     <CardTitle className="text-2xl font-bold flex items-center">
                         <DollarSign className="w-6 h-6 mr-2" /> Listado de Transacciones de Venta
                     </CardTitle>
-                    {/* El botón de crear NO lleva readOnly, por lo que permite editar */}
+                    {}
                     <SaleForm onSuccess={fetchSales} />
                 </CardHeader>
                 <CardContent>
@@ -103,7 +103,7 @@ const SalesPage: React.FC = () => {
                                                 {sale.clientId ? `Cliente #${sale.clientId}` : <span className="text-gray-400 italic">Anónimo</span>}
                                             </TableCell>
 
-                                            {/* --- LÓGICA DE VENCIMIENTO --- */}
+                                            {}
                                             <TableCell>
                                                 <div className="flex flex-col gap-1">
                                                     {sale.paymentCondition === 'CREDITO' ? (
@@ -140,12 +140,12 @@ const SalesPage: React.FC = () => {
                                                 </Badge>
                                             </TableCell>
                                             
-                                            {/* --- ACCIONES: Solo ver detalle --- */}
+                                            {}
                                             <TableCell className="text-right">
                                                 <SaleForm 
                                                     initialData={sale} 
                                                     onSuccess={fetchSales}
-                                                    readOnly={true} // <--- ACTIVAMOS MODO LECTURA
+                                                    readOnly={true}
                                                     trigger={
                                                         <Button variant="ghost" size="icon" title="Ver Detalle / Anular">
                                                             <Eye className="h-4 w-4 text-gray-500 hover:text-blue-600" />
