@@ -1,5 +1,5 @@
 import { httpStore } from "../httpStore";
-// Importamos los tipos desde el store centralizado
+
 import { SaleDetail, SaleDetailPayload } from "../../types/store";
 
 const BASE_URL = 'http://localhost:8083/api/store';

@@ -51,7 +51,7 @@ import { Plus, Loader2, Ban } from "lucide-react";
 
 import SaleDetailManager, { CartItemPayload } from "./SaleDetailManager";
 
-// --- Enums & Schema ---
+
 
 const SaleTypeEnum = z.enum(["BOLETA", "FACTURA", "TICKET"]);
 const SaleStatusEnum = z.enum(["PENDIENTE", "COMPLETADA", "CANCELADA", "EMITIDA"]);
@@ -84,7 +84,7 @@ interface SaleFormProps {
     readOnly?: boolean; 
 }
 
-// Helper para fecha
+
 const formatLocalDateTime = (isoString: string | undefined): string => {
     if (!isoString) return "";
     const date = new Date(isoString);
@@ -105,10 +105,10 @@ const SaleForm: React.FC<SaleFormProps> = ({
 
     const [cartDetails, setCartDetails] = useState<CartItemPayload[]>([]);
     
-    // Referencias
+
     const { clients, sellers, saleTypes, loading: refLoading } = useReferenceData();
     
-    // [CORRECCIÓN 1] Eliminado el hook useInventory que no tienes.
+
 
     const paymentConditions = [
         { id: "CONTADO", name: "Pago al Contado" },
@@ -140,22 +140,22 @@ const SaleForm: React.FC<SaleFormProps> = ({
 
     const watchedPaymentCondition = form.watch("paymentCondition");
 
-    // --- EFFECT: Cargar datos al abrir modal ---
+
     useEffect(() => {
         if (open) {
-            // 1. HIDRATAR CARRITO (Modo Lectura)
+
             if (initialData && initialData.details && initialData.details.length > 0) {
                 
                 const mappedDetails: CartItemPayload[] = initialData.details.map((d, index) => {
-                    // [CORRECCIÓN 2] Quitamos la búsqueda por nombre ya que no tenemos la lista de productos
-                    // Si quisieras nombres reales, tendrías que usar ProductService.getAll() aquí.
+
+
                     
                     return {
-                        // [CORRECCIÓN 3] tempKey ahora es number (usamos d.id o timestamp simulado)
+
                         tempKey: d.id ? d.id : (Date.now() + index),
                         
                         productId: d.productId,
-                        // Fallback simple para el nombre
+
                         productName: `Producto #${d.productId}`, 
                         quantity: d.quantity,
                         unitPrice: d.unitPrice,
@@ -166,11 +166,11 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 });
                 setCartDetails(mappedDetails);
             } else {
-                // Modo Creación: Carrito vacío
+
                 setCartDetails([]); 
             }
 
-            // 2. RESETEAR FORMULARIO
+
             const initialSellerId = initialData?.sellerId
                 ? String(initialData.sellerId)
                 : (sellers.length > 0 ? String(sellers[0].id) : "");
@@ -196,7 +196,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
         ? `Detalle de Venta #${initialData?.id}`
         : "Crear Nueva Venta";
 
-    // --- MANEJO DE ANULACIÓN ---
+
     const handleCancelSale = async () => {
         if (!initialData?.id) return;
         try {
@@ -221,7 +221,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
         }
     };
 
-    // --- MANEJO DE CREACIÓN ---
+
     const onSubmit = async (data: SaleFormData) => {
         if (readOnly) return;
 
@@ -244,7 +244,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 throw new Error("La venta debe contener al menos un producto.");
             }
 
-            // Mapeamos explícitamente cada campo para cumplir con Omit<SaleDetailPayload...>
+
             const detailsPayload = cartDetails.map(detail => ({
                 productId: detail.productId,
                 unitPrice: detail.unitPrice,
@@ -313,7 +313,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="grid gap-4 py-4"
                     >
-                        {/* PRIMERA FILA */}
+                        {}
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -374,7 +374,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             />
                         </div>
 
-                        {/* SEGUNDA FILA */}
+                        {}
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -427,7 +427,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             )}
                         </div>
 
-                        {/* TERCERA FILA */}
+                        {}
                         <div className="grid grid-cols-2 gap-4 border-b pb-4">
                             <FormField
                                 control={form.control}
@@ -478,7 +478,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             />
                         </div>
 
-                        {/* DETALLE DE PRODUCTOS */}
+                        {}
                         <div className={readOnly ? "opacity-80 pointer-events-none" : ""}>
                             <SaleDetailManager
                                 details={cartDetails}
@@ -492,7 +492,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             </Button>
 
                             {!readOnly ? (
-                                // MODO CREACIÓN
+
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting || cartDetails.length === 0}
@@ -505,7 +505,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                     Crear Venta Completa
                                 </Button>
                             ) : (
-                                // MODO LECTURA
+
                                 initialData?.status !== 'CANCELADA' && (
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>

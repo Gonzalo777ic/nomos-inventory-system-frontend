@@ -1,6 +1,6 @@
 import { Collection } from "./inventory/collections"; 
 
-// --- HORARIOS Y CONFIGURACIÓN ---
+
 
 export type StoreSchedule = {
     id: number;
@@ -43,7 +43,7 @@ export interface PaymentMethodConfig {
 
 export type PaymentMethodPayload = Omit<PaymentMethodConfig, 'id'>;
 
-// --- VENTAS Y DETALLES ---
+
 
 /**
  * Interfaz que representa un ítem (detalle) de una venta ya registrada en BD.
@@ -63,14 +63,14 @@ export interface SaleDetail {
  * Payload base para crear o modificar un detalle.
  */
 export interface SaleDetailPayload {
-    saleId?: number; // Opcional porque al crear una venta nueva, aún no existe el saleId
+    saleId?: number;
     productId: number;
     unitPrice: number;
     quantity: number;
     subtotal: number;
     taxRateId: number;
     promotionId?: number | null;
-    tempId?: string; // Para manejo en frontend antes de guardar
+    tempId?: string;
 }
 
 export interface SaleTypeRef {
@@ -94,29 +94,29 @@ export interface SalePayload {
 export interface Sale {
     id: number;
     clientId: number | null;
-    saleDate: string; // ISO String
+    saleDate: string;
     type: 'BOLETA' | 'FACTURA' | 'TICKET' | string;
     
-    // Campos Financieros
+
     paymentCondition: 'CONTADO' | 'CREDITO';
-    dueDate?: string;     // Fecha de vencimiento
+    dueDate?: string;
     creditDays: number;
     
-    // Totales y Estado
+
     totalAmount: number;
     totalDiscount: number;
     status: 'COMPLETADA' | 'PENDIENTE' | 'CANCELADA' | 'PAGADO' | 'EMITIDA' | string;
     sellerId: number;
     
-    // Relaciones
-    details?: SaleDetail[];       // Lista de productos
-    collections?: Collection[];   // Lista de pagos/cobranzas
+
+    details?: SaleDetail[];
+    collections?: Collection[];
 }
 
 /**
  * DTO Completo para crear la venta con sus detalles en una sola transacción
  */
 export interface SaleCreationDTO extends SalePayload {
-    // Usamos el payload pero aseguramos que la lista no tenga saleId (se genera en back)
+
     details: Omit<SaleDetailPayload, 'saleId' | 'tempId'>[]; 
 }
