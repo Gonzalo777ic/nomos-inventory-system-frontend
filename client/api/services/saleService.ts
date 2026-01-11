@@ -61,6 +61,6 @@ export const SaleService = {
     },
 
     cancelSale: async (id: number): Promise<void> => {
-        await httpStore.patch(`/store/sales/${id}/cancel`);
+        await httpStore.patch(`${SALES_URL}/${id}/cancel`);
     }
 };
