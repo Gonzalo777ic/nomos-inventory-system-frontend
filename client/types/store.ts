@@ -45,6 +45,31 @@ export type PaymentMethodPayload = Omit<PaymentMethodConfig, 'id'>;
 
 
 
+
+export type InstallmentStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'OVERDUE';
+export type AccountsReceivableStatus = 'ACTIVE' | 'PAID' | 'CANCELLED' | 'BAD_DEBT';
+
+export interface Installment {
+    id: number;
+    number: number;
+    dueDate: string;
+    expectedAmount: number;
+    paidAmount: number;
+    status: InstallmentStatus;
+    capitalAmount?: number;
+    interestAmount?: number;
+}
+
+export interface AccountsReceivable {
+    id: number;
+    sale?: Sale;
+    totalAmount: number;
+    status: AccountsReceivableStatus;
+    installments: Installment[];
+    collections?: Collection[];
+}
+
+
 /**
  * Interfaz que representa un ítem (detalle) de una venta ya registrada en BD.
  */
@@ -111,6 +136,7 @@ export interface Sale {
 
     details?: SaleDetail[];
     collections?: Collection[];
+    accountsReceivable?: AccountsReceivable;
 }
 
 /**

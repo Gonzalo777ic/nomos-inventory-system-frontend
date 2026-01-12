@@ -42,6 +42,7 @@ import Warehouses from "./pages/Warehouses";
 import PaymentMethods from "./pages/PaymentMethods";
 
 import { QuotationReviewAdmin } from "./components/forms/QuotationReviewAdmin";
+import CollectionDetailPage from "./pages/CollectionDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -137,6 +138,7 @@ const AppContent = () => {
                   {}
                   <Route path="/promotions" element={<Promotions />} />
                   <Route path="/collections" element={<Collections />} />
+                  <Route path="/collections/:id" element={<CollectionDetailPage />} />
                   <Route path="/returns" element={<Returns />} />
                 </Route>
 
