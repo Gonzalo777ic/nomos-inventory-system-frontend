@@ -4,10 +4,13 @@ export interface Collection {
     id: number;
     sale?: Sale;
     saleId?: number;
+    accountsReceivableId?: number;
+    installmentId?: number;
     collectionDate: string;
     amount: number;
     paymentMethod: PaymentMethodConfig;
     referenceNumber?: string;
+    status: 'ACTIVO' | 'ANULADO';
 }
 
 export interface CollectionPayload {
@@ -23,4 +26,5 @@ export interface SaleWithBalance extends Sale {
     paidAmount: number;
     balance: number;
     isOverdue?: boolean;
+    dueDateStr?: string;
 }
