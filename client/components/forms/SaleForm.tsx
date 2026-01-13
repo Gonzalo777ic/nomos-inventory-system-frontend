@@ -63,17 +63,14 @@ const formSchema = z.object({
     type: SaleTypeEnum,
     paymentCondition: PaymentConditionEnum,
     
-
     numberOfInstallments: z.coerce.number().min(1).optional(),
     
-
     creditStartDate: z.string().optional(),
     
     status: SaleStatusEnum,
     sellerId: z.string().min(1, "El vendedor es requerido"),
     saleDate: z.string().min(1, "La fecha de venta es requerida"),
 }).refine((data) => {
-
     if (data.paymentCondition === "CREDITO") {
         return data.numberOfInstallments && data.numberOfInstallments > 0;
     }
@@ -93,6 +90,7 @@ interface SaleFormProps {
 }
 
 
+
 const formatLocalDateTime = (isoString: string | undefined): string => {
     if (!isoString) return "";
     const date = new Date(isoString);
@@ -101,11 +99,12 @@ const formatLocalDateTime = (isoString: string | undefined): string => {
     return localIso.substring(0, 16);
 };
 
-
 const formatDateSimple = (isoString: string | undefined): string => {
     if (!isoString) return new Date().toISOString().split('T')[0];
     return isoString.split('T')[0];
 };
+
+
 
 const SaleForm: React.FC<SaleFormProps> = ({
     initialData,
@@ -134,8 +133,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
 
     const defaultDate = formatLocalDateTime(new Date().toISOString());
 
-
-
     const initialInstallments = initialData?.creditDays 
         ? Math.round(initialData.creditDays / 30) 
         : 1;
@@ -146,11 +143,8 @@ const SaleForm: React.FC<SaleFormProps> = ({
             clientId: getInitialClientId(),
             type: (initialData?.type as any) || "BOLETA",
             paymentCondition: (initialData?.paymentCondition as any) || "CONTADO",
-            
-
             numberOfInstallments: initialInstallments,
             creditStartDate: formatDateSimple(initialData?.saleDate),
-            
             status: (initialData?.status as any) || "PENDIENTE",
             sellerId: String(initialData?.sellerId || ""),
             saleDate: formatLocalDateTime(initialData?.saleDate) || defaultDate,
@@ -172,7 +166,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
         if (open) {
             setCartDetails([]); 
 
-
             if (initialData && initialData.details && initialData.details.length > 0) {
                 const mappedDetails: CartItemPayload[] = initialData.details.map((d, index) => ({
                     tempKey: d.id ? d.id : (Date.now() + index),
@@ -193,7 +186,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
 
             const initialType = (initialData?.type as any)
                 || (saleTypes.length > 0 ? (saleTypes[0] as any).id : "BOLETA");
-
 
             const calcInstallments = initialData?.creditDays ? Math.round(initialData.creditDays / 30) : 1;
 
@@ -240,6 +232,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
         }
     };
 
+
     const onSubmit = async (data: SaleFormData) => {
         if (readOnly) return;
 
@@ -247,8 +240,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
 
         const clientIdNum = data.clientId === "NULL_CLIENT" ? null : Number(data.clientId);
         const sellerIdNum = Number(data.sellerId);
-
-
 
 
         const calculatedCreditDays = data.paymentCondition === "CREDITO" 
@@ -260,14 +251,15 @@ const SaleForm: React.FC<SaleFormProps> = ({
             saleDate: new Date(data.saleDate).toISOString(),
             type: data.type,
             paymentCondition: data.paymentCondition,
-            
-
-            creditDays: calculatedCreditDays, 
-            
+            creditDays: calculatedCreditDays,
             sellerId: sellerIdNum,
             
 
-            numberOfInstallments: data.paymentCondition === 'CREDITO' ? Number(data.numberOfInstallments) : 1
+            numberOfInstallments: data.paymentCondition === 'CREDITO' ? Number(data.numberOfInstallments) : 1,
+            
+
+
+            creditStartDate: data.paymentCondition === 'CREDITO' ? data.creditStartDate : null
         };
 
         try {
@@ -458,7 +450,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                     )}
                                 />
 
-                                {}
                                 {watchedPaymentCondition === "CREDITO" && (
                                     <div className="grid grid-cols-2 gap-4 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md animate-in fade-in slide-in-from-top-1">
                                         
