@@ -43,6 +43,8 @@ import PaymentMethods from "./pages/PaymentMethods";
 
 import { QuotationReviewAdmin } from "./components/forms/QuotationReviewAdmin";
 import CollectionDetailPage from "./pages/CollectionDetailPage";
+import CreditDocuments from "./pages/CreditDocuments";
+import CreditDocumentDetail from "./pages/CreditDocumentDetail";
 
 const queryClient = new QueryClient();
 
@@ -139,6 +141,8 @@ const AppContent = () => {
                   <Route path="/promotions" element={<Promotions />} />
                   <Route path="/collections" element={<Collections />} />
                   <Route path="/collections/:id" element={<CollectionDetailPage />} />
+                  <Route path="/credit-documents" element={<CreditDocuments />} />
+                  <Route path="/credit-documents/:id" element={<CreditDocumentDetail />} />
                   <Route path="/returns" element={<Returns />} />
                 </Route>
 

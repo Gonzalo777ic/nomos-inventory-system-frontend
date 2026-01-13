@@ -61,6 +61,37 @@ export interface Installment {
     penaltyAmount?: number;
 }
 
+
+export type CreditDocumentType = 'PAGARE' | 'LETRA_CAMBIO';
+export type CreditDocumentStatus = 'DRAFT' | 'ISSUED' | 'SIGNED' | 'EXECUTED' | 'CANCELLED';
+
+export interface CreditDocument {
+    id: number;
+    type: CreditDocumentType;
+    amount: number;
+    documentNumber: string;
+    issueDate: string;
+    dueDate: string;
+    debtorName: string;
+    debtorIdNumber: string;
+    creditorName: string;
+    status: CreditDocumentStatus;
+    legalNotes?: string;
+}
+
+export interface CreditDocumentPayload {
+    accountsReceivableId: number;
+    type: 'PAGARE' | 'LETRA_CAMBIO';
+    amount: number;
+    issueDate: string;
+    dueDate: string;
+    debtorName: string;
+    debtorIdNumber: string;
+    documentNumber: string;
+    legalNotes?: string;
+}
+
+
 export interface AccountsReceivable {
     id: number;
     sale?: Sale;
@@ -68,6 +99,7 @@ export interface AccountsReceivable {
     status: AccountsReceivableStatus;
     installments: Installment[];
     collections?: Collection[];
+    creditDocuments?: CreditDocument[];
 }
 
 

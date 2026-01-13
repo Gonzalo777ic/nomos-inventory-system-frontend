@@ -6,7 +6,7 @@ import {
     Home, Package, DollarSign, Truck, Settings, BarChart3, ShoppingCart, 
     Archive, Users, ClipboardList, Tag, CreditCard, RefreshCw, Map, 
     PackageOpen, Scale, Ruler, Percent, Megaphone, Clock, AlertTriangle, 
-    Briefcase, Warehouse, Wallet, ClipboardCheck
+    Briefcase, Warehouse, Wallet, ClipboardCheck, FileSignature
 } from 'lucide-react'; 
 const ROLE_CLAIM_KEY = "https://nomosstore.com/roles";
 
@@ -43,6 +43,7 @@ export const SidebarNavigation: React.FC = () => {
                             { to: "/sales", label: "Registro de Ventas", icon: <ClipboardList className="h-4 w-4" /> },
                             { to: "/promotions", label: "Promociones y Ofertas", icon: <Tag className="h-4 w-4" /> },
                             { to: "/collections", label: "Gestión de Cobranzas", icon: <CreditCard className="h-4 w-4" /> },
+                            { to: "/credit-documents", label: "Títulos Valores (Legal)", icon: <FileSignature className="h-4 w-4" /> },
                             { to: "/returns", label: "Gestión de Devoluciones", icon: <RefreshCw className="h-4 w-4" /> },
                     ] : [])
                     ]}
