@@ -58,6 +58,7 @@ export interface Installment {
     status: InstallmentStatus;
     capitalAmount?: number;
     interestAmount?: number;
+    penaltyAmount?: number;
 }
 
 export interface AccountsReceivable {
@@ -111,6 +112,8 @@ export interface SalePayload {
     paymentCondition: 'CONTADO' | 'CREDITO';
     creditDays?: number;
     dueDate?: string;
+    creditStartDate?: string | null; 
+    numberOfInstallments?: number;
 }
 
 /**
