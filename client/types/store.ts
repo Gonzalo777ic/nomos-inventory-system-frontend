@@ -72,9 +72,19 @@ export interface CreditDocument {
     documentNumber: string;
     issueDate: string;
     dueDate: string;
+    
+
     debtorName: string;
     debtorIdNumber: string;
     creditorName: string;
+    
+
+    guarantorName?: string;
+    guarantorIdNumber?: string;
+    placeOfIssue?: string;
+    placeOfPayment?: string;
+
+
     status: CreditDocumentStatus;
     legalNotes?: string;
 }
@@ -89,6 +99,14 @@ export interface CreditDocumentPayload {
     debtorIdNumber: string;
     documentNumber: string;
     legalNotes?: string;
+    creditorName?: string;
+
+
+    guarantorName?: string;
+    guarantorIdNumber?: string;
+    placeOfIssue: string;
+    placeOfPayment: string;
+
 }
 
 
