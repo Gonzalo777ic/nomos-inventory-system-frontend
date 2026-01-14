@@ -7,6 +7,7 @@ import { AccountsReceivableService } from "@/api/services/accountsReceivableServ
 import { CreditDocumentService } from "@/api/services/creditDocumentService";
 import { AccountsReceivable, CreditDocument } from "@/types/store";
 import { CreditDocumentForm } from "@/components/forms/CreditDocumentForm";
+import { CreditContextPanel } from "@/components/panels/CreditContextPanel";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,153 +54,147 @@ const CreditDocumentDetail: React.FC = () => {
     const balance = ar.totalAmount - paid;
 
     return (
-        <div className="p-8 max-w-6xl mx-auto space-y-6">
+        <div className="p-6 max-w-[1400px] mx-auto space-y-6">
             
             {}
             <div className="flex items-center gap-2 mb-4">
                 <Button variant="ghost" size="sm" onClick={() => navigate('/credit-documents')}>
                     <ArrowLeft className="w-4 h-4 mr-2"/> Volver a la lista
                 </Button>
+                <h1 className="text-xl font-bold ml-2">Expediente de Crédito #{id}</h1>
             </div>
 
             {}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2 border-l-4 border-l-indigo-600 shadow-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <FileSignature className="w-5 h-5 text-indigo-600"/>
-                            Expediente de Crédito: Venta #{ar.sale?.id}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm pt-4">
-                        <div>
-                            <div className="text-muted-foreground">Cliente ID</div>
-                            <div className="font-medium">{ar.sale?.clientId || 'N/A'}</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Emisión Venta</div>
-                            <div className="font-medium">{new Date(ar.sale?.saleDate || "").toLocaleDateString()}</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Monto Total</div>
-                            <div className="font-medium">${ar.totalAmount.toFixed(2)}</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Saldo Actual</div>
-                            <div className="font-bold text-red-600">${balance.toFixed(2)}</div>
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                
+                {}
+                <div className="lg:col-span-1">
+                    <CreditContextPanel ar={ar} /> {}
+                </div>
 
                 {}
-                <Card className="flex flex-col justify-center items-center p-6 bg-slate-50 border-dashed">
-                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                        <DialogTrigger asChild>
-                            <Button size="lg" className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md">
-                                <Plus className="w-5 h-5 mr-2" /> Crear Nuevo Documento
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle>Emitir Título Valor</DialogTitle>
-                            </DialogHeader>
-                            {}
-                            <CreditDocumentForm 
-                                onSuccess={() => {
-                                    setIsCreateOpen(false);
-                                    queryClient.invalidateQueries({ queryKey: ["credit-documents", id] });
-                                }}
-                                initialData={{
-                                    accountsReceivableId: ar.id,
-                                    amount: balance,
-                                    debtorName: `Cliente ${ar.sale?.clientId || ''}`
-                                }}
-                            />
-                        </DialogContent>
-                    </Dialog>
-                    <p className="text-xs text-muted-foreground mt-3 text-center">
-                        Genera un Pagaré o Letra de Cambio para respaldar legalmente este saldo.
-                    </p>
-                </Card>
-            </div>
+                <div className="lg:col-span-3 space-y-6">
+                    
+                    {}
+                    <Card className="flex flex-col sm:flex-row justify-between items-center p-6 bg-white border-l-4 border-l-indigo-600 shadow-sm gap-4">
+                        <div>
+                            <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800">
+                                <FileSignature className="w-5 h-5 text-indigo-600"/>
+                                Emisión de Documentos
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Genere títulos valores para respaldar el saldo pendiente de 
+                                <span className="font-bold text-slate-900 ml-1">${balance.toFixed(2)}</span>.
+                            </p>
+                        </div>
+                        
+                        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                            <DialogTrigger asChild>
+                                <Button size="default" className="bg-indigo-600 hover:bg-indigo-700 shadow-md whitespace-nowrap">
+                                    <Plus className="w-4 h-4 mr-2" /> Nuevo Título Valor
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[700px] max-h-[95vh] overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle>Emitir Título Valor (Pagaré / Letra)</DialogTitle>
+                                </DialogHeader>
+                                
+                                <CreditDocumentForm 
+                                    onSuccess={() => {
+                                        setIsCreateOpen(false);
+                                        queryClient.invalidateQueries({ queryKey: ["credit-documents", id] });
+                                    }}
+                                    initialData={{
+                                        accountsReceivableId: ar.id,
+                                        amount: balance,
+                                        debtorName: `Cliente ${ar.sale?.clientId || ''}`
+                                    }}
+                                    contextData={ar}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </Card>
 
-            <Separator />
+                    <Separator />
 
-            {}
-            <div>
-                <h2 className="text-xl font-bold mb-4 text-slate-800">Documentos Legales Asociados</h2>
-                <Card>
-                    <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Tipo Documento</TableHead>
-                                    <TableHead>Nro. Folio</TableHead>
-                                    <TableHead>Deudor / Firmante</TableHead>
-                                    <TableHead>Fechas (Emisión / Venc.)</TableHead>
-                                    <TableHead className="text-right">Monto Avalado</TableHead>
-                                    <TableHead className="text-center">Estado Legal</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {documents.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
-                                            No hay documentos emitidos para esta deuda.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {documents.map((doc) => (
-                                    <TableRow key={doc.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <div className={`p-2 rounded-full ${doc.type === 'PAGARE' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'}`}>
-                                                    {doc.type === 'PAGARE' ? <FileText className="w-4 h-4"/> : <Stamp className="w-4 h-4"/>}
-                                                </div>
-                                                <span className="font-medium">{doc.type === 'PAGARE' ? 'Pagaré' : 'Letra'}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="font-mono">{doc.documentNumber}</TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col">
-                                                <span className="font-medium">{doc.debtorName}</span>
-                                                <span className="text-[10px] text-muted-foreground">{doc.debtorIdNumber}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col text-xs">
-                                                <span>E: {doc.issueDate}</span>
-                                                <span className="text-red-600 font-semibold">V: {doc.dueDate}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right font-bold text-slate-700">
-                                            ${doc.amount.toFixed(2)}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Badge variant={doc.status === 'SIGNED' ? 'default' : 'secondary'} className={doc.status === 'SIGNED' ? 'bg-green-600 hover:bg-green-700' : ''}>
-                                                {doc.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {doc.status === 'DRAFT' && (
-                                                <Button 
-                                                    variant="outline" 
-                                                    size="sm" 
-                                                    className="text-xs h-8"
-                                                    onClick={() => statusMutation.mutate({ docId: doc.id, status: 'SIGNED' })}
-                                                >
-                                                    <CheckCircle2 className="w-3 h-3 mr-1 text-green-600"/> Registrar Firma
-                                                </Button>
-                                            )}
-                                            {}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                    {}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-4 text-slate-700 flex items-center gap-2">
+                            <Stamp className="w-5 h-5"/> Documentos Registrados
+                        </h2>
+                        <Card>
+                            <CardContent className="p-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Documento</TableHead>
+                                            <TableHead>Nro. Folio</TableHead>
+                                            <TableHead>Deudor</TableHead>
+                                            <TableHead>Fechas</TableHead>
+                                            <TableHead className="text-right">Monto</TableHead>
+                                            <TableHead className="text-center">Estado</TableHead>
+                                            <TableHead className="text-right">Acciones</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {documents.length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
+                                                    No hay documentos legales emitidos.
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                        {documents.map((doc) => (
+                                            <TableRow key={doc.id}>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className={`p-2 rounded-full ${doc.type === 'PAGARE' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'}`}>
+                                                            {doc.type === 'PAGARE' ? <FileText className="w-4 h-4"/> : <Stamp className="w-4 h-4"/>}
+                                                        </div>
+                                                        <span className="font-medium text-sm">{doc.type === 'PAGARE' ? 'Pagaré' : 'Letra'}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="font-mono text-sm">{doc.documentNumber}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-sm">{doc.debtorName}</span>
+                                                        <span className="text-[10px] text-muted-foreground">{doc.debtorIdNumber}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col text-xs">
+                                                        <span>E: {doc.issueDate}</span>
+                                                        <span className="text-red-600 font-semibold">V: {doc.dueDate}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-right font-bold text-slate-700">
+                                                    ${doc.amount.toFixed(2)}
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Badge variant={doc.status === 'SIGNED' ? 'default' : 'secondary'} className={doc.status === 'SIGNED' ? 'bg-green-600 hover:bg-green-700' : ''}>
+                                                        {doc.status}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {doc.status === 'DRAFT' && (
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm" 
+                                                            className="text-xs h-8"
+                                                            onClick={() => statusMutation.mutate({ docId: doc.id, status: 'SIGNED' })}
+                                                        >
+                                                            <CheckCircle2 className="w-3 h-3 mr-1 text-green-600"/> Firmar
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
             </div>
         </div>
     );
