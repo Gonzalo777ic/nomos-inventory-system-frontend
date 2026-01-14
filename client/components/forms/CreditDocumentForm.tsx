@@ -181,7 +181,7 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
 
                             <div className="grid grid-cols-2 gap-4">
                                 <FormField control={form.control} name="debtorName" render={({ field }) => (
-                                    <FormItem><FormLabel>Deudor (Nombre)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Deudor (Nombre)</FormLabel><FormControl><Input/></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="debtorIdNumber" render={({ field }) => (
                                     <FormItem><FormLabel>DNI / RUC</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
