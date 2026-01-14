@@ -94,7 +94,7 @@ const CreditDocumentDetail: React.FC = () => {
                                     <Plus className="w-4 h-4 mr-2" /> Nuevo Título Valor
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[700px] max-h-[95vh] overflow-y-auto">
+                            <DialogContent className="sm:max-w-[1000px] max-h-[95vh] overflow-y-auto p-6">
                                 <DialogHeader>
                                     <DialogTitle>Emitir Título Valor (Pagaré / Letra)</DialogTitle>
                                 </DialogHeader>
