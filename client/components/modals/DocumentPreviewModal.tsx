@@ -18,11 +18,11 @@ const formatDateLong = (dateStr: string) => {
 const PagareTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
     <div className="border-[3px] border-slate-800 p-8 bg-[#fdfbf7] text-slate-900 font-serif shadow-sm h-full flex flex-col justify-between">
         
-        {}
+        {/* HEADER: Título y Datos Clave */}
         <div className="mb-8">
             <div className="flex justify-between items-start border-b-2 border-slate-800 pb-2">
                 
-                {}
+                {/* IZQUIERDA: TÍTULO Y VENCIMIENTO */}
                 <div>
                     <div className="border-2 border-slate-800 px-6 py-1 inline-block mb-2">
                         <h1 className="text-4xl font-black tracking-[0.1em] uppercase">PAGARÉ</h1>
@@ -35,7 +35,7 @@ const PagareTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
                     </div>
                 </div>
 
-                {}
+                {/* DERECHA: LUGAR PAGO Y MONTO */}
                 <div className="text-right flex flex-col items-end gap-2">
                     <div className="text-sm font-bold w-full">
                         <span className="uppercase text-slate-500 mr-2">Lugar de Pago:</span>
@@ -53,13 +53,13 @@ const PagareTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
                 </div>
             </div>
             
-            {}
+            {/* SUB-HEADER LEGAL */}
             <div className="text-center text-[10px] uppercase tracking-wider text-slate-500 mt-1 font-sans">
                 Por este pagaré me comprometo a pagar el día del vencimiento indicado
             </div>
         </div>
 
-        {}
+        {/* CUERPO PRINCIPAL (TEXTO LEGAL) */}
         <div className="space-y-6 text-base leading-loose text-justify px-4">
             <p>
                 Yo, <span className="font-bold uppercase border-b border-dotted border-slate-400 px-2 min-w-[200px] inline-block text-center">{data.debtorName || "____________________"}</span>, 
@@ -68,7 +68,7 @@ const PagareTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
                 la suma de <span className="font-bold bg-yellow-50/50 px-2 border-b border-yellow-200">{formatCurrency(data.amount || 0)}</span>.
             </p>
 
-            {}
+            {/* CONDICIONAL: CLÁUSULAS (Solo si existen) */}
             {data.legalNotes && (
                 <div className="mt-4 p-3 bg-slate-50 border-l-4 border-slate-400 text-sm italic text-slate-700">
                     <span className="font-bold not-italic text-slate-900 block text-xs uppercase mb-1">Cláusulas Especiales:</span>
@@ -77,11 +77,11 @@ const PagareTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
             )}
         </div>
 
-        {}
+        {/* PIE: LUGARES Y FIRMAS */}
         <div className="mt-8 border-t-2 border-slate-800 pt-4">
             <div className="grid grid-cols-2 gap-8 items-end">
                 
-                {}
+                {/* IZQUIERDA: FECHA EMISIÓN */}
                 <div className="text-sm font-sans">
                     <span className="block font-bold uppercase text-slate-500 text-xs mb-1">Lugar y Fecha de Emisión</span>
                     <span className="font-medium uppercase border-b border-slate-400 inline-block min-w-[150px]">
@@ -89,10 +89,10 @@ const PagareTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
                     </span>
                 </div>
 
-                {}
+                {/* DERECHA: FIRMA */}
                 <div className="text-center">
                     <div className="h-16 border-b border-slate-900 mb-2 w-3/4 mx-auto relative">
-                        {}
+                        {/* Espacio para firmar */}
                         <span className="absolute bottom-1 right-0 text-[8px] text-slate-400">ACEPTO</span>
                     </div>
                     <p className="font-bold text-xs uppercase">Firma del Deudor / Aceptante</p>
@@ -106,8 +106,8 @@ const PagareTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
 
 const LetraCambioTemplate = ({ data }: { data: Partial<CreditDocumentPayload> }) => (
     <div className="border border-green-700 p-6 bg-[#eef7ee] text-green-900 font-sans relative overflow-hidden h-full flex flex-col justify-between">
-       {}
-       {}
+       {/* ... (código anterior de la Letra) ... */}
+       {/* Se mantiene idéntico al anterior que ya funcionaba bien */}
        <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
             <span className="text-[150px] font-black uppercase text-green-900">LETRA</span>
         </div>
@@ -196,13 +196,13 @@ interface DocumentPreviewModalProps {
 export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ open, onOpenChange, data }) => {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            {}
+            {/* Ancho máximo para horizontalidad */}
             <DialogContent className="max-w-[900px] bg-slate-100 p-8">
                 <DialogHeader className="mb-4">
                     <DialogTitle>Vista Previa del Documento</DialogTitle>
                 </DialogHeader>
                 
-                {}
+                {/* Contenedor con altura mínima para asegurar aspecto de papel apaisado */}
                 <div className="w-full mx-auto bg-white shadow-2xl p-8 min-h-[500px]">
                     {data.type === 'PAGARE' ? (
                         <PagareTemplate data={data} />
