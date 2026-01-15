@@ -1,9 +1,9 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CreditDocumentPayload } from "@/types/store";
-import { Printer } from "lucide-react";
-
+import { CreditDocumentPayload, CreditDocumentStatus } from "@/types/store";
+import { Printer, PenTool, Loader2 } from "lucide-react";
+import { useDocumentActions } from "@/hooks/useDocumentActions";
 
 const formatCurrency = (amount: number) => 
     new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
@@ -190,13 +190,19 @@ const LetraCambioTemplate = ({ data }: { data: Partial<CreditDocumentPayload> })
 interface DocumentPreviewModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    data: Partial<CreditDocumentPayload>;
+
+
+    data: Partial<CreditDocumentPayload> & { id?: number; status?: string }; 
+    onReload?: () => void;
 }
 
-export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ open, onOpenChange, data }) => {
+export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ open, onOpenChange, data, onReload }) => {
+    
+
+    const { handleSign, handleDownloadPdf, isLoading } = useDocumentActions();
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            {}
             <DialogContent className="max-w-[900px] bg-slate-100 p-8">
                 <DialogHeader className="mb-4">
                     <DialogTitle>Vista Previa del Documento</DialogTitle>
@@ -209,13 +215,50 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ open
                     ) : (
                         <LetraCambioTemplate data={data} />
                     )}
+                    
+                    {}
+                    {data.status === 'DRAFT' && (
+                         <div className="mt-4 text-center text-xs text-amber-600 bg-amber-50 border border-amber-200 p-2 rounded">
+                            Vista preliminar. Firme el documento para generar el PDF legal.
+                         </div>
+                    )}
                 </div>
 
                 <div className="flex justify-end gap-2 mt-6">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Cerrar</Button>
-                    <Button variant="default" className="bg-slate-800 text-white hover:bg-slate-700">
-                        <Printer className="w-4 h-4 mr-2"/> Imprimir PDF
-                    </Button>
+                    
+                    {}
+                    
+                    {}
+                    {data.status === 'DRAFT' && data.id && (
+                        <Button 
+                            onClick={() => {
+                                handleSign(data.id!, () => {
+
+                                    if(onReload) onReload();
+                                    onOpenChange(false);
+                                });
+                            }}
+                            disabled={isLoading}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                            {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <PenTool className="w-4 h-4 mr-2"/>}
+                            Firmar Documento
+                        </Button>
+                    )}
+
+                    {}
+                    {data.status === 'SIGNED' && data.id && (
+                        <Button 
+                            variant="default" 
+                            className="bg-slate-800 text-white hover:bg-slate-700"
+                            onClick={() => handleDownloadPdf(data.id!, data.documentNumber || 'Documento')}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <Printer className="w-4 h-4 mr-2"/>}
+                            Imprimir PDF Oficial
+                        </Button>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
