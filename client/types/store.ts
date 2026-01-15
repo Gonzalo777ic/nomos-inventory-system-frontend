@@ -61,6 +61,18 @@ export interface Installment {
     penaltyAmount?: number;
 }
 
+export type LegalEntityType = 'NATURAL_PERSON' | 'LEGAL_ENTITY';
+
+export interface LegalEntity {
+    id: number;
+    legalName: string;
+    taxId: string;
+    address?: string;
+    email?: string;
+    phone?: string;
+    type: LegalEntityType;
+    parent?: LegalEntity;
+}
 
 export type CreditDocumentType = 'PAGARE' | 'LETRA_CAMBIO';
 export type CreditDocumentStatus = 'DRAFT' | 'ISSUED' | 'SIGNED' | 'EXECUTED' | 'CANCELLED';
@@ -76,7 +88,7 @@ export interface CreditDocument {
 
     debtorName: string;
     debtorIdNumber: string;
-    creditorName: string;
+    creditor: LegalEntity;
     
 
     guarantorName?: string;
@@ -97,10 +109,11 @@ export interface CreditDocumentPayload {
     dueDate: string;
     debtorName: string;
     debtorIdNumber: string;
+    
+    creditorEntityId: number;
+    creditorName?: string;
     documentNumber: string;
     legalNotes?: string;
-    creditorName?: string;
-
 
     guarantorName?: string;
     guarantorIdNumber?: string;

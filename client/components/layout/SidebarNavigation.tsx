@@ -65,6 +65,7 @@ export const SidebarNavigation: React.FC = () => {
             {isAdmin && (
                 <SubMenu label="Maestros & Config" icon={<Settings className="h-5 w-5" />}>
                     {[
+                        { to: "/legal-entities", label: "Entidades Legales (Empresas)", icon: <Briefcase className="h-4 w-4" /> },
                         { to: "/users", label: "Usuarios y Roles", icon: <Users className="h-4 w-4" /> },
                         { to: "/clients", label: "Clientes", icon: <Users className="h-4 w-4" /> },
                         { to: "/brands", label: "Marcas (Fabricantes)", icon: <Briefcase className="h-4 w-4" /> },
