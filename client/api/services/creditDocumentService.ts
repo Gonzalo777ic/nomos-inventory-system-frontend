@@ -6,7 +6,7 @@ const BASE_URL = 'http://localhost:8083/api/store/credit-documents';
 export const CreditDocumentService = {
 
   /**
-   * Obtener TODOS los documentos legales (Dashboard General).
+   * Obtener TODOS los documentos legales (Dashboard General)
    */
   getAll: async (): Promise<CreditDocument[]> => {
 
