@@ -45,6 +45,7 @@ import { QuotationReviewAdmin } from "./components/forms/QuotationReviewAdmin";
 import CollectionDetailPage from "./pages/CollectionDetailPage";
 import CreditDocuments from "./pages/CreditDocuments";
 import CreditDocumentDetail from "./pages/CreditDocumentDetail";
+import LegalEntities from "./pages/LegalEntities";
 
 const queryClient = new QueryClient();
 
@@ -155,6 +156,7 @@ const AppContent = () => {
                   <Route path="/brands" element={<Brands />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/uom" element={<UOM />} />
+                  <Route path="/legal-entities" element={<LegalEntities />} />
                   <Route path="/attributes" element={<Attributes />} />
                   <Route path="/taxes" element={<Taxes />} />
                   <Route path="/payment-methods" element={<PaymentMethods />} />

@@ -2,14 +2,15 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Save, Eye, FileText, Banknote, MapPin, Scale, User, Calendar, LayoutDashboard } from "lucide-react";
+import { Loader2, Save, Eye, FileText, Banknote, MapPin, Scale, Building2, Plus } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CreditDocumentService } from "../../api/services/creditDocumentService";
-import { CreditDocumentPayload, AccountsReceivable } from "../../types/store";
+import { LegalEntityService } from "../../api/services/legalEntityService";
+import { CreditDocumentPayload, AccountsReceivable, LegalEntity } from "../../types/store";
 import { useToast } from "../../hooks/use-toast";
 import { DocumentPreviewModal } from "../modals/DocumentPreviewModal";
-
-import { CreditContextPanel } from "../panels/CreditContextPanel"; 
+import { CreditContextPanel } from "../panels/CreditContextPanel";
 
 import { Button } from "../ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
@@ -21,6 +22,10 @@ import { Separator } from "../ui/separator";
 
 const formSchema = z.object({
     accountsReceivableId: z.coerce.number(),
+    
+
+    creditorEntityId: z.coerce.number().min(1, "Debe seleccionar una empresa emisora"),
+    
     type: z.enum(["PAGARE", "LETRA_CAMBIO"]),
     amount: z.coerce.number().min(0.01, "Monto requerido"),
     documentNumber: z.string().min(1, "Nro documento requerido"),
@@ -39,6 +44,7 @@ const formSchema = z.object({
 
 interface CreditDocumentFormProps {
     onSuccess: () => void;
+
     initialData?: Partial<CreditDocumentPayload>; 
     contextData?: AccountsReceivable;
 }
@@ -47,6 +53,12 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
     const { toast } = useToast();
     const [previewOpen, setPreviewOpen] = useState(false);
     
+
+    const { data: legalEntities = [] } = useQuery<LegalEntity[]>({
+        queryKey: ["legal-entities"],
+        queryFn: LegalEntityService.getAll,
+    });
+
 
     const defaultBalance = useMemo(() => {
         if (!contextData) return 0;
@@ -58,6 +70,9 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
         resolver: zodResolver(formSchema),
         defaultValues: {
             accountsReceivableId: initialData?.accountsReceivableId || 0,
+
+            creditorEntityId: initialData?.creditorEntityId || (legalEntities.length > 0 ? legalEntities[0].id : 0),
+            
             type: initialData?.type || "PAGARE",
             amount: initialData?.amount || defaultBalance || 0,
             documentNumber: "",
@@ -72,14 +87,23 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
         }
     });
 
+
+    useEffect(() => {
+        if (legalEntities.length > 0 && !form.getValues("creditorEntityId")) {
+            form.setValue("creditorEntityId", legalEntities[0].id);
+        }
+    }, [legalEntities, form]);
+
     const { isSubmitting } = form.formState;
     const watchedType = form.watch("type");
     const formData = form.watch();
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         try {
+
             const payload: CreditDocumentPayload = {
                 accountsReceivableId: data.accountsReceivableId,
+                creditorEntityId: data.creditorEntityId,
                 type: data.type,
                 amount: data.amount,
                 documentNumber: data.documentNumber,
@@ -107,13 +131,12 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
             
             {}
             {contextData && (
+                
                 <div className="lg:w-[320px] shrink-0 border-r pr-6 border-slate-100 hidden lg:block">
-                    <div className="sticky top-0">
-                        <div className="mb-4 flex items-center gap-2 text-indigo-700 font-semibold bg-indigo-50 p-2 rounded">
-                            <LayoutDashboard className="w-4 h-4"/> 
+                    <div className="mb-4 flex items-center gap-2 text-indigo-700 font-semibold bg-indigo-50 p-2 rounded">
                             <span className="text-xs uppercase tracking-wide">Referencia Financiera</span>
                         </div>
-                        {}
+                    <div className="sticky top-0">
                         <CreditContextPanel ar={contextData} />
                     </div>
                 </div>
@@ -131,27 +154,41 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
                         </div>
 
                         {}
-                        {contextData && (
-                            <div className="lg:hidden bg-blue-50/50 p-3 rounded-lg border border-blue-100 flex justify-between items-center text-sm mb-4">
-                                <div>
-                                    <span className="text-muted-foreground text-xs font-bold uppercase">Venta Ref.</span> 
-                                    <div className="font-medium">#{contextData.sale?.id}</div>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-blue-600 text-xs font-bold uppercase">Saldo Actual</span>
-                                    <div className="font-bold text-lg">${defaultBalance.toFixed(2)}</div>
-                                </div>
-                            </div>
-                        )}
+                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <FormField control={form.control} name="creditorEntityId" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="flex items-center gap-2 text-slate-700">
+                                        <Building2 className="w-4 h-4"/> Empresa Emisora (Acreedor)
+                                    </FormLabel>
+                                    <Select 
+                                        onValueChange={(val) => field.onChange(Number(val))} 
+                                        value={field.value ? String(field.value) : undefined}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="bg-white">
+                                                <SelectValue placeholder="Seleccione empresa..." />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {legalEntities.map(entity => (
+                                                <SelectItem key={entity.id} value={String(entity.id)}>
+                                                    {entity.legalName} ({entity.taxId})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </div>
 
                         {}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
                             <div className="space-y-4">
                                 <h3 className="font-semibold text-sm flex items-center gap-2 text-indigo-600 border-b pb-2">
                                     <FileText className="w-4 h-4"/> 1. Definición del Título
                                 </h3>
-                                
+                                {}
                                 <div className="grid grid-cols-2 gap-4">
                                     <FormField control={form.control} name="type" render={({ field }) => (
                                         <FormItem>
@@ -202,7 +239,7 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
                                 <h3 className="font-semibold text-sm flex items-center gap-2 text-indigo-600 border-b pb-2">
                                     <Scale className="w-4 h-4"/> 2. Partes y Condiciones
                                 </h3>
-
+                                {}
                                 <div className="grid grid-cols-2 gap-4">
                                     <FormField control={form.control} name="debtorName" render={({ field }) => (
                                         <FormItem><FormLabel>Deudor (Nombre)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
@@ -258,10 +295,15 @@ export const CreditDocumentForm: React.FC<CreditDocumentFormProps> = ({ onSucces
                 </Form>
             </div>
 
+            {}
             <DocumentPreviewModal 
                 open={previewOpen} 
                 onOpenChange={setPreviewOpen} 
-                data={formData as Partial<CreditDocumentPayload>} 
+                data={{
+                    ...formData,
+
+                    creditorName: legalEntities.find(e => e.id === formData.creditorEntityId)?.legalName
+                } as Partial<CreditDocumentPayload>} 
             />
         </div>
     );
