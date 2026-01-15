@@ -1,5 +1,5 @@
 import { httpStore } from "../httpStore";
-import { CreditDocument, CreditDocumentPayload } from "../../types/store";
+import { CreditDocument, CreditDocumentPayload, CreditDocumentStatus } from "../../types/store";
 
 const BASE_URL = 'http://localhost:8083/api/store/credit-documents';
 
@@ -31,5 +31,21 @@ export const CreditDocumentService = {
 
   delete: async (id: number): Promise<void> => {
     await httpStore.delete(`${BASE_URL}/${id}`);
+  },
+
+  downloadPdf: async (id: number): Promise<Blob> => {
+    const response = await httpStore.get<Blob>(`${BASE_URL}/${id}/pdf`, {
+      responseType: 'blob' 
+    });
+    return response.data;
+  },
+
+  /**
+   * Firma el documento cambiando su estado a SIGNED.
+   * Esto habilita la descarga del PDF oficial.
+   */
+  signDocument: async (id: number): Promise<CreditDocument> => {
+    return CreditDocumentService.updateStatus(id, 'SIGNED');
   }
+  
 };
