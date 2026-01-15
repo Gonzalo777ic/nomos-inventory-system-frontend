@@ -27,5 +27,9 @@ export const CreditDocumentService = {
   updateStatus: async (id: number, status: string): Promise<CreditDocument> => {
     const response = await httpStore.patch<CreditDocument>(`${BASE_URL}/${id}/status?status=${status}`);
     return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await httpStore.delete(`${BASE_URL}/${id}`);
   }
 };
