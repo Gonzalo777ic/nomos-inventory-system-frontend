@@ -3,9 +3,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SaleService } from "../../api/services/saleService";
+// Asegúrate de importar tu servicio de documentos
+import { SalesDocumentService } from "../../api/services/salesDocumentService"; 
 import {
     Sale,
     SaleCreationDTO,
+    SalesDocument, // Importar tipo
+    SalesDocumentType // Importar enum
 } from "../../types/store";
 import { useToast } from "../../hooks/use-toast";
 import { useReferenceData } from "../../hooks/useReferenceData";
@@ -48,12 +52,12 @@ import {
     FormMessage,
     FormDescription
 } from "../ui/form";
-import { Plus, Loader2, Ban, CalendarClock, CreditCard } from "lucide-react";
+// Importar icono de Impresora
+import { Plus, Loader2, Ban, CreditCard, Printer, FileCheck } from "lucide-react"; 
 
 import SaleDetailManager, { CartItemPayload } from "./SaleDetailManager";
 
-
-
+// ... (Enums y Schema se mantienen igual) ...
 const SaleTypeEnum = z.enum(["BOLETA", "FACTURA", "TICKET"]);
 const SaleStatusEnum = z.enum(["PENDIENTE", "COMPLETADA", "CANCELADA", "EMITIDA"]);
 const PaymentConditionEnum = z.enum(["CONTADO", "CREDITO"]);
@@ -62,11 +66,8 @@ const formSchema = z.object({
     clientId: z.string().nullable().optional(),
     type: SaleTypeEnum,
     paymentCondition: PaymentConditionEnum,
-    
     numberOfInstallments: z.coerce.number().min(1).optional(),
-    
     creditStartDate: z.string().optional(),
-    
     status: SaleStatusEnum,
     sellerId: z.string().min(1, "El vendedor es requerido"),
     saleDate: z.string().min(1, "La fecha de venta es requerida"),
@@ -89,8 +90,6 @@ interface SaleFormProps {
     readOnly?: boolean; 
 }
 
-
-
 const formatLocalDateTime = (isoString: string | undefined): string => {
     if (!isoString) return "";
     const date = new Date(isoString);
@@ -104,8 +103,6 @@ const formatDateSimple = (isoString: string | undefined): string => {
     return isoString.split('T')[0];
 };
 
-
-
 const SaleForm: React.FC<SaleFormProps> = ({
     initialData,
     onSuccess,
@@ -117,6 +114,10 @@ const SaleForm: React.FC<SaleFormProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [cartDetails, setCartDetails] = useState<CartItemPayload[]>([]);
     
+    // Estado para manejar el documento asociado (Factura/Boleta)
+    const [linkedDocument, setLinkedDocument] = useState<SalesDocument | null>(null);
+    const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
     const { clients, sellers, saleTypes, loading: refLoading } = useReferenceData();
 
     const paymentConditions = [
@@ -155,17 +156,19 @@ const SaleForm: React.FC<SaleFormProps> = ({
     const watchedPaymentCondition = form.watch("paymentCondition");
     const watchedSaleDate = form.watch("saleDate");
 
-
     useEffect(() => {
         if (!readOnly && watchedSaleDate && !form.getValues("creditStartDate")) {
             form.setValue("creditStartDate", watchedSaleDate.split('T')[0]);
         }
     }, [watchedSaleDate, readOnly, form]);
 
+    // Lógica para cargar datos y buscar documentos existentes
     useEffect(() => {
         if (open) {
             setCartDetails([]); 
+            setLinkedDocument(null); // Resetear documento
 
+            // 1. Cargar detalles del carrito
             if (initialData && initialData.details && initialData.details.length > 0) {
                 const mappedDetails: CartItemPayload[] = initialData.details.map((d, index) => ({
                     tempKey: d.id ? d.id : (Date.now() + index),
@@ -178,6 +181,16 @@ const SaleForm: React.FC<SaleFormProps> = ({
                     promotionId: d.promotionId
                 }));
                 setCartDetails(mappedDetails);
+
+                // 2. Buscar si ya existe un documento (Boleta/Factura) para esta venta
+                // Nota: Asumimos que initialData.documents viene populado o hacemos fetch si es necesario
+                if (initialData.documents && initialData.documents.length > 0) {
+                    // Tomamos el último documento válido (no anulado)
+                    const validDoc = initialData.documents.find(d => d.status !== 'VOIDED' && d.status !== 'REJECTED');
+                    if (validDoc) {
+                        setLinkedDocument(validDoc);
+                    }
+                }
             }
 
             const initialSellerId = initialData?.sellerId
@@ -208,6 +221,27 @@ const SaleForm: React.FC<SaleFormProps> = ({
         ? `Detalle de Venta #${initialData?.id}`
         : "Nueva Venta Comercial";
 
+    // --- FUNCIÓN PARA DESCARGAR PDF ---
+    const handlePrintPdf = async () => {
+        if (!linkedDocument) return;
+        
+        try {
+            setIsDownloadingPdf(true);
+            const blob = await SalesDocumentService.downloadPdf(linkedDocument.id);
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(() => window.URL.revokeObjectURL(url), 100);
+        } catch (error) {
+            toast({
+                title: "Error de impresión",
+                description: "No se pudo generar el PDF del comprobante.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsDownloadingPdf(false);
+        }
+    };
+
     const handleCancelSale = async () => {
         if (!initialData?.id) return;
         try {
@@ -232,7 +266,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
         }
     };
 
-
     const onSubmit = async (data: SaleFormData) => {
         if (readOnly) return;
 
@@ -240,7 +273,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
 
         const clientIdNum = data.clientId === "NULL_CLIENT" ? null : Number(data.clientId);
         const sellerIdNum = Number(data.sellerId);
-
 
         const calculatedCreditDays = data.paymentCondition === "CREDITO" 
             ? (Number(data.numberOfInstallments) * 30) 
@@ -253,12 +285,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
             paymentCondition: data.paymentCondition,
             creditDays: calculatedCreditDays,
             sellerId: sellerIdNum,
-            
-
             numberOfInstallments: data.paymentCondition === 'CREDITO' ? Number(data.numberOfInstallments) : 1,
-            
-
-
             creditStartDate: data.paymentCondition === 'CREDITO' ? data.creditStartDate : null
         };
 
@@ -281,12 +308,29 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 details: detailsPayload,
             };
 
+            // 1. CREAR LA VENTA
             const resultSale = await SaleService.createSaleWithDetails(saleCreationPayload);
 
-            toast({
-                title: "Venta Registrada",
-                description: `Venta #${resultSale.id} creada. ${data.paymentCondition === 'CREDITO' ? 'Se generó el cronograma de pagos.' : 'Pago al contado.'}`,
-            });
+            // 2. GENERACIÓN AUTOMÁTICA DEL DOCUMENTO (Event Based Accounting)
+            // Una vez confirmada la venta, emitimos inmediatamente el comprobante
+            try {
+                // Mapeamos el tipo de venta (BOLETA/FACTURA) al tipo de documento
+                const docType = data.type as SalesDocumentType; 
+                await SalesDocumentService.issue(resultSale.id, docType);
+                
+                toast({
+                    title: "Transacción Exitosa",
+                    description: `Venta #${resultSale.id} registrada y ${docType} emitida correctamente.`,
+                });
+            } catch (docError) {
+                // Si falla el documento, la venta igual existe, pero avisamos al usuario
+                console.error("Error generando documento:", docError);
+                toast({
+                    title: "Venta Registrada (Sin Comprobante)",
+                    description: `La venta #${resultSale.id} se guardó, pero hubo un error generando la factura electrónica. Intente emitirla manualmente.`,
+                    variant: "destructive"
+                });
+            }
 
             setOpen(false);
             onSuccess();
@@ -322,6 +366,12 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                 ANULADA
                             </span>
                         )}
+                         {/* Indicador si tiene documento tributario */}
+                        {readOnly && linkedDocument && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full border border-green-200 flex items-center">
+                                <FileCheck className="w-3 h-3 mr-1"/> {linkedDocument.series}-{linkedDocument.number}
+                            </span>
+                        )}
                     </DialogTitle>
                     <DialogDescription>
                         {readOnly
@@ -333,7 +383,9 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
                         
-                        {}
+                        {/* ... (SECCIONES DEL FORMULARIO: SELECTORES, FECHAS, ETC. IGUAL QUE ANTES) ... */}
+                        {/* Se mantiene idéntico tu código de inputs aquí, lo omito para brevedad */}
+                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <FormField
                                 control={form.control}
@@ -420,13 +472,12 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             />
                         </div>
 
-                        {}
+                        {/* ... (SECCION TÉRMINOS FINANCIEROS Y DETALLE DE VENTA) ... */}
                         <div className="border rounded-lg p-4 space-y-4">
-                            <h3 className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                             <h3 className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                 <CreditCard className="w-4 h-4"/> Términos Financieros
                             </h3>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
                                     name="paymentCondition"
@@ -452,7 +503,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
 
                                 {watchedPaymentCondition === "CREDITO" && (
                                     <div className="grid grid-cols-2 gap-4 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md animate-in fade-in slide-in-from-top-1">
-                                        
                                         <FormField
                                             control={form.control}
                                             name="numberOfInstallments"
@@ -504,7 +554,6 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             </div>
                         </div>
 
-                        {}
                         <div className={readOnly ? "opacity-80 pointer-events-none" : ""}>
                             <SaleDetailManager
                                 details={cartDetails}
@@ -512,10 +561,30 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             />
                         </div>
 
-                        <DialogFooter className="pt-4 flex justify-between sm:justify-between w-full">
-                            <Button variant="outline" onClick={() => setOpen(false)} type="button">
-                                Cerrar
-                            </Button>
+                        <DialogFooter className="pt-4 flex justify-between sm:justify-between w-full gap-2">
+                            <div className="flex gap-2">
+                                <Button variant="outline" onClick={() => setOpen(false)} type="button">
+                                    Cerrar
+                                </Button>
+
+                                {/* BOTÓN DE IMPRESIÓN (SOLO EN READONLY Y SI EXISTE DOCUMENTO) */}
+                                {readOnly && linkedDocument && (
+                                    <Button 
+                                        type="button" 
+                                        variant="secondary" 
+                                        onClick={handlePrintPdf}
+                                        disabled={isDownloadingPdf}
+                                        className="bg-slate-800 text-white hover:bg-slate-700"
+                                    >
+                                        {isDownloadingPdf ? (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                        ) : (
+                                            <Printer className="mr-2 h-4 w-4"/>
+                                        )}
+                                        Imprimir {linkedDocument.type}
+                                    </Button>
+                                )}
+                            </div>
 
                             {!readOnly ? (
                                 <Button type="submit" disabled={isSubmitting || cartDetails.length === 0}>
@@ -535,6 +604,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                                 <AlertDialogTitle>¿Anular venta #{initialData?.id}?</AlertDialogTitle>
                                                 <AlertDialogDescription>
                                                     Se cancelará la deuda y se anularán los pagos asociados.
+                                                    Si existe factura electrónica, deberá emitir una Nota de Crédito manualmente.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
