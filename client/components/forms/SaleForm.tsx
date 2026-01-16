@@ -3,13 +3,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SaleService } from "../../api/services/saleService";
-// Asegúrate de importar tu servicio de documentos
+
 import { SalesDocumentService } from "../../api/services/salesDocumentService"; 
 import {
     Sale,
     SaleCreationDTO,
-    SalesDocument, // Importar tipo
-    SalesDocumentType // Importar enum
+    SalesDocument,
+    SalesDocumentType
 } from "../../types/store";
 import { useToast } from "../../hooks/use-toast";
 import { useReferenceData } from "../../hooks/useReferenceData";
@@ -52,12 +52,13 @@ import {
     FormMessage,
     FormDescription
 } from "../ui/form";
-// Importar icono de Impresora
-import { Plus, Loader2, Ban, CreditCard, Printer, FileCheck } from "lucide-react"; 
+
+import { Plus, Loader2, Ban, CreditCard, Printer, FileCheck, Eye } from "lucide-react"; 
 
 import SaleDetailManager, { CartItemPayload } from "./SaleDetailManager";
 
-// ... (Enums y Schema se mantienen igual) ...
+import { SalesDocumentPreviewModal } from "../modals/SalesDocumentPreviewModal"; 
+
 const SaleTypeEnum = z.enum(["BOLETA", "FACTURA", "TICKET"]);
 const SaleStatusEnum = z.enum(["PENDIENTE", "COMPLETADA", "CANCELADA", "EMITIDA"]);
 const PaymentConditionEnum = z.enum(["CONTADO", "CREDITO"]);
@@ -114,9 +115,12 @@ const SaleForm: React.FC<SaleFormProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [cartDetails, setCartDetails] = useState<CartItemPayload[]>([]);
     
-    // Estado para manejar el documento asociado (Factura/Boleta)
+
     const [linkedDocument, setLinkedDocument] = useState<SalesDocument | null>(null);
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [selectedDocument, setSelectedDocument] = useState<SalesDocument | null>(null);
 
     const { clients, sellers, saleTypes, loading: refLoading } = useReferenceData();
 
@@ -162,13 +166,13 @@ const SaleForm: React.FC<SaleFormProps> = ({
         }
     }, [watchedSaleDate, readOnly, form]);
 
-    // Lógica para cargar datos y buscar documentos existentes
+
     useEffect(() => {
         if (open) {
             setCartDetails([]); 
-            setLinkedDocument(null); // Resetear documento
+            setLinkedDocument(null);
 
-            // 1. Cargar detalles del carrito
+
             if (initialData && initialData.details && initialData.details.length > 0) {
                 const mappedDetails: CartItemPayload[] = initialData.details.map((d, index) => ({
                     tempKey: d.id ? d.id : (Date.now() + index),
@@ -182,10 +186,10 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 }));
                 setCartDetails(mappedDetails);
 
-                // 2. Buscar si ya existe un documento (Boleta/Factura) para esta venta
-                // Nota: Asumimos que initialData.documents viene populado o hacemos fetch si es necesario
+
+
                 if (initialData.documents && initialData.documents.length > 0) {
-                    // Tomamos el último documento válido (no anulado)
+
                     const validDoc = initialData.documents.find(d => d.status !== 'VOIDED' && d.status !== 'REJECTED');
                     if (validDoc) {
                         setLinkedDocument(validDoc);
@@ -221,7 +225,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
         ? `Detalle de Venta #${initialData?.id}`
         : "Nueva Venta Comercial";
 
-    // --- FUNCIÓN PARA DESCARGAR PDF ---
+
     const handlePrintPdf = async () => {
         if (!linkedDocument) return;
         
@@ -308,13 +312,13 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 details: detailsPayload,
             };
 
-            // 1. CREAR LA VENTA
+
             const resultSale = await SaleService.createSaleWithDetails(saleCreationPayload);
 
-            // 2. GENERACIÓN AUTOMÁTICA DEL DOCUMENTO (Event Based Accounting)
-            // Una vez confirmada la venta, emitimos inmediatamente el comprobante
+
+
             try {
-                // Mapeamos el tipo de venta (BOLETA/FACTURA) al tipo de documento
+
                 const docType = data.type as SalesDocumentType; 
                 await SalesDocumentService.issue(resultSale.id, docType);
                 
@@ -323,7 +327,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                     description: `Venta #${resultSale.id} registrada y ${docType} emitida correctamente.`,
                 });
             } catch (docError) {
-                // Si falla el documento, la venta igual existe, pero avisamos al usuario
+
                 console.error("Error generando documento:", docError);
                 toast({
                     title: "Venta Registrada (Sin Comprobante)",
@@ -366,7 +370,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                 ANULADA
                             </span>
                         )}
-                         {/* Indicador si tiene documento tributario */}
+                         {}
                         {readOnly && linkedDocument && (
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full border border-green-200 flex items-center">
                                 <FileCheck className="w-3 h-3 mr-1"/> {linkedDocument.series}-{linkedDocument.number}
@@ -383,8 +387,8 @@ const SaleForm: React.FC<SaleFormProps> = ({
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
                         
-                        {/* ... (SECCIONES DEL FORMULARIO: SELECTORES, FECHAS, ETC. IGUAL QUE ANTES) ... */}
-                        {/* Se mantiene idéntico tu código de inputs aquí, lo omito para brevedad */}
+                        {}
+                        {}
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <FormField
@@ -472,7 +476,7 @@ const SaleForm: React.FC<SaleFormProps> = ({
                             />
                         </div>
 
-                        {/* ... (SECCION TÉRMINOS FINANCIEROS Y DETALLE DE VENTA) ... */}
+                        {}
                         <div className="border rounded-lg p-4 space-y-4">
                              <h3 className="text-sm font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                 <CreditCard className="w-4 h-4"/> Términos Financieros
@@ -567,7 +571,24 @@ const SaleForm: React.FC<SaleFormProps> = ({
                                     Cerrar
                                 </Button>
 
-                                {/* BOTÓN DE IMPRESIÓN (SOLO EN READONLY Y SI EXISTE DOCUMENTO) */}
+                                {}
+    {readOnly && linkedDocument && (
+        <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={() => {
+
+                setSelectedDocument(linkedDocument);
+                setIsPreviewOpen(true);
+            }}
+            className="bg-slate-800 text-white hover:bg-slate-700"
+        >
+            <Eye className="mr-2 h-4 w-4"/>
+            Ver Comprobante
+        </Button>
+    )}
+
+                                {}
                                 {readOnly && linkedDocument && (
                                     <Button 
                                         type="button" 
@@ -621,6 +642,12 @@ const SaleForm: React.FC<SaleFormProps> = ({
                     </form>
                 </Form>
             </DialogContent>
+            <SalesDocumentPreviewModal 
+                open={isPreviewOpen}
+                onOpenChange={setIsPreviewOpen}
+                sale={initialData || null}
+                document={selectedDocument}
+            />
         </Dialog>
     );
 };
