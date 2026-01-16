@@ -133,6 +133,37 @@ export interface AccountsReceivable {
     creditDocuments?: CreditDocument[];
 }
 
+/**
+ * Interfaz para Documento de Venta.
+ */
+
+export type SalesDocumentType = 'BOLETA' | 'FACTURA' | 'NOTA_CREDITO' | 'NOTA_DEBITO' | 'TICKET';
+
+export type SalesDocumentStatus = 
+    | 'DRAFT'      
+    | 'ISSUED'      
+    | 'SENT_SUNAT'  
+    | 'ACCEPTED'    
+    | 'REJECTED'    
+    | 'VOIDED';     
+
+export interface SalesDocument {
+    id: number;
+    type: SalesDocumentType;
+    series: string;
+    number: string;
+    issueDate: string; 
+    status: SalesDocumentStatus;
+    totalAmount: number;
+    
+    digestValue?: string;
+    pdfUrl?: string;
+    xmlUrl?: string;
+    cdrUrl?: string;
+    responseMessage?: string;
+}
+
+
 
 /**
  * Interfaz que representa un ítem (detalle) de una venta ya registrada en BD.
@@ -203,6 +234,8 @@ export interface Sale {
     details?: SaleDetail[];
     collections?: Collection[];
     accountsReceivable?: AccountsReceivable;
+
+    documents?: SalesDocument[];
 }
 
 /**
