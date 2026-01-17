@@ -46,6 +46,8 @@ import CollectionDetailPage from "./pages/CollectionDetailPage";
 import CreditDocuments from "./pages/CreditDocuments";
 import CreditDocumentDetail from "./pages/CreditDocumentDetail";
 import LegalEntities from "./pages/LegalEntities";
+import GlobalReturnsHistoryPage from "./pages/GlobalReturnsHistoryPage";
+import SaleReturnDetailPage from "./pages/SaleReturnDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -145,6 +147,8 @@ const AppContent = () => {
                   <Route path="/credit-documents" element={<CreditDocuments />} />
                   <Route path="/credit-documents/:id" element={<CreditDocumentDetail />} />
                   <Route path="/returns" element={<Returns />} />
+                  <Route path="/returns/history" element={<GlobalReturnsHistoryPage />} />
+                  <Route path="/returns/:id" element={<SaleReturnDetailPage />} />
                 </Route>
 
                 {}
