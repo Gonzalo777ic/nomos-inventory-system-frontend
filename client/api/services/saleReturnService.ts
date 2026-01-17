@@ -30,6 +30,12 @@ export const SaleReturnService = {
         const response = await httpStore.get<SaleReturn[]>(`${BASE_URL}/sale/${saleId}`);
         return response.data;
     },
+
+
+    getAll: async (): Promise<SaleReturn[]> => {
+        const response = await httpStore.get<SaleReturn[]>(BASE_URL);
+        return response.data;
+    },
     
     /**
      * Cancela un borrador (opcional, si implementaste el endpoint DELETE)
