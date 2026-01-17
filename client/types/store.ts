@@ -245,3 +245,54 @@ export interface SaleCreationDTO extends SalePayload {
 
     details: Omit<SaleDetailPayload, 'saleId' | 'tempId'>[]; 
 }
+
+
+/**
+ * MÓDULO DE DEVOLUCIONES (SALE RETURNS)
+ */
+export type SaleReturnType = 'TOTAL' | 'PARTIAL';
+export type SaleReturnStatus = 'DRAFT' | 'CONFIRMED' | 'CANCELLED';
+
+/**
+ * Detalle de la devolución (Item devuelto)
+ */
+export interface SaleReturnDetail {
+    id: number;
+    saleReturnId?: number; 
+    originalSaleDetailId: number; 
+    quantity: number;
+    unitPrice: number;
+    subtotal: number;
+}
+
+/**
+ * Cabecera de la devolución
+ */
+export interface SaleReturn {
+    id: number;
+    saleId: number;
+    returnDate: string; 
+    type: SaleReturnType;
+    status: SaleReturnStatus;
+    reason: string;
+    totalRefundAmount: number;
+    
+    creditNote?: SalesDocument; 
+    
+    details: SaleReturnDetail[];
+    
+    createdByUserId?: number;
+}
+
+/**
+ * Payload para crear un BORRADOR de devolución
+ */
+export interface SaleReturnRequestPayload {
+    saleId: number;
+    reason: string;
+    type: SaleReturnType;
+    items: {
+        originalDetailId: number;
+        quantity: number;
+    }[];
+}
