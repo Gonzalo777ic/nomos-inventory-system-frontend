@@ -3,15 +3,18 @@ import { useParams, useNavigate } from "react-router-dom";
 import { SaleService } from "@/api/services/saleService";
 import { SaleReturnService } from "@/api/services/saleReturnService";
 import { Sale, SaleReturn } from "@/types/store";
-
 import { SaleReturnForm } from "@/components/forms/SaleReturnForm"; 
+
+
+import { SalesReturnDocumentPreviewModal } from "@/components/modals/SalesReturnDocumentPreviewModal";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
-import { ArrowLeft, RotateCcw, FileCheck, Loader2 } from "lucide-react";
+import { ArrowLeft, RotateCcw, FileCheck, Loader2, Eye } from "lucide-react";
 
 export default function SaleReturnDetailPage() {
     const { id } = useParams();
@@ -20,29 +23,33 @@ export default function SaleReturnDetailPage() {
     const [sale, setSale] = useState<Sale | null>(null);
     const [returns, setReturns] = useState<SaleReturn[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     
+
+    const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+    
+
+
+    const [selectedDoc, setSelectedDoc] = useState<any | null>(null);
+
     useEffect(() => {
         if (id) loadData();
     }, [id]);
 
     const loadData = async () => {
         setLoading(true);
-        setErrorMsg(null); 
+        setErrorMsg(null);
         try {
             const saleId = Number(id);
-            if (isNaN(saleId)) throw new Error("ID de venta inválido");
+            if (isNaN(saleId)) throw new Error("ID inválido");
 
             const saleData = await SaleService.getById(saleId);
             setSale(saleData);
-
             const returnsData = await SaleReturnService.getBySale(saleId);
             setReturns(returnsData);
         } catch (error: any) {
-            console.error("Error cargando detalles", error);
-
-            setErrorMsg(error.response?.data?.message || error.message || "Error desconocido");
+            console.error("Error", error);
+            setErrorMsg(error.message || "Error al cargar datos");
         } finally {
             setLoading(false);
         }
@@ -50,16 +57,15 @@ export default function SaleReturnDetailPage() {
 
     if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin h-8 w-8"/></div>;
     
-
     if (errorMsg) return (
         <div className="p-10 text-center">
-            <h2 className="text-red-600 font-bold text-xl mb-2">Error cargando la venta</h2>
-            <p className="text-slate-600">{errorMsg}</p>
+            <h2 className="text-red-600 font-bold">Error</h2>
+            <p>{errorMsg}</p>
             <Button variant="outline" onClick={() => navigate('/returns')} className="mt-4">Volver</Button>
         </div>
     );
 
-    if (!sale) return <div className="p-10">Venta no encontrada (Null).</div>;
+    if (!sale) return <div className="p-10">Venta no encontrada.</div>;
 
     return (
         <div className="p-6 space-y-6 max-w-6xl mx-auto">
@@ -72,10 +78,8 @@ export default function SaleReturnDetailPage() {
                     <h1 className="text-3xl font-bold text-slate-900">Gestión de Retorno #{sale.id}</h1>
                     <p className="text-slate-500">Detalles de la venta y emisión de notas de crédito.</p>
                 </div>
-                
-                {/* BOTÓN PARA ABRIR EL MODAL DE DEVOLUCIÓN */}
                 <Button 
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => setIsReturnModalOpen(true)}
                     className="bg-red-600 hover:bg-red-700 text-white shadow-lg"
                 >
                     <RotateCcw className="mr-2 h-4 w-4" />
@@ -83,7 +87,7 @@ export default function SaleReturnDetailPage() {
                 </Button>
             </div>
 
-            {/* Resumen de la Venta */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                     <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Cliente</CardTitle></CardHeader>
@@ -99,22 +103,23 @@ export default function SaleReturnDetailPage() {
                 </Card>
             </div>
 
-            {/* Tabla Histórica de esta venta */}
+            {}
             <Card>
-                <CardHeader><CardTitle>Historial de Devoluciones Asociadas</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Historial de Devoluciones y Notas de Crédito</CardTitle></CardHeader>
                 <CardContent>
                     {returns.length === 0 ? (
-                        <div className="text-center py-8 text-slate-400 border-2 border-dashed rounded">No hay devoluciones para esta venta.</div>
+                        <div className="text-center py-8 text-slate-400 border-2 border-dashed rounded">No hay devoluciones.</div>
                     ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>ID Retorno</TableHead>
+                                    <TableHead>ID</TableHead>
                                     <TableHead>Fecha</TableHead>
                                     <TableHead>Motivo</TableHead>
-                                    <TableHead>Nota de Crédito</TableHead>
+                                    <TableHead>Doc. Fiscal</TableHead>
                                     <TableHead className="text-right">Monto</TableHead>
                                     <TableHead className="text-center">Estado</TableHead>
+                                    <TableHead className="text-center">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -122,17 +127,33 @@ export default function SaleReturnDetailPage() {
                                     <TableRow key={ret.id}>
                                         <TableCell>#{ret.id}</TableCell>
                                         <TableCell>{new Date(ret.returnDate).toLocaleDateString()}</TableCell>
-                                        <TableCell>{ret.reason}</TableCell>
+                                        <TableCell className="max-w-[200px] truncate" title={ret.reason}>{ret.reason}</TableCell>
                                         <TableCell>
                                             {ret.creditNote ? (
-                                                <div className="flex items-center gap-2 text-green-700 font-bold text-xs">
-                                                    <FileCheck className="w-4 h-4" />
+                                                <div className="flex items-center gap-2 text-slate-700 font-medium text-xs">
+                                                    <FileCheck className="w-4 h-4 text-green-600" />
                                                     {ret.creditNote.series}-{ret.creditNote.number}
                                                 </div>
-                                            ) : <Badge variant="outline">Pendiente</Badge>}
+                                            ) : <span className="text-xs text-muted-foreground">-</span>}
                                         </TableCell>
                                         <TableCell className="text-right font-bold text-red-600">- S/ {ret.totalRefundAmount.toFixed(2)}</TableCell>
                                         <TableCell className="text-center"><Badge>{ret.status}</Badge></TableCell>
+                                        
+                                        {}
+                                        <TableCell className="text-center">
+                                            {ret.creditNote ? (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm"
+                                                    onClick={() => setSelectedDoc(ret.creditNote)}
+                                                    title="Ver Nota de Crédito"
+                                                >
+                                                    <Eye className="w-4 h-4 text-slate-600 hover:text-blue-600" />
+                                                </Button>
+                                            ) : (
+                                                <span className="text-muted-foreground text-xs">-</span>
+                                            )}
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -141,12 +162,19 @@ export default function SaleReturnDetailPage() {
                 </CardContent>
             </Card>
 
-            {/* MODAL */}
             <SaleReturnForm 
                 sale={sale}
-                open={isModalOpen}
-                onOpenChange={setIsModalOpen}
+                open={isReturnModalOpen}
+                onOpenChange={setIsReturnModalOpen}
                 onSuccess={loadData}
+            />
+
+            {}
+            <SalesReturnDocumentPreviewModal 
+                open={!!selectedDoc}
+                onOpenChange={(val) => !val && setSelectedDoc(null)}
+                sale={sale}
+                document={selectedDoc}
             />
         </div>
     );

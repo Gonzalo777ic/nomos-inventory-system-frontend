@@ -136,7 +136,7 @@ export const SaleReturnForm: React.FC<SaleReturnFormProps> = ({
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
-                    {/* Resumen */}
+                    {}
                     <div className="grid grid-cols-3 gap-4 text-sm bg-slate-50 p-3 rounded-md border">
                         <div>
                             <span className="block font-bold text-slate-500">Cliente</span>
@@ -152,7 +152,7 @@ export const SaleReturnForm: React.FC<SaleReturnFormProps> = ({
                         </div>
                     </div>
 
-                    {/* Tabla de Productos */}
+                    {}
                     <div className="border rounded-md max-h-[300px] overflow-auto">
                         <Table>
                             <TableHeader>
@@ -191,7 +191,7 @@ export const SaleReturnForm: React.FC<SaleReturnFormProps> = ({
                         </Table>
                     </div>
 
-                    {/* Motivo */}
+                    {}
                     <div className="space-y-2">
                         <Label>Motivo de la Devolución <span className="text-red-500">*</span></Label>
                         <Textarea 

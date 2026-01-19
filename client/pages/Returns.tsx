@@ -49,7 +49,7 @@ export default function ReturnsPage() {
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Gestión de Devoluciones</h1>
                     <p className="text-slate-500">Seleccione una venta para gestionar sus devoluciones.</p>
                 </div>
-                {/* Botón para ir al Historial Global */}
+                {}
                 <Button variant="outline" onClick={() => navigate('/returns/history')}>
                     <History className="mr-2 h-4 w-4" />
                     Ver Historial Global
@@ -94,7 +94,7 @@ export default function ReturnsPage() {
                                         <TableCell><Badge variant="outline">{sale.type}</Badge></TableCell>
                                         <TableCell className="text-right">S/ {sale.totalAmount.toFixed(2)}</TableCell>
                                         <TableCell className="text-center">
-                                            {/* AQUÍ ESTÁ LA CORRECCIÓN: NAVEGA AL DETALLE, NO ABRE MODAL */}
+                                            {}
                                             <Button 
                                                 size="sm" 
                                                 variant="secondary"
