@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Search, Plus, Trash2, DollarSign } from "lucide-react";
 import { SaleDetailPayload } from "../../types/store";
 import { useToast } from "../../hooks/use-toast";
@@ -46,14 +46,28 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
     const [searchTerm, setSearchTerm] = useState("");
 
 
+
     const { data: products = [], isLoading } = useQuery<ProductReference[]>({
         queryKey: ["products-for-sale"],
+        queryFn: async () => {
+            const rawProducts = await getProducts();
 
+            return rawProducts.map((p: any) => ({
+                id: p.id,
+                name: p.name,
+                sku: p.sku,
+                price: p.price,
 
-        queryFn: getProducts as () => Promise<ProductReference[]>, 
+                taxRateId: p.taxRateId || 1
+            }));
+        },
         staleTime: 1000 * 60 * 10,
     });
 
+    const addItemForm = useForm<AddItemFormData>({
+        resolver: zodResolver(addItemSchema),
+        defaultValues: { quantity: 1 },
+    });
 
     const handleSearch = () => {
         if (!searchTerm.trim()) return;
@@ -75,28 +89,19 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
         }
 
         setSelectedProduct(product);
-        addItemForm.setFocus("quantity");
-    };
 
-    const addItemForm = useForm<AddItemFormData>({
-        resolver: zodResolver(addItemSchema),
-        defaultValues: { quantity: 1 },
-    });
+        setTimeout(() => addItemForm.setFocus("quantity"), 50);
+    };
 
     const handleAddItem = (data: AddItemFormData) => {
         if (!selectedProduct) {
             toast({ title: "Error", description: "Debe seleccionar un producto primero.", variant: "destructive" });
             return;
         }
-        
-
 
         const effectiveTaxRateId = (selectedProduct.taxRateId && selectedProduct.taxRateId > 0) 
             ? selectedProduct.taxRateId 
             : 1;
-
-        console.log(`[Detail Add] Usando TaxRate ID: ${effectiveTaxRateId}`);
-
 
         const newDetail: CartItemPayload = {
             productId: selectedProduct.id,
@@ -106,13 +111,17 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
             taxRateId: effectiveTaxRateId,
             promotionId: null,
 
-            tempKey: details.length > 0 ? details[details.length - 1].tempKey + 1 : 1,
+            tempKey: Date.now() + Math.random(), 
         };
 
+
         setDetails([...details, newDetail]);
+        
+
         setSelectedProduct(null);
         setSearchTerm("");
         addItemForm.reset({ quantity: 1 });
+        
         toast({ title: "Ítem Añadido", description: `Producto añadido: ${selectedProduct.name}` });
     };
 
@@ -125,7 +134,6 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
 
     return (
         <div className="space-y-6">
-            {}
             <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-4">
                 <h4 className="font-medium">Añadir Producto</h4>
 
@@ -135,21 +143,30 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
                         placeholder="Buscar por SKU o nombre..."
                         className="flex-grow"
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleSearch();
+                            }
+                        }}
                     />
                     <Button onClick={handleSearch} variant="outline" type="button">
                         <Search className="w-4 h-4 mr-1" /> Buscar
                     </Button>
                 </div>
 
-                {isLoading && <p>Cargando productos...</p>}
+                {isLoading && <p className="text-xs text-muted-foreground">Cargando catálogo...</p>}
 
                 {selectedProduct && (
                     <Form {...addItemForm}>
-                        <div className="grid grid-cols-4 gap-4 items-end">
+                        {/* NOTA: No usamos <form> tag aquí para evitar anidamiento 
+                           de forms si el componente padre ya es un form 
+                        */}
+                        <div className="grid grid-cols-4 gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-200">
                             <FormItem className="col-span-2">
-                                <FormLabel>Producto</FormLabel>
-                                <Input readOnly value={`${selectedProduct.name} (S/. ${selectedProduct.price.toFixed(2)})`} />
+                                <FormLabel>Producto Seleccionado</FormLabel>
+                                <Input readOnly value={`${selectedProduct.name} (S/. ${selectedProduct.price.toFixed(2)})`} className="bg-slate-100" />
                             </FormItem>
 
                             <FormField
@@ -159,14 +176,25 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
                                     <FormItem className="col-span-1">
                                         <FormLabel>Cantidad</FormLabel>
                                         <FormControl>
-                                            <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} min={1} />
+                                            <Input 
+                                                type="number" 
+                                                {...field} 
+                                                onChange={(e) => field.onChange(Number(e.target.value))} 
+                                                min={1} 
+                                                onKeyDown={(e) => {
+                                                    if(e.key === "Enter") {
+                                                        e.preventDefault();
+                                                        addItemForm.handleSubmit(handleAddItem)();
+                                                    }
+                                                }}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            <Button type="button" onClick={addItemForm.handleSubmit(handleAddItem)} className="col-span-1">
+                            <Button type="button" onClick={addItemForm.handleSubmit(handleAddItem)} className="col-span-1 bg-slate-900 text-white hover:bg-slate-800">
                                 <Plus className="w-4 h-4 mr-1" /> Añadir
                             </Button>
                         </div>
@@ -174,7 +202,6 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
                 )}
             </div>
 
-            {}
             <h4 className="font-medium pt-2 flex justify-between items-center">
                 Ítems en Carrito ({details.length})
                 <span className="text-xl font-bold text-green-700 flex items-center">
@@ -182,10 +209,12 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
                 </span>
             </h4>
 
-            <ScrollArea className="h-[250px] border rounded-lg">
+            <ScrollArea className="h-[250px] border rounded-lg bg-white">
                 {details.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
-                        Añada productos usando la barra de búsqueda.
+                    <div className="p-8 text-center text-gray-400 flex flex-col items-center justify-center h-full">
+                        <Search className="w-8 h-8 mb-2 opacity-20" />
+                        <p>No hay productos en el carrito.</p>
+                        <p className="text-xs">Busque y añada productos arriba.</p>
                     </div>
                 ) : (
                     <Table>
@@ -202,14 +231,14 @@ const SaleDetailManager: React.FC<SaleDetailManagerProps> = ({ details, setDetai
                         <TableBody>
                             {details.map((item) => (
                                 <TableRow key={item.tempKey}>
-                                    <TableCell>{item.productId}</TableCell>
+                                    <TableCell className="font-mono text-xs">{item.productId}</TableCell>
                                     <TableCell>S/. {item.unitPrice.toFixed(2)}</TableCell>
                                     <TableCell>{item.quantity}</TableCell>
-                                    <TableCell className="font-semibold">S/. {item.subtotal.toFixed(2)}</TableCell>
-                                    <TableCell>{item.taxRateId}</TableCell>
+                                    <TableCell className="font-bold text-slate-700">S/. {item.subtotal.toFixed(2)}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">{item.taxRateId}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm" onClick={() => handleDelete(item.tempKey)}>
-                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                        <Button variant="ghost" size="sm" onClick={() => handleDelete(item.tempKey)} className="hover:bg-red-50 hover:text-red-600">
+                                            <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </TableCell>
                                 </TableRow>
