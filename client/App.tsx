@@ -35,7 +35,7 @@ import UOM from "./pages/UOM";
 import Attributes from "./pages/Attributes";
 import Taxes from "./pages/Taxes";
 import Announcements from "./pages/Announcements";
-import Movements from "./pages/Movements";
+import AccountingMovements from "./pages/AccountingMovements";
 import Audit from "./pages/Audit";
 import StoreSchedule from "./pages/StoreSchedule";
 import Warehouses from "./pages/Warehouses";
@@ -128,7 +128,7 @@ const AppContent = () => {
                   <Route path="/inventory" element={<Inventory />} />
                   <Route path="/warehouses" element={<Warehouses />} />
                   <Route path="/suppliers" element={<Suppliers />} />
-                  <Route path="/movements" element={<Movements />} />
+                  <Route path="/accounting-movements" element={<AccountingMovements />} />
                 </Route>
 
                 {}

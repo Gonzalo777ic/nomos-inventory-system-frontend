@@ -6,8 +6,9 @@ import {
     Home, Package, DollarSign, Truck, Settings, BarChart3, ShoppingCart, 
     Archive, Users, ClipboardList, Tag, CreditCard, RefreshCw, Map, 
     PackageOpen, Scale, Ruler, Percent, Megaphone, Clock, AlertTriangle, 
-    Briefcase, Warehouse, Wallet, ClipboardCheck, FileSignature
+    Briefcase, Warehouse, Wallet, ClipboardCheck, FileSignature, Activity // <--- Nuevo icono importado
 } from 'lucide-react'; 
+
 const ROLE_CLAIM_KEY = "https://nomosstore.com/roles";
 
 export const SidebarNavigation: React.FC = () => {
@@ -21,7 +22,7 @@ export const SidebarNavigation: React.FC = () => {
         <nav className="mt-6 space-y-2 text-sm">
             <NavItem to="/dashboard" label="Dashboard" icon={Home} />
             
-            {}
+            {/* INVENTARIO */}
             <SubMenu label="Inventario" icon={<Package className="h-5 w-5" />}>
                 {[
                     { to: "/products", label: "Catálogo de Productos", icon: <ShoppingCart className="h-4 w-4" /> },
@@ -34,23 +35,44 @@ export const SidebarNavigation: React.FC = () => {
                 ]}
             </SubMenu>
 
-            {}
-            
-                <SubMenu label="Ventas & Caja" icon={<DollarSign className="h-5 w-5" />}>
-                    {[
-                        { to: "/quotations", label: "Cotizaciones", icon: <Tag className="h-4 w-4" /> },
-                        ...(!isSupplier ? [
-                            { to: "/sales", label: "Registro de Ventas", icon: <ClipboardList className="h-4 w-4" /> },
-                            { to: "/promotions", label: "Promociones y Ofertas", icon: <Tag className="h-4 w-4" /> },
-                            { to: "/collections", label: "Gestión de Cobranzas", icon: <CreditCard className="h-4 w-4" /> },
-                            { to: "/credit-documents", label: "Títulos Valores (Legal)", icon: <FileSignature className="h-4 w-4" /> },
-                            { to: "/returns", label: "Gestión de Devoluciones", icon: <RefreshCw className="h-4 w-4" /> },
+            {/* VENTAS Y CAJA */}
+            <SubMenu label="Ventas & Caja" icon={<DollarSign className="h-5 w-5" />}>
+                {[
+                    { to: "/quotations", label: "Cotizaciones", icon: <Tag className="h-4 w-4" /> },
+                    ...(!isSupplier ? [
+                        { to: "/sales", label: "Registro de Ventas", icon: <ClipboardList className="h-4 w-4" /> },
+                        { to: "/promotions", label: "Promociones y Ofertas", icon: <Tag className="h-4 w-4" /> },
+                        { to: "/collections", label: "Gestión de Cobranzas", icon: <CreditCard className="h-4 w-4" /> },
+                        { to: "/credit-documents", label: "Títulos Valores (Legal)", icon: <FileSignature className="h-4 w-4" /> },
+                        { to: "/returns", label: "Gestión de Devoluciones", icon: <RefreshCw className="h-4 w-4" /> },
                     ] : [])
+                ]}
+            </SubMenu>
+
+            {/* NUEVO SUBMENÚ: MOVIMIENTOS */}
+            {!isSupplier && (
+                <SubMenu label="Movimientos" icon={<Activity className="h-5 w-5" />}>
+                    {[
+                        { 
+                            to: "/accounting-movements", 
+                            label: "Mov. Contables (Balance)", 
+                            icon: <Scale className="h-4 w-4" /> 
+                        },
+                        { 
+                            to: "/inventory-movements", 
+                            label: "Mov. de Inventario", 
+                            icon: <Package className="h-4 w-4" /> 
+                        },
+                        { 
+                            to: "/cash-movements", 
+                            label: "Mov. de Caja / Pagos", 
+                            icon: <Wallet className="h-4 w-4" /> // Icono de billetera para caja
+                        },
                     ]}
                 </SubMenu>
-            
+            )}
 
-            {}
+            {/* LOGÍSTICA */}
             <SubMenu label="Logística & Envíos" icon={<Truck className="h-5 w-5" />}>
                 {[
                     { to: "/shipping-guides", label: "Guías de Remisión", icon: <Map className="h-4 w-4" /> },
@@ -61,7 +83,7 @@ export const SidebarNavigation: React.FC = () => {
                 ]}
             </SubMenu>
             
-            {}
+            {/* CONFIGURACIÓN (ADMIN) */}
             {isAdmin && (
                 <SubMenu label="Configuración de Datos" icon={<Settings className="h-5 w-5" />}>
                     {[
@@ -79,14 +101,14 @@ export const SidebarNavigation: React.FC = () => {
                 </SubMenu>
             )}
             
-            {}
+            {/* REPORTES & SISTEMA */}
             <SubMenu label="Reportes & Sistema" icon={<BarChart3 className="h-5 w-5" />}>
                 {[
                     { to: "/alerts", label: "Alertas de Stock", icon: <AlertTriangle className="h-4 w-4" /> },
                     { to: "/store-schedule", label: "Horarios de Atención", icon: <Clock className="h-4 w-4" /> },
                     ...(!isSupplier ? [
                         { to: "/reports", label: "Generador de Reportes", icon: <BarChart3 className="h-4 w-4" /> },
-                        { to: "/movements", label: "Historial de Movimientos", icon: <ClipboardList className="h-4 w-4" /> },
+                        // Eliminado "Historial de Movimientos" de aquí ya que ahora tiene su propio menú
                         { to: "/audit", label: "Registro de Auditoría", icon: <ClipboardCheck className="h-4 w-4" /> },
                     ] : [])
                 ]}
