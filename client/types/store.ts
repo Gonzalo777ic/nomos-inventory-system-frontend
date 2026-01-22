@@ -296,3 +296,29 @@ export interface SaleReturnRequestPayload {
         quantity: number;
     }[];
 }
+
+
+/**
+ * ==========================================
+ * Movimientos contables
+ * ==========================================
+ */
+
+export interface AccountingJournalLine {
+    id: number;
+    accountCode: string; 
+    accountName: string; 
+    debit: number;      
+    credit: number;    
+    costCenter?: string;
+}
+
+export interface AccountingJournalEntry {
+    id: number;
+    entryDate: string;        
+    concept: string;          
+    referenceDocument: string; 
+    status: 'DRAFT' | 'POSTED' | 'ANNULLED';
+    lines: AccountingJournalLine[];
+    createdByUserId?: number;
+}

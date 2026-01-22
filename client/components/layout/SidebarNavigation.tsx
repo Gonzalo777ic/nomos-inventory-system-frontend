@@ -6,7 +6,7 @@ import {
     Home, Package, DollarSign, Truck, Settings, BarChart3, ShoppingCart, 
     Archive, Users, ClipboardList, Tag, CreditCard, RefreshCw, Map, 
     PackageOpen, Scale, Ruler, Percent, Megaphone, Clock, AlertTriangle, 
-    Briefcase, Warehouse, Wallet, ClipboardCheck, FileSignature, Activity // <--- Nuevo icono importado
+    Briefcase, Warehouse, Wallet, ClipboardCheck, FileSignature, Activity
 } from 'lucide-react'; 
 
 const ROLE_CLAIM_KEY = "https://nomosstore.com/roles";
@@ -66,7 +66,7 @@ export const SidebarNavigation: React.FC = () => {
                         { 
                             to: "/cash-movements", 
                             label: "Mov. de Caja / Pagos", 
-                            icon: <Wallet className="h-4 w-4" /> // Icono de billetera para caja
+                            icon: <Wallet className="h-4 w-4" />
                         },
                     ]}
                 </SubMenu>
@@ -108,7 +108,7 @@ export const SidebarNavigation: React.FC = () => {
                     { to: "/store-schedule", label: "Horarios de Atención", icon: <Clock className="h-4 w-4" /> },
                     ...(!isSupplier ? [
                         { to: "/reports", label: "Generador de Reportes", icon: <BarChart3 className="h-4 w-4" /> },
-                        // Eliminado "Historial de Movimientos" de aquí ya que ahora tiene su propio menú
+
                         { to: "/audit", label: "Registro de Auditoría", icon: <ClipboardCheck className="h-4 w-4" /> },
                     ] : [])
                 ]}
