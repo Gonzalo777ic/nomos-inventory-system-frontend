@@ -123,7 +123,7 @@ export default function AccountingMovements() {
                 </CardContent>
             </Card>
 
-            {/* MODAL DETALLE DEL ASIENTO (PARTIDA DOBLE) */}
+            {}
             <EntryDetailModal 
                 open={!!selectedEntry} 
                 onOpenChange={(open) => !open && setSelectedEntry(null)}
@@ -151,7 +151,7 @@ function EntryDetailModal({ open, onOpenChange, entry }: { open: boolean, onOpen
                 </DialogHeader>
                 
                 <div className="space-y-4">
-                    {/* Header Info */}
+                    {}
                     <div className="bg-slate-50 p-4 rounded-md border text-sm grid grid-cols-2 gap-4">
                         <div>
                             <span className="block text-slate-500 text-xs uppercase font-bold">Concepto</span>
@@ -171,7 +171,7 @@ function EntryDetailModal({ open, onOpenChange, entry }: { open: boolean, onOpen
                         </div>
                     </div>
 
-                    {/* Tabla de Líneas (Debe / Haber) */}
+                    {}
                     <div className="border rounded-md overflow-hidden">
                         <Table>
                             <TableHeader>
@@ -196,7 +196,7 @@ function EntryDetailModal({ open, onOpenChange, entry }: { open: boolean, onOpen
                                     </TableRow>
                                 ))}
                                 
-                                {/* Footer Totales */}
+                                {}
                                 <TableRow className="bg-slate-50 font-bold border-t-2 border-slate-200">
                                     <TableCell colSpan={2} className="text-right uppercase text-xs text-slate-500">Totales</TableCell>
                                     <TableCell className="text-right text-emerald-700">{formatCurrency(totalDebit)}</TableCell>
@@ -206,7 +206,7 @@ function EntryDetailModal({ open, onOpenChange, entry }: { open: boolean, onOpen
                         </Table>
                     </div>
 
-                    {/* Validación de Balance */}
+                    {}
                     <div className={`flex items-center gap-2 text-sm p-2 rounded justify-center ${isBalanced ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                         <ArrowRightLeft className="w-4 h-4" />
                         {isBalanced ? "Asiento Balanceado (Partida Doble Correcta)" : "¡ALERTA! Asiento Descuadrado"}

@@ -22,7 +22,7 @@ export const SidebarNavigation: React.FC = () => {
         <nav className="mt-6 space-y-2 text-sm">
             <NavItem to="/dashboard" label="Dashboard" icon={Home} />
             
-            {/* INVENTARIO */}
+            {}
             <SubMenu label="Inventario" icon={<Package className="h-5 w-5" />}>
                 {[
                     { to: "/products", label: "Catálogo de Productos", icon: <ShoppingCart className="h-4 w-4" /> },
@@ -35,7 +35,7 @@ export const SidebarNavigation: React.FC = () => {
                 ]}
             </SubMenu>
 
-            {/* VENTAS Y CAJA */}
+            {}
             <SubMenu label="Ventas & Caja" icon={<DollarSign className="h-5 w-5" />}>
                 {[
                     { to: "/quotations", label: "Cotizaciones", icon: <Tag className="h-4 w-4" /> },
@@ -49,7 +49,7 @@ export const SidebarNavigation: React.FC = () => {
                 ]}
             </SubMenu>
 
-            {/* NUEVO SUBMENÚ: MOVIMIENTOS */}
+            {}
             {!isSupplier && (
                 <SubMenu label="Movimientos" icon={<Activity className="h-5 w-5" />}>
                     {[
@@ -72,7 +72,7 @@ export const SidebarNavigation: React.FC = () => {
                 </SubMenu>
             )}
 
-            {/* LOGÍSTICA */}
+            {}
             <SubMenu label="Logística & Envíos" icon={<Truck className="h-5 w-5" />}>
                 {[
                     { to: "/shipping-guides", label: "Guías de Remisión", icon: <Map className="h-4 w-4" /> },
@@ -83,7 +83,7 @@ export const SidebarNavigation: React.FC = () => {
                 ]}
             </SubMenu>
             
-            {/* CONFIGURACIÓN (ADMIN) */}
+            {}
             {isAdmin && (
                 <SubMenu label="Configuración de Datos" icon={<Settings className="h-5 w-5" />}>
                     {[
@@ -101,7 +101,7 @@ export const SidebarNavigation: React.FC = () => {
                 </SubMenu>
             )}
             
-            {/* REPORTES & SISTEMA */}
+            {}
             <SubMenu label="Reportes & Sistema" icon={<BarChart3 className="h-5 w-5" />}>
                 {[
                     { to: "/alerts", label: "Alertas de Stock", icon: <AlertTriangle className="h-4 w-4" /> },
