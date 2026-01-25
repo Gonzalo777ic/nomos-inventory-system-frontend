@@ -13,5 +13,15 @@ export const InventoryMovementService = {
         return response.data;
     },
 
+        /**
+     * Obtener un movimiento específico por ID.
+     */
+    getById: async (id: number): Promise<InventoryMovement> => {
+        const response = await http.get<InventoryMovement>(`${BASE_URL}/${id}`);
+        return response.data;
+    },
+
+
+
 
 };
