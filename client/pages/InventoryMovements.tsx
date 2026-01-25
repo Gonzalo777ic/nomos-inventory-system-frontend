@@ -16,5 +16,22 @@ export default function InventoryMovements() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
+    useEffect(() => {
+        loadMovements();
+    }, []);
+
+    const loadMovements = async () => {
+        setLoading(true);
+        try {
+            const data = await InventoryMovementService.getAll();
+            const sorted = data.sort((a, b) => new Date(b.movementDate).getTime() - new Date(a.movementDate).getTime());
+            setMovements(sorted);
+        } catch (error) {
+            console.error("Error cargando kardex", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     
 }
