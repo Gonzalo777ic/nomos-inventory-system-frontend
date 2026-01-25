@@ -34,3 +34,13 @@ export interface InventoryMovement {
     observation?: string;
 }
 
+export interface CreateInventoryMovementPayload {
+    product: { id: number };
+    inventoryItem?: { id: number };
+    quantityChange: number;
+    type: InventoryMovementType;
+    reason: string;
+    movementDate: string;
+    referenceId?: number;
+    referenceService?: string;
+}
