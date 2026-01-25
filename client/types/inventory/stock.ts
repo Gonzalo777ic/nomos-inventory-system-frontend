@@ -11,3 +11,26 @@ export type InventoryItem = {
     location: string;
     entryDate: string;
 };
+
+
+
+export type InventoryMovementType = 'ENTRADA' | 'SALIDA_VENTA' | 'AJUSTE_DEVOLUCION' | 'AJUSTE_PERDIDA' | 'TRANSFERENCIA';
+
+export interface InventoryMovement {
+    id: number;
+    product: Product; 
+    inventoryItemId?: number;
+    warehouseId?: number;
+    
+    quantityChange: number; 
+    balanceAfter: number;   
+    
+    type: InventoryMovementType;
+    reason: string;
+    movementDate: string; 
+    
+    referenceId?: number;
+    referenceService?: string;
+    observation?: string;
+}
+
