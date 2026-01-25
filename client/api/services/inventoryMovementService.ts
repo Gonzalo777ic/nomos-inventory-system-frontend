@@ -21,6 +21,16 @@ export const InventoryMovementService = {
         return response.data;
     },
 
+        /**
+     * Obtener el Kardex de un producto específico.
+     */
+    getByProduct: async (productId: number): Promise<InventoryMovement[]> => {
+        const response = await http.get<InventoryMovement[]>(`${BASE_URL}/product/${productId}`);
+        return response.data;
+    },
+
+
+
 
 
 
