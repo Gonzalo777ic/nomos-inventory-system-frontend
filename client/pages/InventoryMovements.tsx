@@ -10,3 +10,11 @@ import { Loader2, Search, ArrowUpCircle, ArrowDownCircle, Package, RefreshCw } f
 
 const formatDate = (dateStr: string) => 
     new Date(dateStr).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+export default function InventoryMovements() {
+    const [movements, setMovements] = useState<InventoryMovement[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    
+}
