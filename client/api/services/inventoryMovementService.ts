@@ -29,7 +29,13 @@ export const InventoryMovementService = {
         return response.data;
     },
 
-
+        /**
+     * Registrar un movimiento manual (ej: Ajuste por pérdida o inventario inicial).
+     */
+    create: async (data: CreateInventoryMovementPayload): Promise<InventoryMovement> => {
+        const response = await http.post<InventoryMovement>(BASE_URL, data);
+        return response.data;
+    }
 
 
 
