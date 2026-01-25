@@ -8,3 +8,5 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, Search, ArrowUpCircle, ArrowDownCircle, Package, RefreshCw } from 'lucide-react';
 
+const formatDate = (dateStr: string) => 
+    new Date(dateStr).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
