@@ -28,3 +28,4 @@ dist-ssr
 
 # Archivos específicos
 AGENTS.md
+.env
