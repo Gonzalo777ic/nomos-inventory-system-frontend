@@ -189,13 +189,17 @@ const AppContent = () => {
 };
 
 const App = () => {
-  const domain =
-    import.meta.env.VITE_AUTH0_DOMAIN || "AUTH0_DOMAIN_REDACTED";
-  const clientId =
-    import.meta.env.VITE_AUTH0_CLIENT_ID || "AUTH0_CLIENT_ID_REDACTED";
-  const audience =
-    import.meta.env.VITE_AUTH0_AUDIENCE || "https://nomos.inventory.api";
+  const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+  const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 
+  if (!domain || !clientId || !audience) {
+    console.error(
+      "Faltan variables de entorno de Auth0 en el archivo .env (VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID, VITE_AUTH0_AUDIENCE)"
+    );
+    return <div>Error de configuración: Faltan variables de entorno.</div>;
+  }
+  
   return (
     <Auth0Provider
       domain={domain}
