@@ -14,3 +14,19 @@ export interface StockAlertCalculated {
     status: 'LOW' | 'CRITICAL';
 }
 
+export interface Alert {
+    id: number;
+    product: Product;
+    inventoryItem?: { id: number; lotNumber: string; expirationDate: string };
+    type: AlertType;
+    status: AlertStatus;
+    title: string;
+    description: string;
+    severity: number;
+    createdAt: string;
+    resolvedAt?: string;
+}
+
+export interface UpdateAlertStatusPayload {
+    status: AlertStatus;
+}
