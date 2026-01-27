@@ -60,7 +60,9 @@ export const SubMenu: React.FC<SubMenuProps> = ({ label, icon, children }) => {
             </button>
             {}
             <div 
-                className={`transition-all duration-300 overflow-hidden ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
                 style={{ transitionProperty: 'max-height, opacity' }}
             >
                 <div className="pl-6 border-l border-gray-300 dark:border-gray-700 ml-3 space-y-1 py-1">
