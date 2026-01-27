@@ -41,3 +41,10 @@ export const updateAlertStatus = async (id: number, status: AlertStatus): Promis
     const response = await http.patch<Alert>(`${API_BASE_URL}/${id}/status`, payload);
     return response.data;
 };
+
+/**
+ * Elimina una alerta del historial.
+ */
+export const deleteAlert = async (id: number): Promise<void> => {
+    await http.delete(`${API_BASE_URL}/${id}`);
+};
