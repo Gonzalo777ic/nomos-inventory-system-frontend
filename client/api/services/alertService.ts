@@ -32,3 +32,12 @@ export const getPersistentAlerts = async (status?: AlertStatus): Promise<Alert[]
         throw error;
     }
 };
+
+/**
+ * Actualiza el estado de una alerta (ej: de ACTIVE a RESOLVED).
+ */
+export const updateAlertStatus = async (id: number, status: AlertStatus): Promise<Alert> => {
+    const payload: UpdateAlertStatusPayload = { status };
+    const response = await http.patch<Alert>(`${API_BASE_URL}/${id}/status`, payload);
+    return response.data;
+};
