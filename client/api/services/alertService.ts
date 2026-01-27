@@ -48,3 +48,11 @@ export const updateAlertStatus = async (id: number, status: AlertStatus): Promis
 export const deleteAlert = async (id: number): Promise<void> => {
     await http.delete(`${API_BASE_URL}/${id}`);
 };
+
+/**
+ * Obtiene alertas específicas de un producto.
+ */
+export const getAlertsByProduct = async (productId: number): Promise<Alert[]> => {
+    const response = await http.get<Alert[]>(`${API_BASE_URL}/product/${productId}`);
+    return response.data;
+};
