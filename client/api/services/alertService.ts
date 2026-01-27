@@ -17,3 +17,18 @@ export const getCalculatedStockAlerts = async (): Promise<StockAlertCalculated[]
         throw error;
     }
 };
+
+/**
+ * Obtiene el historial de alertas persistentes.
+ * @param status (Opcional) Filtrar por estado: 'ACTIVE', 'RESOLVED', etc.
+ */
+export const getPersistentAlerts = async (status?: AlertStatus): Promise<Alert[]> => {
+    try {
+        const params = status ? { status } : {};
+        const response = await http.get<Alert[]>(API_BASE_URL, { params });
+        return response.data;
+    } catch (error) {
+        console.error("[Alerts API] Error obteniendo historial de alertas:", error);
+        throw error;
+    }
+};
