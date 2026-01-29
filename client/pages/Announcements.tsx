@@ -137,6 +137,70 @@ const AnnouncementsPage: React.FC = () => {
                 </button>
             </div>
 
+            {}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {loading ? (
+                    <div className="p-8 text-center text-gray-500">Cargando anuncios...</div>
+                ) : announcements.length === 0 ? (
+                    <div className="p-8 text-center text-gray-500">No hay anuncios registrados.</div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 uppercase font-semibold">
+                                <tr>
+                                    <th className="px-6 py-3">Título / Contenido</th>
+                                    <th className="px-6 py-3">Tipo</th>
+                                    <th className="px-6 py-3">Vigencia</th>
+                                    <th className="px-6 py-3">Estado</th>
+                                    <th className="px-6 py-3 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {announcements.map((ann) => (
+                                    <tr key={ann.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-gray-900 dark:text-gray-100">{ann.title}</div>
+                                            <div className="text-gray-500 truncate max-w-xs">{ann.content}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium border
+                                                ${ann.type === 'BANNER' ? 'bg-blue-100 text-blue-800 border-blue-200' : 
+                                                  ann.type === 'POPUP' ? 'bg-purple-100 text-purple-800 border-purple-200' : 
+                                                  'bg-amber-100 text-amber-800 border-amber-200'}`}>
+                                                {ann.type}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 text-xs">
+                                            <div className="flex items-center gap-1"><Calendar className="w-3 h-3"/> {formatDate(ann.startDate)}</div>
+                                            <div className="flex items-center gap-1 mt-1"><Calendar className="w-3 h-3"/> {formatDate(ann.endDate)}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <button 
+                                                onClick={() => handleToggle(ann.id)}
+                                                className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-colors
+                                                ${ann.isActive 
+                                                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' 
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                            >
+                                                {ann.isActive ? <><Eye className="w-3 h-3"/> Activo</> : <><EyeOff className="w-3 h-3"/> Inactivo</>}
+                                            </button>
+                                        </td>
+                                        <td className="px-6 py-4 text-right space-x-2">
+                                            <button onClick={() => handleEditClick(ann)} className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50">
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                            <button onClick={() => handleDelete(ann.id)} className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
             
         </div>
     );
