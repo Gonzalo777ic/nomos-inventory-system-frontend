@@ -13,7 +13,32 @@ const AnnouncementsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
+    const [formData, setFormData] = useState<AnnouncementDTO>({
+        title: '',
+        content: '',
+        type: 'BANNER',
+        startDate: new Date().toISOString().slice(0, 16),
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+        isActive: true,
+        targetAudience: 'ALL'
+    });
 
+
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            const data = await AnnouncementService.getAll();
+
+            setAnnouncements(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al cargar los anuncios");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    
     
 
     return (
