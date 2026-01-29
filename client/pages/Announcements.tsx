@@ -7,3 +7,20 @@ import {
 import { toast } from 'sonner';
 
 
+const AnnouncementsPage: React.FC = () => {
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+
+
+    
+
+    return (
+        <div className="p-6 space-y-6">
+            
+        </div>
+    );
+};
+
+export default AnnouncementsPage;
