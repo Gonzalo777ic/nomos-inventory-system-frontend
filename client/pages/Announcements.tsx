@@ -38,7 +38,25 @@ const AnnouncementsPage: React.FC = () => {
         }
     };
 
-    
+    useEffect(() => {
+        loadData();
+    }, []);
+
+
+    const handleCreateClick = () => {
+        setEditingId(null);
+        setFormData({
+            title: '',
+            content: '',
+            type: 'BANNER',
+            startDate: new Date().toISOString().slice(0, 16),
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+            isActive: true,
+            targetAudience: 'ALL'
+        });
+        setIsModalOpen(true);
+    };
+
     
 
     return (
