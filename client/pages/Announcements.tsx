@@ -57,6 +57,21 @@ const AnnouncementsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
+    const handleEditClick = (announcement: Announcement) => {
+        setEditingId(announcement.id);
+        setFormData({
+            title: announcement.title,
+            content: announcement.content,
+            type: announcement.type,
+            startDate: announcement.startDate ? new Date(announcement.startDate).toISOString().slice(0, 16) : '',
+            endDate: announcement.endDate ? new Date(announcement.endDate).toISOString().slice(0, 16) : '',
+            isActive: announcement.isActive,
+            targetAudience: announcement.targetAudience || 'ALL'
+        });
+        setIsModalOpen(true);
+    };
+
+    
     
 
     return (
