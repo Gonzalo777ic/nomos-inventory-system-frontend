@@ -54,5 +54,11 @@ export const AnnouncementService = {
         return response.data;
     },
 
-   
+     /**
+     * Eliminar anuncio.
+     */
+    delete: async (id: number): Promise<void> => {
+        await httpStore.delete(`${ANNOUNCEMENTS_URL}/${id}`);
+    }
+    
 };
