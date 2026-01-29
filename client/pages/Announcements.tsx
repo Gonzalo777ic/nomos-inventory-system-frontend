@@ -357,6 +357,33 @@ const AnnouncementsPage: React.FC = () => {
                                 </div>
                             </div>
 
+
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Estado de Publicación</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        {formData.isActive 
+                                            ? 'El anuncio será visible inmediatamente' 
+                                            : 'Se guardará como borrador (Oculto)'}
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={formData.isActive}
+                                    onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
+                                        formData.isActive ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-600'
+                                    }`}
+                                >
+                                    <span
+                                        className={`${
+                                            formData.isActive ? 'translate-x-6' : 'translate-x-1'
+                                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                    />
+                                </button>
+                            </div>
+
                             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <button 
                                     type="button"
