@@ -21,7 +21,15 @@ export const AnnouncementService = {
         const response = await httpStore.get<Announcement[]>(`${ANNOUNCEMENTS_URL}/active`);
         return response.data;
     },
+    /**
+     * Obtener un anuncio por ID.
+     */
+    getById: async (id: number): Promise<Announcement> => {
+        const response = await httpStore.get<Announcement>(`${ANNOUNCEMENTS_URL}/${id}`);
+        return response.data;
+    },
 
+    
     
     
 };
