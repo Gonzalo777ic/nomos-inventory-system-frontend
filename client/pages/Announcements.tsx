@@ -2,33 +2,46 @@ import React, { useEffect, useState } from 'react';
 import { AnnouncementService } from '@/api/services/announcementService';
 import { Announcement, AnnouncementDTO, AnnouncementType } from '@/types/store/announcement';
 import { 
-    Megaphone, Plus, Calendar, Eye, EyeOff, Trash2, Edit, X, Save 
+    Megaphone, Plus, Calendar, Eye, EyeOff, Trash2, Edit, X, Save, 
+    AlertTriangle, CheckCircle2 
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 
+interface ConfirmState {
+    isOpen: boolean;
+    type: 'DELETE' | 'TOGGLE' | null;
+    id: number | null;
+    title: string;
+    message: string;
+    confirmBtnText: string;
+    confirmBtnStyle: 'danger' | 'warning' | 'primary';
+}
+
 const AnnouncementsPage: React.FC = () => {
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
+    
 
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [formData, setFormData] = useState<AnnouncementDTO>({
-        title: '',
-        content: '',
-        type: 'BANNER',
+        title: '', content: '', type: 'BANNER', 
         startDate: new Date().toISOString().slice(0, 16),
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-        isActive: true,
-        targetAudience: 'ALL'
+        isActive: true, targetAudience: 'ALL'
     });
 
+
+    const [confirmState, setConfirmState] = useState<ConfirmState>({
+        isOpen: false, type: null, id: null, title: '', message: '', 
+        confirmBtnText: '', confirmBtnStyle: 'primary'
+    });
 
     const loadData = async () => {
         setLoading(true);
         try {
             const data = await AnnouncementService.getAll();
-
             setAnnouncements(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         } catch (error) {
             console.error(error);
@@ -38,88 +51,105 @@ const AnnouncementsPage: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    useEffect(() => { loadData(); }, []);
 
 
     const handleCreateClick = () => {
         setEditingId(null);
         setFormData({
-            title: '',
-            content: '',
-            type: 'BANNER',
+            title: '', content: '', type: 'BANNER',
             startDate: new Date().toISOString().slice(0, 16),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-            isActive: true,
-            targetAudience: 'ALL'
+            isActive: false, targetAudience: 'ALL'
         });
-        setIsModalOpen(true);
+        setIsFormModalOpen(true);
     };
 
-    const handleEditClick = (announcement: Announcement) => {
-        setEditingId(announcement.id);
+    const handleEditClick = (ann: Announcement) => {
+        setEditingId(ann.id);
         setFormData({
-            title: announcement.title,
-            content: announcement.content,
-            type: announcement.type,
-            startDate: announcement.startDate ? new Date(announcement.startDate).toISOString().slice(0, 16) : '',
-            endDate: announcement.endDate ? new Date(announcement.endDate).toISOString().slice(0, 16) : '',
-            isActive: announcement.isActive,
-            targetAudience: announcement.targetAudience || 'ALL'
+            title: ann.title, content: ann.content, type: ann.type,
+            startDate: ann.startDate ? new Date(ann.startDate).toISOString().slice(0, 16) : '',
+            endDate: ann.endDate ? new Date(ann.endDate).toISOString().slice(0, 16) : '',
+            isActive: ann.isActive, targetAudience: ann.targetAudience || 'ALL'
         });
-        setIsModalOpen(true);
+        setIsFormModalOpen(true);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm("¿Estás seguro de eliminar este anuncio?")) return;
-        try {
-            await AnnouncementService.delete(id);
-            toast.success("Anuncio eliminado");
-            loadData();
-        } catch (error) {
-            toast.error("Error al eliminar");
-        }
-    };
-
-    const handleToggle = async (id: number) => {
-        try {
-            await AnnouncementService.toggleActive(id);
-            toast.success("Estado actualizado");
-            loadData();
-        } catch (error) {
-            toast.error("No se pudo cambiar el estado");
-        }
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             if (editingId) {
                 await AnnouncementService.update(editingId, formData);
-                toast.success("Anuncio actualizado correctamente");
+                toast.success("Anuncio actualizado");
             } else {
                 await AnnouncementService.create(formData);
-                toast.success("Anuncio creado correctamente");
+                toast.success("Anuncio creado");
             }
-            setIsModalOpen(false);
+            setIsFormModalOpen(false);
             loadData();
         } catch (error) {
             toast.error("Error al guardar. Verifica las fechas.");
         }
     };
 
-    const formatDate = (dateString: string) => {
-        if (!dateString) return '-';
-        return new Date(dateString).toLocaleDateString('es-PE', { 
-            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' 
+
+
+
+    const requestDelete = (id: number) => {
+        setConfirmState({
+            isOpen: true,
+            type: 'DELETE',
+            id,
+            title: '¿Eliminar Anuncio?',
+            message: 'Esta acción es irreversible. El anuncio dejará de ser visible inmediatamente.',
+            confirmBtnText: 'Sí, Eliminar',
+            confirmBtnStyle: 'danger'
         });
     };
-    
+
+
+    const requestToggle = (ann: Announcement) => {
+        const action = ann.isActive ? 'Desactivar' : 'Activar';
+        setConfirmState({
+            isOpen: true,
+            type: 'TOGGLE',
+            id: ann.id,
+            title: `¿${action} Anuncio?`,
+            message: `Estás a punto de ${action.toLowerCase()} el anuncio "${ann.title}".`,
+            confirmBtnText: `Sí, ${action}`,
+            confirmBtnStyle: ann.isActive ? 'warning' : 'primary'
+        });
+    };
+
+
+    const executeConfirmation = async () => {
+        if (!confirmState.id || !confirmState.type) return;
+
+        try {
+            if (confirmState.type === 'DELETE') {
+                await AnnouncementService.delete(confirmState.id);
+                toast.success("Anuncio eliminado correctamente");
+            } else if (confirmState.type === 'TOGGLE') {
+                await AnnouncementService.toggleActive(confirmState.id);
+                toast.success("Estado actualizado correctamente");
+            }
+
+            setConfirmState({ ...confirmState, isOpen: false });
+            loadData();
+        } catch (error) {
+            toast.error("Ocurrió un error al procesar la solicitud");
+        }
+    };
+
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit' });
+    };
 
     return (
         <div className="p-6 space-y-6">
-            {}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -132,15 +162,14 @@ const AnnouncementsPage: React.FC = () => {
                     onClick={handleCreateClick}
                     className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm"
                 >
-                    <Plus className="h-5 w-5" />
-                    Nuevo Anuncio
+                    <Plus className="h-5 w-5" /> Nuevo Anuncio
                 </button>
             </div>
 
             {}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Cargando anuncios...</div>
+                    <div className="p-8 text-center text-gray-500 animate-pulse">Cargando anuncios...</div>
                 ) : announcements.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">No hay anuncios registrados.</div>
                 ) : (
@@ -175,12 +204,13 @@ const AnnouncementsPage: React.FC = () => {
                                             <div className="flex items-center gap-1 mt-1"><Calendar className="w-3 h-3"/> {formatDate(ann.endDate)}</div>
                                         </td>
                                         <td className="px-6 py-4">
+                                            {}
                                             <button 
-                                                onClick={() => handleToggle(ann.id)}
+                                                onClick={() => requestToggle(ann)}
                                                 className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-colors
                                                 ${ann.isActive 
-                                                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' 
-                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-200' 
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'}`}
                                             >
                                                 {ann.isActive ? <><Eye className="w-3 h-3"/> Activo</> : <><EyeOff className="w-3 h-3"/> Inactivo</>}
                                             </button>
@@ -189,7 +219,8 @@ const AnnouncementsPage: React.FC = () => {
                                             <button onClick={() => handleEditClick(ann)} className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50">
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            <button onClick={() => handleDelete(ann.id)} className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50">
+                                            {}
+                                            <button onClick={() => requestDelete(ann.id)} className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </td>
@@ -200,21 +231,59 @@ const AnnouncementsPage: React.FC = () => {
                     </div>
                 )}
             </div>
-            
+
             {}
-            {isModalOpen && (
+            {confirmState.isOpen && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700 scale-100 transform transition-all">
+                        <div className="flex flex-col items-center text-center gap-4">
+                            <div className={`p-3 rounded-full ${confirmState.confirmBtnStyle === 'danger' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
+                                <AlertTriangle className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                    {confirmState.title}
+                                </h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    {confirmState.message}
+                                </p>
+                            </div>
+                            <div className="flex gap-3 w-full mt-2">
+                                <button 
+                                    onClick={() => setConfirmState({...confirmState, isOpen: false})}
+                                    className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 font-medium"
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    onClick={executeConfirmation}
+                                    className={`flex-1 px-4 py-2 rounded-lg text-white font-medium shadow-sm transition-colors
+                                        ${confirmState.confirmBtnStyle === 'danger' ? 'bg-red-600 hover:bg-red-700' : 
+                                          confirmState.confirmBtnStyle === 'warning' ? 'bg-amber-600 hover:bg-amber-700' : 
+                                          'bg-emerald-600 hover:bg-emerald-700'}`}
+                                >
+                                    {confirmState.confirmBtnText}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {}
+            {isFormModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
                             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                                 {editingId ? 'Editar Anuncio' : 'Nuevo Anuncio'}
                             </h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                            <button onClick={() => setIsFormModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                         
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
                                 <input 
@@ -235,7 +304,6 @@ const AnnouncementsPage: React.FC = () => {
                                     className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-emerald-500 focus:border-emerald-500 p-2 border"
                                     value={formData.content}
                                     onChange={e => setFormData({...formData, content: e.target.value})}
-                                    placeholder="Detalles del comunicado..."
                                 />
                             </div>
 
@@ -292,7 +360,7 @@ const AnnouncementsPage: React.FC = () => {
                             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <button 
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={() => setIsFormModalOpen(false)}
                                     className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
                                 >
                                     Cancelar
@@ -301,15 +369,13 @@ const AnnouncementsPage: React.FC = () => {
                                     type="submit"
                                     className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 transition-colors"
                                 >
-                                    <Save className="w-4 h-4" />
-                                    Guardar Anuncio
+                                    <Save className="w-4 h-4" /> Guardar
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
-            
         </div>
     );
 };
