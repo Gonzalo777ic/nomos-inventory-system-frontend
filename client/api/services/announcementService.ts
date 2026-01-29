@@ -29,7 +29,14 @@ export const AnnouncementService = {
         return response.data;
     },
 
-    
+    /**
+     * Crear un nuevo anuncio.
+     */
+    create: async (data: AnnouncementDTO): Promise<Announcement> => {
+        const response = await httpStore.post<Announcement>(ANNOUNCEMENTS_URL, data);
+        return response.data;
+    },
+
     
     
 };
