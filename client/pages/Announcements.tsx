@@ -82,7 +82,39 @@ const AnnouncementsPage: React.FC = () => {
         }
     };
 
-    
+    const handleToggle = async (id: number) => {
+        try {
+            await AnnouncementService.toggleActive(id);
+            toast.success("Estado actualizado");
+            loadData();
+        } catch (error) {
+            toast.error("No se pudo cambiar el estado");
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (editingId) {
+                await AnnouncementService.update(editingId, formData);
+                toast.success("Anuncio actualizado correctamente");
+            } else {
+                await AnnouncementService.create(formData);
+                toast.success("Anuncio creado correctamente");
+            }
+            setIsModalOpen(false);
+            loadData();
+        } catch (error) {
+            toast.error("Error al guardar. Verifica las fechas.");
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('es-PE', { 
+            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' 
+        });
+    };
     
 
     return (
