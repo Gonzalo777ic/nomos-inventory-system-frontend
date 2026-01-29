@@ -200,7 +200,115 @@ const AnnouncementsPage: React.FC = () => {
                     </div>
                 )}
             </div>
+            
+            {}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                {editingId ? 'Editar Anuncio' : 'Nuevo Anuncio'}
+                            </h2>
+                            <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
+                                <input 
+                                    required
+                                    type="text" 
+                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-emerald-500 focus:border-emerald-500 p-2 border"
+                                    value={formData.title}
+                                    onChange={e => setFormData({...formData, title: e.target.value})}
+                                    placeholder="Ej: Mantenimiento Programado"
+                                />
+                            </div>
 
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contenido</label>
+                                <textarea 
+                                    required
+                                    rows={3}
+                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-emerald-500 focus:border-emerald-500 p-2 border"
+                                    value={formData.content}
+                                    onChange={e => setFormData({...formData, content: e.target.value})}
+                                    placeholder="Detalles del comunicado..."
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo</label>
+                                    <select 
+                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
+                                        value={formData.type}
+                                        onChange={e => setFormData({...formData, type: e.target.value as AnnouncementType})}
+                                    >
+                                        <option value="BANNER">Banner Superior</option>
+                                        <option value="POPUP">Ventana Emergente</option>
+                                        <option value="SYSTEM">Aviso de Sistema</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Audiencia</label>
+                                    <select 
+                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
+                                        value={formData.targetAudience}
+                                        onChange={e => setFormData({...formData, targetAudience: e.target.value})}
+                                    >
+                                        <option value="ALL">Todos los Usuarios</option>
+                                        <option value="ADMINS">Solo Administradores</option>
+                                        <option value="CASHIERS">Cajeros</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Inicio Vigencia</label>
+                                    <input 
+                                        type="datetime-local" 
+                                        required
+                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
+                                        value={formData.startDate}
+                                        onChange={e => setFormData({...formData, startDate: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fin Vigencia</label>
+                                    <input 
+                                        type="datetime-local" 
+                                        required
+                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
+                                        value={formData.endDate}
+                                        onChange={e => setFormData({...formData, endDate: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <button 
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 transition-colors"
+                                >
+                                    <Save className="w-4 h-4" />
+                                    Guardar Anuncio
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             
         </div>
     );
