@@ -11,3 +11,14 @@ export interface Announcement {
     targetAudience?: string; 
     createdAt: string;
 }
+
+
+export interface AnnouncementDTO {
+    title: string;
+    content: string;
+    type: AnnouncementType;
+    startDate: string;
+    endDate: string;
+    isActive: boolean;
+    targetAudience?: string;
+}
