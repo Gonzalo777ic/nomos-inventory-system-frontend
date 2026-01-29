@@ -46,5 +46,13 @@ export const AnnouncementService = {
     },
     
     
-    
+    /**
+     * Alternar estado Activo/Inactivo rápidamente.
+     */
+    toggleActive: async (id: number): Promise<Announcement> => {
+        const response = await httpStore.patch<Announcement>(`${ANNOUNCEMENTS_URL}/${id}/toggle`);
+        return response.data;
+    },
+
+   
 };
