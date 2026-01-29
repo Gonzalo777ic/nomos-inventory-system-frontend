@@ -71,6 +71,17 @@ const AnnouncementsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
+    const handleDelete = async (id: number) => {
+        if (!confirm("¿Estás seguro de eliminar este anuncio?")) return;
+        try {
+            await AnnouncementService.delete(id);
+            toast.success("Anuncio eliminado");
+            loadData();
+        } catch (error) {
+            toast.error("Error al eliminar");
+        }
+    };
+
     
     
 
