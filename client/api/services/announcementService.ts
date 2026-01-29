@@ -14,6 +14,14 @@ export const AnnouncementService = {
         const response = await httpStore.get<Announcement[]>(ANNOUNCEMENTS_URL);
         return response.data;
     },
+    /**
+     * Obtener solo los anuncios activos y vigentes (Para mostrar al usuario final).
+     */
+    getActive: async (): Promise<Announcement[]> => {
+        const response = await httpStore.get<Announcement[]>(`${ANNOUNCEMENTS_URL}/active`);
+        return response.data;
+    },
 
+    
     
 };
