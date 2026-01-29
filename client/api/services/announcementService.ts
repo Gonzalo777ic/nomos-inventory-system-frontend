@@ -37,6 +37,14 @@ export const AnnouncementService = {
         return response.data;
     },
 
+    /**
+     * Actualizar un anuncio existente.
+     */
+    update: async (id: number, data: AnnouncementDTO): Promise<Announcement> => {
+        const response = await httpStore.put<Announcement>(`${ANNOUNCEMENTS_URL}/${id}`, data);
+        return response.data;
+    },
+    
     
     
 };
