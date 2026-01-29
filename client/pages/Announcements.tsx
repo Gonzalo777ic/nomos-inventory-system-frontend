@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { AnnouncementService } from '@/api/services/announcementService';
-import { Announcement, AnnouncementDTO, AnnouncementType } from '@/types/store/announcement';
+import { Announcement, AnnouncementDTO } from '@/types/store/announcement';
 import { 
-    Megaphone, Plus, Calendar, Eye, EyeOff, Trash2, Edit, X, Save, 
-    AlertTriangle, CheckCircle2 
+    Megaphone, Plus, Calendar, Eye, EyeOff, Trash2, Edit, AlertTriangle 
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { AnnouncementForm } from '../components/forms/AnnouncementForm';
 
 interface ConfirmState {
     isOpen: boolean;
@@ -21,16 +21,10 @@ interface ConfirmState {
 const AnnouncementsPage: React.FC = () => {
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
-    
+
 
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [formData, setFormData] = useState<AnnouncementDTO>({
-        title: '', content: '', type: 'BANNER', 
-        startDate: new Date().toISOString().slice(0, 16),
-        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-        isActive: true, targetAudience: 'ALL'
-    });
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
 
 
     const [confirmState, setConfirmState] = useState<ConfirmState>({
@@ -54,67 +48,49 @@ const AnnouncementsPage: React.FC = () => {
     useEffect(() => { loadData(); }, []);
 
 
+    
     const handleCreateClick = () => {
-        setEditingId(null);
-        setFormData({
-            title: '', content: '', type: 'BANNER',
-            startDate: new Date().toISOString().slice(0, 16),
-            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-            isActive: false, targetAudience: 'ALL'
-        });
+        setSelectedAnnouncement(null);
         setIsFormModalOpen(true);
     };
 
     const handleEditClick = (ann: Announcement) => {
-        setEditingId(ann.id);
-        setFormData({
-            title: ann.title, content: ann.content, type: ann.type,
-            startDate: ann.startDate ? new Date(ann.startDate).toISOString().slice(0, 16) : '',
-            endDate: ann.endDate ? new Date(ann.endDate).toISOString().slice(0, 16) : '',
-            isActive: ann.isActive, targetAudience: ann.targetAudience || 'ALL'
-        });
+        setSelectedAnnouncement(ann);
         setIsFormModalOpen(true);
     };
 
-    const handleFormSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleFormSubmit = async (data: AnnouncementDTO) => {
         try {
-            if (editingId) {
-                await AnnouncementService.update(editingId, formData);
+            if (selectedAnnouncement) {
+                await AnnouncementService.update(selectedAnnouncement.id, data);
                 toast.success("Anuncio actualizado");
             } else {
-                await AnnouncementService.create(formData);
+                await AnnouncementService.create(data);
                 toast.success("Anuncio creado");
             }
-            setIsFormModalOpen(false);
             loadData();
+
         } catch (error) {
             toast.error("Error al guardar. Verifica las fechas.");
+            throw error;
         }
     };
 
 
 
-
     const requestDelete = (id: number) => {
         setConfirmState({
-            isOpen: true,
-            type: 'DELETE',
-            id,
+            isOpen: true, type: 'DELETE', id,
             title: '¿Eliminar Anuncio?',
             message: 'Esta acción es irreversible. El anuncio dejará de ser visible inmediatamente.',
-            confirmBtnText: 'Sí, Eliminar',
-            confirmBtnStyle: 'danger'
+            confirmBtnText: 'Sí, Eliminar', confirmBtnStyle: 'danger'
         });
     };
-
 
     const requestToggle = (ann: Announcement) => {
         const action = ann.isActive ? 'Desactivar' : 'Activar';
         setConfirmState({
-            isOpen: true,
-            type: 'TOGGLE',
-            id: ann.id,
+            isOpen: true, type: 'TOGGLE', id: ann.id,
             title: `¿${action} Anuncio?`,
             message: `Estás a punto de ${action.toLowerCase()} el anuncio "${ann.title}".`,
             confirmBtnText: `Sí, ${action}`,
@@ -122,10 +98,8 @@ const AnnouncementsPage: React.FC = () => {
         });
     };
 
-
     const executeConfirmation = async () => {
         if (!confirmState.id || !confirmState.type) return;
-
         try {
             if (confirmState.type === 'DELETE') {
                 await AnnouncementService.delete(confirmState.id);
@@ -134,14 +108,12 @@ const AnnouncementsPage: React.FC = () => {
                 await AnnouncementService.toggleActive(confirmState.id);
                 toast.success("Estado actualizado correctamente");
             }
-
             setConfirmState({ ...confirmState, isOpen: false });
             loadData();
         } catch (error) {
             toast.error("Ocurrió un error al procesar la solicitud");
         }
     };
-
 
     const formatDate = (dateString: string) => {
         if (!dateString) return '-';
@@ -204,7 +176,6 @@ const AnnouncementsPage: React.FC = () => {
                                             <div className="flex items-center gap-1 mt-1"><Calendar className="w-3 h-3"/> {formatDate(ann.endDate)}</div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {}
                                             <button 
                                                 onClick={() => requestToggle(ann)}
                                                 className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-colors
@@ -219,7 +190,6 @@ const AnnouncementsPage: React.FC = () => {
                                             <button onClick={() => handleEditClick(ann)} className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50">
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            {}
                                             <button onClick={() => requestDelete(ann.id)} className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -271,138 +241,12 @@ const AnnouncementsPage: React.FC = () => {
             )}
 
             {}
-            {isFormModalOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                {editingId ? 'Editar Anuncio' : 'Nuevo Anuncio'}
-                            </h2>
-                            <button onClick={() => setIsFormModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
-                                <input 
-                                    required
-                                    type="text" 
-                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-emerald-500 focus:border-emerald-500 p-2 border"
-                                    value={formData.title}
-                                    onChange={e => setFormData({...formData, title: e.target.value})}
-                                    placeholder="Ej: Mantenimiento Programado"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contenido</label>
-                                <textarea 
-                                    required
-                                    rows={3}
-                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-emerald-500 focus:border-emerald-500 p-2 border"
-                                    value={formData.content}
-                                    onChange={e => setFormData({...formData, content: e.target.value})}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo</label>
-                                    <select 
-                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
-                                        value={formData.type}
-                                        onChange={e => setFormData({...formData, type: e.target.value as AnnouncementType})}
-                                    >
-                                        <option value="BANNER">Banner Superior</option>
-                                        <option value="POPUP">Ventana Emergente</option>
-                                        <option value="SYSTEM">Aviso de Sistema</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Audiencia</label>
-                                    <select 
-                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
-                                        value={formData.targetAudience}
-                                        onChange={e => setFormData({...formData, targetAudience: e.target.value})}
-                                    >
-                                        <option value="ALL">Todos los Usuarios</option>
-                                        <option value="ADMINS">Solo Administradores</option>
-                                        <option value="CASHIERS">Cajeros</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Inicio Vigencia</label>
-                                    <input 
-                                        type="datetime-local" 
-                                        required
-                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
-                                        value={formData.startDate}
-                                        onChange={e => setFormData({...formData, startDate: e.target.value})}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fin Vigencia</label>
-                                    <input 
-                                        type="datetime-local" 
-                                        required
-                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 border"
-                                        value={formData.endDate}
-                                        onChange={e => setFormData({...formData, endDate: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-
-
-                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Estado de Publicación</span>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                                        {formData.isActive 
-                                            ? 'El anuncio será visible inmediatamente' 
-                                            : 'Se guardará como borrador (Oculto)'}
-                                    </span>
-                                </div>
-                                <button
-                                    type="button"
-                                    role="switch"
-                                    aria-checked={formData.isActive}
-                                    onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
-                                        formData.isActive ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-600'
-                                    }`}
-                                >
-                                    <span
-                                        className={`${
-                                            formData.isActive ? 'translate-x-6' : 'translate-x-1'
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </button>
-                            </div>
-
-                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <button 
-                                    type="button"
-                                    onClick={() => setIsFormModalOpen(false)}
-                                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-                                >
-                                    Cancelar
-                                </button>
-                                <button 
-                                    type="submit"
-                                    className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 transition-colors"
-                                >
-                                    <Save className="w-4 h-4" /> Guardar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <AnnouncementForm 
+                isOpen={isFormModalOpen}
+                onClose={() => setIsFormModalOpen(false)}
+                onSubmit={handleFormSubmit}
+                initialData={selectedAnnouncement}
+            />
         </div>
     );
 };
