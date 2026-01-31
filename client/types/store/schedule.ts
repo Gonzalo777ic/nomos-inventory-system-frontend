@@ -17,3 +17,14 @@ export interface StoreScheduleException {
     reason: string; 
 }
 
+
+export interface StoreStatusDTO {
+    status: 'OPEN' | 'CLOSED';
+    message: string;        
+    reason: string;         
+    nextOpening?: string;   
+    currentClosing?: string;
+    closingSoon: boolean;  
+}
+
+
