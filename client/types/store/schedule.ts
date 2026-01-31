@@ -28,3 +28,10 @@ export interface StoreStatusDTO {
 }
 
 
+export interface ScheduleExceptionPayload {
+    date: string;
+    isClosed: boolean;
+    openingTime?: string | null;
+    closingTime?: string | null;
+    reason: string;
+}
