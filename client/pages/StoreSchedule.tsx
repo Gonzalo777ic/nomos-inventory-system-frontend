@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScheduleService } from '@/api/services/scheduleService';
 import { StoreSchedule, StoreScheduleException, StoreStatusDTO, ScheduleExceptionPayload } from '@/types/store/schedule';
-
+import { WeeklyScheduleSummary } from '@/components/panels/WeeklyScheduleSummary';
 import { ScheduleExceptionForm } from '@/components/forms/ScheduleExceptionForm'; 
 import { 
     Clock, Calendar, CheckCircle2, XCircle, 
@@ -151,6 +151,16 @@ const StoreSchedulePage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {}
+            {!loading && weeklySchedule.length > 0 && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 ml-1">
+                        Vista Previa Semanal
+                    </h3>
+                    <WeeklyScheduleSummary schedule={weeklySchedule} />
+                </div>
+            )}
 
             {}
             <div className="border-b border-gray-200 dark:border-gray-700">
