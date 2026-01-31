@@ -21,5 +21,11 @@ export const ScheduleService = {
         return response.data;
     },
 
+    getUpcomingExceptions: async (): Promise<StoreScheduleException[]> => {
+        const response = await httpStore.get<StoreScheduleException[]>(`${SCHEDULE_URL}/exceptions`);
+        return response.data;
+    },
+
+
     
 };
