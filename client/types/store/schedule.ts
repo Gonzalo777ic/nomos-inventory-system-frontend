@@ -7,3 +7,13 @@ export interface StoreSchedule {
     closingTime: string;
     isOpen: boolean;
 }
+
+export interface StoreScheduleException {
+    id: number;
+    date: string; 
+    isClosed: boolean;
+    openingTime?: string | null;
+    closingTime?: string | null;
+    reason: string; 
+}
+
