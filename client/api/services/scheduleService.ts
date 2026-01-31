@@ -41,5 +41,8 @@ export const ScheduleService = {
         await httpStore.delete(`${SCHEDULE_URL}/exceptions/${id}`);
     },
 
-    
+    getCurrentStatus: async (): Promise<StoreStatusDTO> => {
+        const response = await httpStore.get<StoreStatusDTO>(`${STATUS_URL}/current`);
+        return response.data;
+    }
 };
