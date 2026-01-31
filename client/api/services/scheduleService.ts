@@ -27,5 +27,10 @@ export const ScheduleService = {
     },
 
 
-    
+    createException: async (data: ScheduleExceptionPayload): Promise<StoreScheduleException> => {
+        const response = await httpStore.post<StoreScheduleException>(`${SCHEDULE_URL}/exceptions`, data);
+        return response.data;
+    },
+
+   
 };
