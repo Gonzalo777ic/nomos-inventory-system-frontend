@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { ScheduleService } from '@/api/services/scheduleService';
 import { StoreSchedule, StoreScheduleException, StoreStatusDTO, ScheduleExceptionPayload } from '@/types/store/schedule';
-import { ScheduleExceptionForm } from '@/components/forms/ScheduleExceptionForm';
+
+import { ScheduleExceptionForm } from '@/components/forms/ScheduleExceptionForm'; 
 import { 
-    Clock, Calendar, AlertTriangle, CheckCircle2, XCircle, 
-    Save, Plus, Trash2, Edit, RefreshCw 
+    Clock, Calendar, CheckCircle2, XCircle, 
+    Save, Plus, Trash2, Edit, RefreshCw, AlertTriangle 
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mapa para traducir días (Backend envía en Inglés)
 const DAYS_TRANSLATION: Record<string, string> = {
     MONDAY: 'Lunes', TUESDAY: 'Martes', WEDNESDAY: 'Miércoles',
     THURSDAY: 'Jueves', FRIDAY: 'Viernes', SATURDAY: 'Sábado', SUNDAY: 'Domingo'
@@ -18,12 +18,12 @@ const StoreSchedulePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'WEEKLY' | 'EXCEPTIONS'>('WEEKLY');
     const [loading, setLoading] = useState(true);
     
-    // Data States
+
     const [weeklySchedule, setWeeklySchedule] = useState<StoreSchedule[]>([]);
     const [exceptions, setExceptions] = useState<StoreScheduleException[]>([]);
     const [status, setStatus] = useState<StoreStatusDTO | null>(null);
 
-    // Modal States
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingException, setEditingException] = useState<StoreScheduleException | null>(null);
 
@@ -47,22 +47,21 @@ const StoreSchedulePage: React.FC = () => {
 
     useEffect(() => { loadData(); }, []);
 
-    // --- MANEJO DE HORARIO SEMANAL ---
+
     
     const handleUpdateDay = async (day: StoreSchedule) => {
         try {
-            // El input time devuelve "HH:mm", el backend acepta eso o "HH:mm:ss"
+
             await ScheduleService.updateDaySchedule(day.id, {
                 isOpen: day.isOpen,
                 openingTime: day.openingTime,
                 closingTime: day.closingTime
             });
             toast.success("Horario actualizado");
-            // Recargamos el status para ver si cambió algo en vivo
             const newStatus = await ScheduleService.getCurrentStatus();
             setStatus(newStatus);
         } catch (error) {
-            toast.error("Error al actualizar. Verifica que la hora de cierre sea posterior a la apertura.");
+            toast.error("Error al actualizar. Verifica las horas.");
         }
     };
 
@@ -72,7 +71,7 @@ const StoreSchedulePage: React.FC = () => {
         setWeeklySchedule(updated);
     };
 
-    // --- MANEJO DE EXCEPCIONES ---
+
 
     const handleSaveException = async (payload: ScheduleExceptionPayload) => {
         try {
@@ -83,7 +82,6 @@ const StoreSchedulePage: React.FC = () => {
                 await ScheduleService.createException(payload);
                 toast.success("Excepción creada");
             }
-            // Recargar datos
             const [newExceptions, newStatus] = await Promise.all([
                 ScheduleService.getUpcomingExceptions(),
                 ScheduleService.getCurrentStatus()
@@ -107,21 +105,18 @@ const StoreSchedulePage: React.FC = () => {
         }
     };
 
-    // --- RENDER HELPERS ---
-    
-    // Recorta los segundos "09:00:00" -> "09:00" para el input HTML
     const formatTimeForInput = (time: string) => time ? time.slice(0, 5) : '';
     
-    // Formatea fecha para mostrar
     const formatDate = (dateStr: string) => {
+        if(!dateStr) return '';
         const [y, m, d] = dateStr.split('-');
-        return `${d}/${m}/${y}`; // Simple DD/MM/YYYY
+        return `${d}/${m}/${y}`;
     };
 
     return (
         <div className="p-6 space-y-6">
             
-            {/* HEADER & STATUS CARD */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -133,7 +128,6 @@ const StoreSchedulePage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* LIVE STATUS BADGE */}
                 <div className={`p-4 rounded-xl border flex items-center gap-4 shadow-sm ${
                     status?.status === 'OPEN' 
                         ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' 
@@ -158,7 +152,7 @@ const StoreSchedulePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* TABS NAVIGATION */}
+            {}
             <div className="border-b border-gray-200 dark:border-gray-700">
                 <nav className="-mb-px flex space-x-8">
                     <button
@@ -184,14 +178,13 @@ const StoreSchedulePage: React.FC = () => {
                 </nav>
             </div>
 
-            {/* CONTENIDO DE TABS */}
+            {}
             <div className="min-h-[400px]">
                 {loading ? (
                     <div className="flex justify-center items-center h-64 text-gray-400">
                         <RefreshCw className="w-8 h-8 animate-spin" />
                     </div>
                 ) : activeTab === 'WEEKLY' ? (
-                    /* TABLA SEMANAL */
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-700/50">
@@ -253,7 +246,6 @@ const StoreSchedulePage: React.FC = () => {
                         </table>
                     </div>
                 ) : (
-                    /* TAB DE EXCEPCIONES */
                     <div className="space-y-4">
                         <div className="flex justify-between items-center bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 text-sm text-blue-800 dark:text-blue-200">
                             <div className="flex gap-3">
@@ -328,7 +320,6 @@ const StoreSchedulePage: React.FC = () => {
                 )}
             </div>
 
-            {/* MODAL DE EDICIÓN */}
             <ScheduleExceptionForm 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

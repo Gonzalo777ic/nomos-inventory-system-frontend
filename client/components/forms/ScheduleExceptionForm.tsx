@@ -30,9 +30,9 @@ export const ScheduleExceptionForm: React.FC<Props> = ({ isOpen, onClose, onSubm
                     closingTime: initialData.closingTime || ''
                 });
             } else {
-                // Reset para nuevo registro
+
                 setFormData({
-                    date: new Date().toISOString().split('T')[0], // Hoy YYYY-MM-DD
+                    date: new Date().toISOString().split('T')[0],
                     reason: '',
                     isClosed: true,
                     openingTime: '09:00',
@@ -46,7 +46,7 @@ export const ScheduleExceptionForm: React.FC<Props> = ({ isOpen, onClose, onSubm
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            // Limpieza de datos: Si está cerrado, mandamos null en las horas
+
             const payload = {
                 ...formData,
                 openingTime: formData.isClosed ? null : formData.openingTime,
@@ -74,7 +74,7 @@ export const ScheduleExceptionForm: React.FC<Props> = ({ isOpen, onClose, onSubm
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    {/* FECHA */}
+                    {}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha</label>
                         <div className="relative">
@@ -84,12 +84,12 @@ export const ScheduleExceptionForm: React.FC<Props> = ({ isOpen, onClose, onSubm
                                 className="pl-9 w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 border"
                                 value={formData.date}
                                 onChange={e => setFormData({...formData, date: e.target.value})}
-                                disabled={!!initialData} // No editar fecha si ya existe (mejor borrar y crear)
+                                disabled={!!initialData}
                             />
                         </div>
                     </div>
 
-                    {/* RAZÓN */}
+                    {}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motivo / Descripción</label>
                         <input 
@@ -101,7 +101,7 @@ export const ScheduleExceptionForm: React.FC<Props> = ({ isOpen, onClose, onSubm
                         />
                     </div>
 
-                    {/* TIPO DE EXCEPCIÓN (CERRADO / HORARIO ESPECIAL) */}
+                    {}
                     <div className="flex gap-4 pt-2">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input 
@@ -123,7 +123,7 @@ export const ScheduleExceptionForm: React.FC<Props> = ({ isOpen, onClose, onSubm
                         </label>
                     </div>
 
-                    {/* HORAS (SOLO SI NO ESTÁ CERRADO) */}
+                    {}
                     {!formData.isClosed && (
                         <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
                             <div>
