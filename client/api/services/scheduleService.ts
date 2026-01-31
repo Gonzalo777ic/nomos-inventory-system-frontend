@@ -37,5 +37,9 @@ export const ScheduleService = {
         return response.data;
     },
 
+    deleteException: async (id: number): Promise<void> => {
+        await httpStore.delete(`${SCHEDULE_URL}/exceptions/${id}`);
+    },
+
     
 };
