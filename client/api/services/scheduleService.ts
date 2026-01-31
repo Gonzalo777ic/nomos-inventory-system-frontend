@@ -16,5 +16,10 @@ export const ScheduleService = {
         return response.data;
     },
 
+    updateDaySchedule: async (id: number, data: Partial<StoreSchedule>): Promise<StoreSchedule> => {
+        const response = await httpStore.put<StoreSchedule>(`${SCHEDULE_URL}/${id}`, data);
+        return response.data;
+    },
+
     
 };
