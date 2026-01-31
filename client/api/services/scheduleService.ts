@@ -32,5 +32,10 @@ export const ScheduleService = {
         return response.data;
     },
 
-   
+    updateException: async (id: number, data: ScheduleExceptionPayload): Promise<StoreScheduleException> => {
+        const response = await httpStore.put<StoreScheduleException>(`${SCHEDULE_URL}/exceptions/${id}`, data);
+        return response.data;
+    },
+
+    
 };
