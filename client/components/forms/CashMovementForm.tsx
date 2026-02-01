@@ -144,7 +144,20 @@ export const CashMovementForm: React.FC<Props> = ({
         </Select>
       </div>
       {}
-
+            <div className="space-y-2">
+        <Label className="text-gray-500">Nro. Operación / Ref (Opcional)</Label>
+        <div className="relative">
+          <CreditCard className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Ej: 0045812"
+            className="pl-9"
+            value={formData.externalReference || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, externalReference: e.target.value })
+            }
+          />
+        </div>
+      </div>
       {}
     </form>
   );
