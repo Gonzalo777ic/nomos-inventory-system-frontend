@@ -22,5 +22,14 @@ export const CashMovementService = {
         return response.data;
     },
 
+    /**
+     * Obtener el resumen o movimientos del día (Arqueo rápido).
+     * Útil para el Dashboard de Caja.
+     */
+    getDailyMovements: async (): Promise<CashMovement[]> => {
+        const response = await httpStore.get<CashMovement[]>(`${CASH_URL}/daily`);
+        return response.data;
+    },
+
     
 };
