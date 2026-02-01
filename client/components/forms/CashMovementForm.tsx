@@ -43,6 +43,20 @@ export const CashMovementForm: React.FC<Props> = ({
     queryFn: PaymentMethodService.getAll,
   });
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (formData.amount <= 0 || !formData.paymentMethodId || !formData.concept)
+      return;
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {}
