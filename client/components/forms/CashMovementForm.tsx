@@ -57,10 +57,33 @@ export const CashMovementForm: React.FC<Props> = ({
     }
   };
 
+  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {}
-
+        <div className="grid grid-cols-2 gap-4">
+        <div
+          onClick={() => setFormData({ ...formData, type: "INCOME" })}
+          className={`cursor-pointer border rounded-lg p-3 text-center transition-all ${
+            formData.type === "INCOME"
+              ? "bg-emerald-50 border-emerald-500 text-emerald-700 ring-1 ring-emerald-500"
+              : "hover:bg-gray-50"
+          }`}
+        >
+          <span className="font-bold text-sm">INGRESO</span>
+        </div>
+        <div
+          onClick={() => setFormData({ ...formData, type: "EXPENSE" })}
+          className={`cursor-pointer border rounded-lg p-3 text-center transition-all ${
+            formData.type === "EXPENSE"
+              ? "bg-rose-50 border-rose-500 text-rose-700 ring-1 ring-rose-500"
+              : "hover:bg-gray-50"
+          }`}
+        >
+          <span className="font-bold text-sm">EGRESO / GASTO</span>
+        </div>
+      </div>
       {}
 
       {}
