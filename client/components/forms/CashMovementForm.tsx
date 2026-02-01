@@ -159,6 +159,29 @@ export const CashMovementForm: React.FC<Props> = ({
         </div>
       </div>
       {}
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={
+            isSubmitting || formData.amount <= 0 || !formData.paymentMethodId
+          }
+          className={
+            formData.type === "INCOME"
+              ? "bg-emerald-600 hover:bg-emerald-700"
+              : "bg-rose-600 hover:bg-rose-700"
+          }
+        >
+          {isSubmitting ? "Guardando..." : "Registrar Movimiento"}
+        </Button>
+      </div>
     </form>
   );
 };
