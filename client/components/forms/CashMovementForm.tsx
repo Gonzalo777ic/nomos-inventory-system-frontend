@@ -124,7 +124,25 @@ export const CashMovementForm: React.FC<Props> = ({
         </div>
       </div>
       {}
-
+            <div className="space-y-2">
+        <Label>Medio de Pago</Label>
+        <Select
+          onValueChange={(val) =>
+            setFormData({ ...formData, paymentMethodId: Number(val) })
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleccionar caja/banco..." />
+          </SelectTrigger>
+          <SelectContent>
+            {paymentMethods?.map((pm) => (
+              <SelectItem key={pm.id} value={pm.id.toString()}>
+                {pm.name} ({pm.type})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       {}
 
       {}
