@@ -39,5 +39,15 @@ export const CashMovementService = {
         return response.data;
     },
 
+    /**
+     * Registrar un movimiento manual.
+     * Principalmente para GASTOS (Salidas de efectivo, pago de servicios) 
+     * o INGRESOS NO OPERATIVOS (Aporte de capital).
+     */
+    create: async (data: CashMovementPayload): Promise<CashMovement> => {
+        const response = await httpStore.post<CashMovement>(CASH_URL, data);
+        return response.data;
+    },
+
     
 };
