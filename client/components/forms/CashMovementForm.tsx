@@ -38,6 +38,11 @@ export const CashMovementForm: React.FC<Props> = ({
     movementDate: new Date().toISOString(),
   });
 
+  const { data: paymentMethods } = useQuery<PaymentMethodConfig[]>({
+    queryKey: ["payment-methods"],
+    queryFn: PaymentMethodService.getAll,
+  });
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {}
