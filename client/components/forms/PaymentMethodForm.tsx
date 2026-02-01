@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PaymentMethodConfig, PaymentMethodPayload } from '../../types/store.ts';
-import { PaymentMethodService } from '../../api/services/paymentMethodConfig';
+import { PaymentMethodService } from '../../api/services/paymentMethodService.ts';
 import { useToast } from '../../hooks/use-toast.ts';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '../ui/dialog.tsx';
 import { Button } from '../ui/button.tsx';

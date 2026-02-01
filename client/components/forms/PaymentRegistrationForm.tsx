@@ -15,7 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-import { PaymentMethodService } from "@/api/services/paymentMethodConfig";
+import { PaymentMethodService } from "@/api/services/paymentMethodService";
 import { CollectionService } from "@/api/services/collectionService";
 import { CollectionPayload } from "@/types/inventory/collections";
 import { Sale } from "@/types/index";

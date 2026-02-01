@@ -49,6 +49,7 @@ import LegalEntities from "./pages/LegalEntities";
 import GlobalReturnsHistoryPage from "./pages/GlobalReturnsHistoryPage";
 import SaleReturnDetailPage from "./pages/SaleReturnDetailPage";
 import InventoryMovements from "./pages/InventoryMovements";
+import CashPage from "./pages/CashMovements";
 
 const queryClient = new QueryClient();
 
@@ -131,6 +132,8 @@ const AppContent = () => {
                   <Route path="/suppliers" element={<Suppliers />} />
                   <Route path="/accounting-movements" element={<AccountingMovements />} />
                   <Route path="/inventory-movements" element={<InventoryMovements />} />
+                  <Route path="/cash-movements" element={<CashPage />} />
+                  
                 </Route>
 
                 {}

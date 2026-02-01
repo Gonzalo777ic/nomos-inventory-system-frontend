@@ -9,7 +9,7 @@ export interface CashMovement {
     type: CashMovementType;
     amount: number;
     
-    paymentMethod: PaymentMethodConfig;
+    paymentMethodName: string;
     collection?: any;
     sale?: Sale;     
     

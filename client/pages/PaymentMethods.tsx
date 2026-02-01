@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Trash2, Wallet } from 'lucide-react';
 import { useToast } from '../hooks/use-toast.ts';
-import { PaymentMethodService } from '../api/services/paymentMethodConfig';
+import { PaymentMethodService } from '../api/services/paymentMethodService.ts';
 import { PaymentMethodConfig} from '../types/store.ts';
 import PaymentMethodForm from '../components/forms/PaymentMethodForm';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card.tsx';
