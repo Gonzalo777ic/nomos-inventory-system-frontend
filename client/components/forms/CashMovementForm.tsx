@@ -104,7 +104,25 @@ export const CashMovementForm: React.FC<Props> = ({
         </div>
       </div>
       {}
-
+        <div className="space-y-2">
+        <Label>Concepto / Motivo</Label>
+        <div className="relative">
+          <FileText className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            placeholder={
+              formData.type === "EXPENSE"
+                ? "Ej: Compra de útiles, Pago de luz..."
+                : "Ej: Aporte de capital..."
+            }
+            className="pl-9"
+            value={formData.concept}
+            onChange={(e) =>
+              setFormData({ ...formData, concept: e.target.value })
+            }
+            required
+          />
+        </div>
+      </div>
       {}
 
       {}
