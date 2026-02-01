@@ -49,5 +49,12 @@ export const CashMovementService = {
         return response.data;
     },
 
-    
+    /**
+     * Anular un movimiento (Solo si es permitido por reglas de negocio).
+     */
+    annul: async (id: number, reason: string): Promise<void> => {
+        await httpStore.patch(`${CASH_URL}/${id}/annul`, reason, {
+            headers: { 'Content-Type': 'text/plain' }
+        });
+    }
 };
