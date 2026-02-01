@@ -85,7 +85,24 @@ export const CashMovementForm: React.FC<Props> = ({
         </div>
       </div>
       {}
-
+        <div className="space-y-2">
+        <Label>Monto</Label>
+        <div className="relative">
+          <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder="0.00"
+            className="pl-9 text-lg font-bold"
+            value={formData.amount || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, amount: parseFloat(e.target.value) })
+            }
+            required
+          />
+        </div>
+      </div>
       {}
 
       {}
