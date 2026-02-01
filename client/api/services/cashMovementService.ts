@@ -31,5 +31,13 @@ export const CashMovementService = {
         return response.data;
     },
 
+    /**
+     * Obtener un movimiento por ID.
+     */
+    getById: async (id: number): Promise<CashMovement> => {
+        const response = await httpStore.get<CashMovement>(`${CASH_URL}/${id}`);
+        return response.data;
+    },
+
     
 };
