@@ -20,3 +20,12 @@ export interface CashMovement {
     createdByUserId: number;
     createdAt: string;
 }
+
+export interface CashMovementPayload {
+    type: CashMovementType;
+    amount: number;
+    paymentMethodId: number;
+    concept: string;
+    externalReference?: string;
+    movementDate?: string; 
+}
