@@ -29,3 +29,10 @@ export interface CashMovementPayload {
     externalReference?: string;
     movementDate?: string; 
 }
+
+export interface CashMovementFilter {
+    startDate?: string;
+    endDate?: string;
+    type?: CashMovementType;
+    paymentMethodId?: number;
+}
