@@ -37,22 +37,26 @@ import {
 import CategoryForm from "../components/forms/CategoryForm";
 import CategoryTreeViewer from "../components/CategoryTreeViewer";
 import { listToTree } from "../utils/categoryMappers";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'; 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 
 const Categories: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
+    null,
   );
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [categoryToDeleteId, setCategoryToDeleteId] = useState<number | null>(
-    null
+    null,
   );
   const [categoryToDeleteName, setCategoryToDeleteName] = useState<string>("");
   const [isTreeView, setIsTreeView] = useState(false);
-
 
   const {
     data: categories = [],
@@ -63,7 +67,6 @@ const Categories: React.FC = () => {
     queryFn: getCategories,
   });
 
-
   const treeData = useMemo(() => listToTree(categories), [categories]);
 
   useEffect(() => {
@@ -72,7 +75,6 @@ const Categories: React.FC = () => {
       console.log(" Estructura en árbol:", treeData);
     }
   }, [categories, treeData]);
-
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteCategory(id),
@@ -91,7 +93,6 @@ const Categories: React.FC = () => {
     },
   });
 
-
   const moveMutation = useMutation({
     mutationFn: async ({
       childId,
@@ -101,8 +102,7 @@ const Categories: React.FC = () => {
       newParentId: number | null;
     }) => {
       const currentCategory = categories.find((c) => c.id === childId);
-      if (!currentCategory)
-        throw new Error("Categoría a mover no encontrada.");
+      if (!currentCategory) throw new Error("Categoría a mover no encontrada.");
 
       const parentObject = newParentId ? { id: newParentId } : null;
 
@@ -126,9 +126,8 @@ const Categories: React.FC = () => {
     },
   });
 
-
   const handleSaveChanges = (
-    changes: { id: number; newParentId: number | null }[]
+    changes: { id: number; newParentId: number | null }[],
   ) => {
     console.log("Cambios recibidos:", changes);
 
@@ -136,7 +135,7 @@ const Categories: React.FC = () => {
       moveMutation.mutate({
         childId: change.id,
         newParentId: change.newParentId,
-      })
+      }),
     );
   };
 
@@ -150,7 +149,7 @@ const Categories: React.FC = () => {
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.description
         ?.toLowerCase()
-        .includes(searchTerm.toLowerCase() || "")
+        .includes(searchTerm.toLowerCase() || ""),
   );
 
   const handleOpenForm = (category: Category | null = null) => {
@@ -330,7 +329,7 @@ const Categories: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
+
       {}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
@@ -341,13 +340,13 @@ const Categories: React.FC = () => {
           </DialogHeader>
           <CategoryForm
             initialData={selectedCategory}
-            onSuccess={handleFormClose} 
+            onSuccess={handleFormClose}
             onClose={handleFormClose}
             categories={categories}
           />
         </DialogContent>
       </Dialog>
-      
+
       {}
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <DialogContent className="sm:max-w-[425px] dark:bg-gray-900">
