@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-import { Plus, Search, Pencil, Trash2, Loader2, X, Eye } from 'lucide-react'; 
+import { Plus, Search, Pencil, Trash2, Loader2, X, Eye, Tags } from 'lucide-react'; 
 import ProductForm from './ProductForm'; 
 
 import ProductDetailModal from '../components/ProductDetailModal';
@@ -13,12 +13,12 @@ import { toast } from 'sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-
+import { useNavigate } from 'react-router-dom'; 
 type ProductListWithStock = ProductListItem & { currentStock: number; };
 
 const ProductList: React.FC = () => {
     const queryClient = useQueryClient();
-    
+    const navigate = useNavigate();
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
@@ -312,6 +312,17 @@ const ProductList: React.FC = () => {
                                                 title="Eliminar"
                                             >
                                                 <Trash2 className="w-4 h-4" />
+                                            </Button>
+
+                                            {}
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon"
+                                                onClick={() => navigate(`/inventory/products/${product.id}/attributes`)}
+                                                className="text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-gray-700"
+                                                title="Atributos Avanzados"
+                                            >
+                                                <Tags className="w-4 h-4" />
                                             </Button>
                                         </div>
                                     </TableCell>
