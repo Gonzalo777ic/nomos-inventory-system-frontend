@@ -68,6 +68,15 @@ const ProductAttributesPage: React.FC = () => {
   const [selectedAttributeId, setSelectedAttributeId] = useState<string>("");
   const [valueInput, setValueInput] = useState<string>("");
 
+  const { data: product } = useQuery({
+    queryKey: ["product", productId],
+    queryFn: () => getProductById(productId),
+    enabled: !!productId,
+  });
+
+
+
+  
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
