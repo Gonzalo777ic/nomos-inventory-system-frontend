@@ -123,6 +123,13 @@ const ProductAttributesPage: React.FC = () => {
     onError: () => toast.error("Error al eliminar atributo"),
   });
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingValue(null);
+    setSelectedAttributeId("");
+    setValueInput("");
+  };
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
