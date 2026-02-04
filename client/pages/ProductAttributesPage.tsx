@@ -265,6 +265,106 @@ const ProductAttributesPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
+
+        {}
+        <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingValue
+                  ? "Editar Valor de Atributo"
+                  : "Asignar Nuevo Atributo"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {}
+              <div className="space-y-2">
+                <Label>Atributo</Label>
+                <Select
+                  value={selectedAttributeId}
+                  onValueChange={setSelectedAttributeId}
+                  disabled={!!editingValue}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar atributo..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {}
+                    {editingValue
+                      ? allAttributes
+                          .filter((a) => a.id === editingValue.attributeId)
+                          .map((attr) => (
+                            <SelectItem
+                              key={attr.id}
+                              value={attr.id.toString()}
+                            >
+                              {attr.name}
+                            </SelectItem>
+                          ))
+                      : availableAttributes.map((attr) => (
+                          <SelectItem key={attr.id} value={attr.id.toString()}>
+                            {attr.name}
+                          </SelectItem>
+                        ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {}
+              {selectedAttrDef && (
+                <div className="space-y-2">
+                  <Label>Valor ({selectedAttrDef.dataType})</Label>
+
+                  {selectedAttrDef.dataType === "Boolean" ? (
+                    <Select value={valueInput} onValueChange={setValueInput}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Verdadero / Sí</SelectItem>
+                        <SelectItem value="false">Falso / No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      type={
+                        selectedAttrDef.dataType === "Number"
+                          ? "number"
+                          : "text"
+                      }
+                      placeholder={`Ingrese valor ${selectedAttrDef.dataType === "Number" ? "numérico" : "de texto"}`}
+                      value={valueInput}
+                      onChange={(e) => setValueInput(e.target.value)}
+                    />
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 mt-4">
+                <Button variant="outline" onClick={handleCloseModal}>
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    !selectedAttributeId ||
+                    !valueInput ||
+                    createMutation.isPending ||
+                    updateMutation.isPending
+                  }
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {createMutation.isPending || updateMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Guardar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
