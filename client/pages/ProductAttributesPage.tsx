@@ -79,6 +79,12 @@ const ProductAttributesPage: React.FC = () => {
     queryFn: getProductAttributes,
   });
 
+  const { data: productValues = [], isLoading } = useQuery({
+    queryKey: ["product-attribute-values", productId],
+    queryFn: () => getAttributeValuesByProduct(productId),
+    enabled: !!productId,
+  });
+
 
 
 
