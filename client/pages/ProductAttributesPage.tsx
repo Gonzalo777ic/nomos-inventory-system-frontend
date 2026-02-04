@@ -85,6 +85,18 @@ const ProductAttributesPage: React.FC = () => {
     enabled: !!productId,
   });
 
+  const createMutation = useMutation({
+    mutationFn: addProductAttributeValue,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["product-attribute-values", productId],
+      });
+      toast.success("Atributo añadido correctamente");
+      handleCloseModal();
+    },
+    onError: () => toast.error("Error al añadir atributo"),
+  });
+
 
 
 
