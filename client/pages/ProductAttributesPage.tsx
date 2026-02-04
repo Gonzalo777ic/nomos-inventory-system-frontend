@@ -144,6 +144,24 @@ const ProductAttributesPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleSubmit = () => {
+    if (!selectedAttributeId || !valueInput) return;
+
+    if (editingValue) {
+      updateMutation.mutate({
+        attrId: editingValue.attributeId,
+        value: valueInput,
+      });
+    } else {
+      createMutation.mutate({
+        productId: productId,
+        attributeId: Number(selectedAttributeId),
+        value: valueInput,
+      });
+    }
+  };
+  
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
