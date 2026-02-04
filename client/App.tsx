@@ -50,6 +50,7 @@ import GlobalReturnsHistoryPage from "./pages/GlobalReturnsHistoryPage";
 import SaleReturnDetailPage from "./pages/SaleReturnDetailPage";
 import InventoryMovements from "./pages/InventoryMovements";
 import CashPage from "./pages/CashMovements";
+import ProductAttributesPage from "./pages/ProductAttributesPage";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,7 @@ const AppContent = () => {
               >
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/inventory/products/:id/attributes" element={<ProductAttributesPage />} />
                 <Route path="/purchases" element={<Purchases />} />
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/store-schedule" element={<StoreSchedule />} />
