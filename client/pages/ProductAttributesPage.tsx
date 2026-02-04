@@ -111,6 +111,18 @@ const ProductAttributesPage: React.FC = () => {
     onError: () => toast.error("Error al actualizar valor"),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (attributeId: number) =>
+      deleteProductAttributeValue(productId, attributeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["product-attribute-values", productId],
+      });
+      toast.success("Atributo eliminado");
+    },
+    onError: () => toast.error("Error al eliminar atributo"),
+  });
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
