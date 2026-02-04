@@ -194,6 +194,77 @@ const ProductAttributesPage: React.FC = () => {
           <Plus className="w-4 h-4 mr-2" />
           Asignar Atributo
         </Button>
+
+        {}
+        <Card className="shadow-lg border-none">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Tag className="w-5 h-5 text-emerald-600" />
+              Atributos Configurados
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex justify-center p-8">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+              </div>
+            ) : productValues.length === 0 ? (
+              <div className="text-center py-10 text-gray-500 bg-gray-50 rounded-lg border border-dashed">
+                <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                <p>Este producto no tiene atributos específicos asignados.</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Atributo</TableHead>
+                    <TableHead>Tipo de Dato</TableHead>
+                    <TableHead>Valor Asignado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {productValues.map((val) => {
+                    const def = allAttributes.find(
+                      (a) => a.id === val.attributeId,
+                    );
+                    return (
+                      <TableRow key={val.id}>
+                        <TableCell className="font-medium">
+                          {def?.name || `ID: ${val.attributeId}`}
+                        </TableCell>
+                        <TableCell>
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">
+                            {def?.dataType || "N/A"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-lg">{val.value}</TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenEdit(val)}
+                          >
+                            <Pencil className="w-4 h-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              deleteMutation.mutate(val.attributeId)
+                            }
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
