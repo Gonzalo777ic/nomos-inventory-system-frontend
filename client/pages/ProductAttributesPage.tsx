@@ -96,9 +96,20 @@ const ProductAttributesPage: React.FC = () => {
     },
     onError: () => toast.error("Error al añadir atributo"),
   });
-
-
-
+  const updateMutation = useMutation({
+    mutationFn: (data: { attrId: number; value: string }) =>
+      updateProductAttributeValue(productId, data.attrId, {
+        value: data.value,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["product-attribute-values", productId],
+      });
+      toast.success("Valor actualizado correctamente");
+      handleCloseModal();
+    },
+    onError: () => toast.error("Error al actualizar valor"),
+  });
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
