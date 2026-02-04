@@ -56,11 +56,19 @@ import {
 import { ProductAttribute, ProductAttributeValue } from "../types";
 
 const ProductAttributesPage: React.FC = () => {
-  
-  
-  
-  
-    return (
+  const { id } = useParams<{ id: string }>();
+  const productId = Number(id);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingValue, setEditingValue] =
+    useState<ProductAttributeValue | null>(null);
+
+  const [selectedAttributeId, setSelectedAttributeId] = useState<string>("");
+  const [valueInput, setValueInput] = useState<string>("");
+
+  return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
 };
