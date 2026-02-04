@@ -164,6 +164,10 @@ const ProductAttributesPage: React.FC = () => {
     (a) => a.id === Number(selectedAttributeId),
   );
 
+  const availableAttributes = allAttributes.filter(
+    (attr) => !productValues.some((pv) => pv.attributeId === attr.id),
+  );
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
