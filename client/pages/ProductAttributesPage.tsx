@@ -137,6 +137,13 @@ const ProductAttributesPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleOpenEdit = (item: ProductAttributeValue) => {
+    setEditingValue(item);
+    setSelectedAttributeId(item.attributeId.toString());
+    setValueInput(item.value);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
