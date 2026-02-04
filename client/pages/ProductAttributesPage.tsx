@@ -74,9 +74,14 @@ const ProductAttributesPage: React.FC = () => {
     enabled: !!productId,
   });
 
+  const { data: allAttributes = [] } = useQuery({
+    queryKey: ["attributes"],
+    queryFn: getProductAttributes,
+  });
 
 
-  
+
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-800 min-h-screen"></div>
   );
