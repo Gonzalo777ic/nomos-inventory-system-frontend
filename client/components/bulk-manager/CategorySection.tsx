@@ -71,7 +71,28 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
       style={{ marginLeft: levelStyles.marginLeft }}
     >
       {}
-     
+      <div
+        className={`
+                    flex items-center gap-3 p-3 rounded-lg border shadow-sm select-none transition-colors
+                    ${
+                      level === 0
+                        ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                        : "bg-gray-50/50 dark:bg-gray-800/50 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }
+                `}
+      >
+        {}
+        
+
+        {}
+        
+
+        {}
+        
+
+        {}
+        
+      </div>
 
       {}
       {isExpanded && (
