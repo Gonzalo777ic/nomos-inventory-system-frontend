@@ -213,7 +213,13 @@ const BulkAttributeManager: React.FC = () => {
           </div>
 
           <div className="flex gap-3">
-            
+            <Button
+              variant="ghost"
+              onClick={() => setSelectedProductIds([])}
+              className="text-gray-300 hover:text-white hover:bg-gray-800"
+            >
+              Cancelar
+            </Button>
             
           </div>
         </div>
