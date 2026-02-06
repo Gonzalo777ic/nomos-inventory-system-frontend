@@ -51,7 +51,7 @@ import SaleReturnDetailPage from "./pages/SaleReturnDetailPage";
 import InventoryMovements from "./pages/InventoryMovements";
 import CashPage from "./pages/CashMovements";
 import ProductAttributesPage from "./pages/ProductAttributesPage";
-import BulkAttributeManager from "./pages/BulkAttributeManager"
+import BulkAttributeManagerPage from "./pages/BulkAttributeManagerPage";
 
 const queryClient = new QueryClient();
 
@@ -98,7 +98,7 @@ const AppContent = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/inventory/products/:id/attributes" element={<ProductAttributesPage />} />
-                <Route path="/inventory/products/bulk-attributes" element={<BulkAttributeManager />} />
+                <Route path="/inventory/products/bulk-attributes" element={<BulkAttributeManagerPage />} />
                 <Route path="/purchases" element={<Purchases />} />
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/store-schedule" element={<StoreSchedule />} />
