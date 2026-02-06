@@ -45,7 +45,13 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  
+  const getAllNodeProductIds = (n: CategoryTreeNode): number[] => {
+    const directIds = n.products.map((p) => p.id);
+    const childIds = n.children.flatMap((child) => getAllNodeProductIds(child));
+    return [...directIds, ...childIds];
+  };
+
+  const allIdsInNode = useMemo(() => getAllNodeProductIds(node), [node]);
 
   
 
