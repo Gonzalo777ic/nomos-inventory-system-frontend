@@ -224,7 +224,16 @@ export const CategorizedProductView: React.FC<CategorizedProductViewProps> = ({
 
   return (
     <div className="space-y-6 pb-20">
-      
+      {tree.map((node) => (
+        <CategorySection
+          key={node.category.id}
+          node={node}
+          level={0}
+          selectedIds={selectedIds}
+          onToggleProduct={onToggleProduct}
+          onToggleCategory={onToggleCategory}
+        />
+      ))}
     </div>
   );
 };
