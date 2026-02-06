@@ -75,7 +75,11 @@ const BulkAttributeManager: React.FC = () => {
     onError: () => toast.error("Error en la asignación masiva."),
   });
 
-  
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.sku.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   
   
