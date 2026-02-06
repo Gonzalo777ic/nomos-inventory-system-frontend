@@ -194,7 +194,7 @@ export const BulkAttributeManager: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/inventory/products")}
+              onClick={() => navigate("/products")}
               className="rounded-full"
             >
               <ArrowLeft className="w-6 h-6" />
