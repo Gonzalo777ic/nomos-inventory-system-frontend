@@ -188,7 +188,45 @@ export const BulkAttributeManager: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
       {}
-      
+      <div className="sticky top-0 z-30 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/60 p-6 border-b dark:border-gray-800">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 max-w-7xl mx-auto">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/inventory/products")}
+              className="rounded-full"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Tag className="w-6 h-6 text-purple-600" />
+                Enriquecimiento Masivo
+              </h1>
+              <p className="text-sm text-gray-500">
+                Gestión de atributos por lotes.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            {}
+            <div className="relative flex-1 md:w-64">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Buscar SKU o Nombre..."
+                className="pl-9 bg-white dark:bg-gray-800"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {}
+            <ViewModeToggle currentMode={viewMode} onModeChange={setViewMode} />
+          </div>
+        </div>
+      </div>
 
       {}
       
