@@ -81,7 +81,14 @@ const BulkAttributeManager: React.FC = () => {
       p.sku.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  
+  const toggleSelectAll = () => {
+    if (selectedProductIds.length === filteredProducts.length) {
+      setSelectedProductIds([]);
+    } else {
+      setSelectedProductIds(filteredProducts.map((p) => p.id));
+    }
+  };
+
   
 
   
