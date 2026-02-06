@@ -99,7 +99,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           className={`w-4 h-4 ${level === 0 ? "text-purple-600" : "text-gray-500"}`}
         />
 
-        
+        <span className="font-semibold text-sm text-gray-700 dark:text-gray-200 select-none">
+          {node.category.name}
+        </span>
 
         
       </div>
