@@ -32,7 +32,15 @@ export const AttributeProductsSheet: React.FC<Props> = ({ attributeId, attribute
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="w-full sm:w-[540px] flex flex-col h-full bg-white dark:bg-gray-900 border-l dark:border-gray-800">
-                
+                <SheetHeader className="pb-4 border-b dark:border-gray-800">
+                    <SheetTitle className="flex items-center gap-2 text-xl dark:text-gray-100">
+                        <Tag className="w-5 h-5 text-emerald-600" />
+                        Uso de: "{attributeName}"
+                    </SheetTitle>
+                    <SheetDescription className="dark:text-gray-400">
+                        Listado de productos que tienen configurado este atributo actualmente.
+                    </SheetDescription>
+                </SheetHeader>
 
                 
                 
