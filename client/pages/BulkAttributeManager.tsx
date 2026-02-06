@@ -299,7 +299,27 @@ const BulkAttributeManager: React.FC = () => {
             )}
           </div>
 
-          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBulkModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleBulkSubmit}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              disabled={
+                !selectedAttributeId ||
+                !bulkValueInput ||
+                bulkMutation.isPending
+              }
+            >
+              {bulkMutation.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              Aplicar a Todos
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
