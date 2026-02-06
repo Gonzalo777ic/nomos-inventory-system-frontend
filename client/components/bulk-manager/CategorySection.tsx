@@ -189,7 +189,21 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             </div>
           )}
 
-          
+          {}
+          {node.children.length > 0 && (
+            <div className="space-y-2">
+              {node.children.map((childNode) => (
+                <CategorySection
+                  key={childNode.category.id}
+                  node={childNode}
+                  level={level + 1}
+                  selectedIds={selectedIds}
+                  onToggleProduct={onToggleProduct}
+                  onToggleCategory={onToggleCategory}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
