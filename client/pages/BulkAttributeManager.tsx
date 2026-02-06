@@ -40,7 +40,8 @@ import { ProductListItem, ProductAttribute } from "../types";
 const BulkAttributeManager: React.FC = () => {
   const queryClient = useQueryClient();
 
-  
+  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   
 
