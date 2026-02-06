@@ -55,7 +55,36 @@ export const BulkAttributeManager: React.FC = () => {
     queryFn: getProducts as unknown as () => Promise<ProductListItem[]>,
   });
 
+  const { data: attributes = [] } = useQuery<ProductAttribute[]>({
+    queryKey: ["attributes"],
+    queryFn: getProductAttributes,
+  });
 
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+    enabled: viewMode === "categorized",
+  });
+
+  const filteredProducts = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(term) ||
+        p.sku.toLowerCase().includes(term),
+    );
+  }, [products, searchTerm]);
+
+  const selectedProductsObjects = useMemo(() => {
+    return products.filter((p) => selectedProductIds.includes(p.id));
+  }, [products, selectedProductIds]);
+
+  const handleToggleProduct = useCallback((id: number) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id],
+    );
+    setLastSelectedId(id);
+  }, []);
 
 
 
