@@ -135,7 +135,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         </div>
 
         {}
-        
+        <Badge
+          variant={selectedCount > 0 ? "default" : "secondary"}
+          className="text-[10px] h-5 px-2"
+        >
+          {selectedCount} / {totalCount}
+        </Badge>
       </div>
 
       {}
