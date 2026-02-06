@@ -109,7 +109,54 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       </div>
 
       {}
-      
+      {isExpanded && (
+        <div className="pl-2 border-l-2 border-gray-100 dark:border-gray-800 ml-3 space-y-2">
+          {}
+          {node.products.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 py-2">
+              {node.products.map((product) => {
+                const isSelected = selectedIds.includes(product.id);
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => onToggleProduct(product.id)}
+                    className={`
+                                            flex items-center gap-3 p-2 rounded-md border cursor-pointer transition-all select-none
+                                            ${
+                                              isSelected
+                                                ? "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800"
+                                                : "bg-white border-gray-100 dark:bg-gray-800 dark:border-gray-700 hover:border-gray-300"
+                                            }
+                                        `}
+                  >
+                    <Checkbox checked={isSelected} />
+                    <div className="overflow-hidden">
+                      <p className="text-sm font-medium truncate text-gray-700 dark:text-gray-200">
+                        {product.name}
+                      </p>
+                      <p className="text-xs text-gray-400 font-mono truncate">
+                        {product.sku}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {}
+          {node.children.map((childNode) => (
+            <CategorySection
+              key={childNode.category.id}
+              node={childNode}
+              level={level + 1}
+              selectedIds={selectedIds}
+              onToggleProduct={onToggleProduct}
+              onToggleCategory={onToggleCategory}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
