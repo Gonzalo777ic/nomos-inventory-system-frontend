@@ -65,9 +65,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
   return (
     <div className="mb-4" style={{ marginLeft: level > 0 ? "1.5rem" : "0" }}>
-      {}
+      {/* --- HEADER DE CATEGORÍA --- */}
       <div className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-        {}
+        {/* Botón Expander */}
         <Button
           variant="ghost"
           size="icon"
@@ -81,7 +81,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           )}
         </Button>
 
-        {}
+        {/* Checkbox de Grupo (Custom para soportar indeterminado) */}
         <div
           className="cursor-pointer text-purple-600"
           onClick={() => onToggleCategory(allIdsInNode)}
@@ -108,10 +108,10 @@ const CategorySection: React.FC<CategorySectionProps> = ({
         </Badge>
       </div>
 
-      {}
+      {/* --- CONTENIDO (Productos + Subcategorías) --- */}
       {isExpanded && (
         <div className="pl-2 border-l-2 border-gray-100 dark:border-gray-800 ml-3 space-y-2">
-          {}
+          {/* Lista de Productos Directos */}
           {node.products.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 py-2">
               {node.products.map((product) => {
@@ -144,7 +144,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             </div>
           )}
 
-          {}
+          {/* Renderizado Recursivo de Hijos */}
           {node.children.map((childNode) => (
             <CategorySection
               key={childNode.category.id}
