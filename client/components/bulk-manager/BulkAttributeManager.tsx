@@ -1,0 +1,83 @@
+import React, { useState, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Search, Tag, Save, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { getProducts } from "../../api/services/products";
+import { getProductAttributes } from "../../api/services/product-attribute";
+import { bulkAssignAttributes } from "../../api/services/productAttributeValue";
+import { getCategories } from "../../api/services/category";
+
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../components/ui/dialog";
+import { Label } from "../../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+
+import { ViewModeToggle } from "./ViewModeToggle";
+import { FlatProductTable } from "./FlatProductTable";
+import { CategorizedProductView } from "./CategorizedProductView";
+import { SelectionDrawer } from "./SelectionDrawer";
+
+import { ProductListItem, ProductAttribute, Category } from "../../types";
+
+export const BulkAttributeManager: React.FC = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  const [lastSelectedId, setLastSelectedId] = useState<number | null>(null);
+
+  const [viewMode, setViewMode] = useState<"flat" | "categorized">("flat");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedAttributeId, setSelectedAttributeId] = useState<string>("");
+  const [bulkValueInput, setBulkValueInput] = useState<string>("");
+
+  const { data: products = [], isLoading: isLoadingProducts } = useQuery<
+    ProductListItem[]
+  >({
+    queryKey: ["products"],
+    queryFn: getProducts as unknown as () => Promise<ProductListItem[]>,
+  });
+
+
+
+
+
+
+
+
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
+      {}
+      
+
+      {}
+      
+
+      {}
+     
+
+      {}
+      
+    </div>
+  );
+};
+
+export default BulkAttributeManager;
