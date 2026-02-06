@@ -20,7 +20,13 @@ interface CategoryTreeNode {
   children: CategoryTreeNode[];
 }
 
-
+interface CategorizedProductViewProps {
+  products: ProductListItem[];
+  categories: Category[];
+  selectedIds: number[];
+  onToggleProduct: (id: number) => void;
+  onToggleCategory: (productIdsInCat: number[]) => void;
+}
 
 
 
