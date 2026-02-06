@@ -229,7 +229,35 @@ export const BulkAttributeManager: React.FC = () => {
       </div>
 
       {}
-      
+      <div className="flex-1 p-6 max-w-7xl mx-auto w-full">
+        {isLoadingProducts ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <Loader2 className="w-8 h-8 animate-spin mb-2 text-purple-600" />
+            <p>Cargando catálogo...</p>
+          </div>
+        ) : (
+          <>
+            {}
+            {viewMode === "flat" ? (
+              <FlatProductTable
+                products={filteredProducts}
+                selectedIds={selectedProductIds}
+                onToggle={handleToggleProduct}
+                onRangeSelect={handleRangeSelect}
+                onSelectAll={handleSelectAll}
+              />
+            ) : (
+              <CategorizedProductView
+                products={filteredProducts}
+                categories={categories}
+                selectedIds={selectedProductIds}
+                onToggleProduct={handleToggleProduct}
+                onToggleCategory={handleToggleCategoryGroup}
+              />
+            )}
+          </>
+        )}
+      </div>
 
       {}
      
