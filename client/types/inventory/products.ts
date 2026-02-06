@@ -50,3 +50,7 @@ export interface AddAttributeValuePayload {
     attributeId: number;
     value: string;
 }
+
+export interface UpdateAttributeValuePayload {
+    value: string;
+}
