@@ -193,7 +193,15 @@ export const CategorizedProductView: React.FC<CategorizedProductViewProps> = ({
 
     const rootNodes: CategoryTreeNode[] = [];
 
-    
+    nodeMap.forEach((node) => {
+      const parentId = node.category.parent?.id;
+
+      if (parentId && nodeMap.has(parentId)) {
+        nodeMap.get(parentId)!.children.push(node);
+      } else {
+        rootNodes.push(node);
+      }
+    });
 
 
     return rootNodes;
