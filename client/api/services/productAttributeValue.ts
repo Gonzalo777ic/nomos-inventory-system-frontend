@@ -31,9 +31,19 @@ export const updateProductAttributeValue = async (
     attributeId: number, 
     payload: UpdateAttributeValuePayload
 ): Promise<ProductAttributeValue> => {
-    const response = await http.put<ProductAttributeValue>(`${API_BASE_URL}/${productId}/${attributeId}`, payload);
+    const fullPayload = {
+        productId: productId,
+        attributeId: attributeId,
+        value: payload.value
+    };
+    
+    const response = await http.put<ProductAttributeValue>(
+        `${API_BASE_URL}/${productId}/${attributeId}`, 
+        fullPayload
+    );
     return response.data;
 };
+
 
 /**
  * 4. Elimina un valor de atributo de un producto (DELETE).
