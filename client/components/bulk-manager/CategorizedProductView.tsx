@@ -14,6 +14,11 @@ import { Badge } from "../../components/ui/badge";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 
+interface CategoryTreeNode {
+  category: Category;
+  products: ProductListItem[];
+  children: CategoryTreeNode[];
+}
 
 
 
