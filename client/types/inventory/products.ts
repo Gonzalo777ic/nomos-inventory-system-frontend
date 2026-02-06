@@ -45,3 +45,8 @@ export interface ProductWithAttributeDetails {
 }
 
 
+export interface AddAttributeValuePayload {
+    productId: number;
+    attributeId: number;
+    value: string;
+}
