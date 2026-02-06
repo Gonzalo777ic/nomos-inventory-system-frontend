@@ -20,7 +20,13 @@ export interface CategoryTreeNode {
   children: CategoryTreeNode[];
 }
 
-
+interface CategorySectionProps {
+  node: CategoryTreeNode;
+  level: number;
+  selectedIds: number[];
+  onToggleProduct: (id: number) => void;
+  onToggleCategory: (productIdsInCat: number[]) => void;
+}
 
 export const CategorySection: React.FC<CategorySectionProps> = ({
   node,
