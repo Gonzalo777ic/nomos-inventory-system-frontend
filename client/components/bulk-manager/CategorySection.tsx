@@ -14,7 +14,11 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Checkbox } from "../../components/ui/checkbox";
 
-
+export interface CategoryTreeNode {
+  category: Category;
+  products: ProductListItem[];
+  children: CategoryTreeNode[];
+}
 
 
 
