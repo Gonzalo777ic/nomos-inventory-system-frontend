@@ -21,7 +21,12 @@ interface Props {
 }
 
 export const AttributeProductsSheet: React.FC<Props> = ({ attributeId, attributeName, isOpen, onClose }) => {
-    
+    const { data: products = [], isLoading, isError } = useQuery({
+        queryKey: ['products-by-attribute', attributeId],
+        queryFn: () => getProductsByAttribute(attributeId!),
+        enabled: !!attributeId && isOpen, 
+        staleTime: 1000 * 60 * 5, 
+    });
     
 
     return (
