@@ -112,7 +112,28 @@ const BulkAttributeManager: React.FC = () => {
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen relative pb-24">
       {}
-      
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <Tag className="w-6 h-6 text-purple-600" />
+            Enriquecimiento Masivo
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Selecciona productos y asigna atributos en lote.
+          </p>
+        </div>
+
+        {}
+        <div className="relative w-72">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Buscar SKU, Nombre..."
+            className="pl-9 bg-white dark:bg-gray-800"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
       {}
       <Card className="shadow-md border-none overflow-hidden">
