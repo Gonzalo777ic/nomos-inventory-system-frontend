@@ -86,7 +86,67 @@ export const BulkAttributeManager: React.FC = () => {
     setLastSelectedId(id);
   }, []);
 
+  const handleRangeSelect = useCallback(
+    (targetId: number) => {
+      if (lastSelectedId === null) {
+        handleToggleProduct(targetId);
+        return;
+      }
 
+      const lastIndex = filteredProducts.findIndex(
+        (p) => p.id === lastSelectedId,
+      );
+      const currentIndex = filteredProducts.findIndex((p) => p.id === targetId);
+
+      if (lastIndex === -1 || currentIndex === -1) return;
+
+      const start = Math.min(lastIndex, currentIndex);
+      const end = Math.max(lastIndex, currentIndex);
+      const rangeIds = filteredProducts.slice(start, end + 1).map((p) => p.id);
+
+      const isTargetSelected = selectedProductIds.includes(targetId);
+
+      setSelectedProductIds((prev) => {
+        const currentSet = new Set(prev);
+        if (isTargetSelected) {
+          rangeIds.forEach((id) => currentSet.delete(id));
+        } else {
+          rangeIds.forEach((id) => currentSet.add(id));
+        }
+        return Array.from(currentSet);
+      });
+      setLastSelectedId(targetId);
+    },
+    [lastSelectedId, filteredProducts, selectedProductIds, handleToggleProduct],
+  );
+
+  const handleSelectAll = useCallback(() => {
+    if (selectedProductIds.length === filteredProducts.length) {
+      setSelectedProductIds([]);
+      setLastSelectedId(null);
+    } else {
+      setSelectedProductIds(filteredProducts.map((p) => p.id));
+    }
+  }, [filteredProducts, selectedProductIds.length]);
+
+  const handleToggleCategoryGroup = useCallback(
+    (productIdsInGroup: number[]) => {
+      const allSelected = productIdsInGroup.every((id) =>
+        selectedProductIds.includes(id),
+      );
+
+      setSelectedProductIds((prev) => {
+        const currentSet = new Set(prev);
+        if (allSelected) {
+          productIdsInGroup.forEach((id) => currentSet.delete(id));
+        } else {
+          productIdsInGroup.forEach((id) => currentSet.add(id));
+        }
+        return Array.from(currentSet);
+      });
+    },
+    [selectedProductIds],
+  );
 
 
 
