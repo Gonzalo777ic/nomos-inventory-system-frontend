@@ -214,7 +214,13 @@ export const CategorizedProductView: React.FC<CategorizedProductViewProps> = ({
     return rootNodes;
   }, [products, categories]);
 
-
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-10 text-gray-500">
+        No hay productos para mostrar.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-20">
