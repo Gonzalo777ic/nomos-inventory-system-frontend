@@ -95,7 +95,15 @@ const BulkAttributeManager: React.FC = () => {
     );
   };
 
-  
+  const handleBulkSubmit = () => {
+    if (!selectedAttributeId || !bulkValueInput) return;
+
+    bulkMutation.mutate({
+      productIds: selectedProductIds,
+      attributeId: Number(selectedAttributeId),
+      value: bulkValueInput,
+    });
+  };
 
   
 
