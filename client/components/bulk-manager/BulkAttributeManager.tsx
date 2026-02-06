@@ -268,7 +268,88 @@ export const BulkAttributeManager: React.FC = () => {
       />
 
       {}
-      
+      <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Asignar Atributo a {selectedProductIds.length} productos
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Atributo</Label>
+              <Select
+                value={selectedAttributeId}
+                onValueChange={setSelectedAttributeId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {attributes.map((attr) => (
+                    <SelectItem key={attr.id} value={attr.id.toString()}>
+                      {attr.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedAttrDef && (
+              <div className="space-y-2">
+                <Label>Valor ({selectedAttrDef.dataType})</Label>
+                {selectedAttrDef.dataType === "Boolean" ? (
+                  <Select
+                    value={bulkValueInput}
+                    onValueChange={setBulkValueInput}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Sí / Verdadero</SelectItem>
+                      <SelectItem value="false">No / Falso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    type={
+                      selectedAttrDef.dataType === "Number" ? "number" : "text"
+                    }
+                    value={bulkValueInput}
+                    onChange={(e) => setBulkValueInput(e.target.value)}
+                    placeholder="Escribe el valor..."
+                    autoFocus
+                  />
+                )}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsAssignModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleBulkSubmit}
+              disabled={
+                !selectedAttributeId ||
+                !bulkValueInput ||
+                bulkMutation.isPending
+              }
+              className="bg-purple-600 text-white"
+            >
+              {bulkMutation.isPending ? (
+                <Loader2 className="animate-spin mr-2" />
+              ) : (
+                <Save className="mr-2" />
+              )}{" "}
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
