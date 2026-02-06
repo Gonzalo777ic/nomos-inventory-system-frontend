@@ -103,7 +103,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           {node.category.name}
         </span>
 
-        
+        <Badge variant="secondary" className="text-[10px] h-5 px-1.5 ml-auto">
+          {selectedCount} / {allIdsInNode.length}
+        </Badge>
       </div>
 
       {}
