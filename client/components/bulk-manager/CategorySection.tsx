@@ -37,7 +37,24 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  
+  const allIdsInNode = useMemo(() => {
+    const getIds = (n: CategoryTreeNode): number[] => {
+      const directIds = n.products.map((p) => p.id);
+      const childIds = n.children.flatMap((child) => getIds(child));
+      return [...directIds, ...childIds];
+    };
+    return getIds(node);
+  }, [node]);
+
+  const selectedCount = allIdsInNode.filter((id) =>
+    selectedIds.includes(id),
+  ).length;
+  const totalCount = allIdsInNode.length;
+
+  const isAllSelected = totalCount > 0 && selectedCount === totalCount;
+  const isIndeterminate = selectedCount > 0 && selectedCount < totalCount;
+
+  if (totalCount === 0) return null;
 
   
 
