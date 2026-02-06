@@ -220,7 +220,13 @@ const BulkAttributeManager: React.FC = () => {
             >
               Cancelar
             </Button>
-            
+            <Button
+              onClick={() => setIsBulkModalOpen(true)}
+              className="bg-white text-gray-900 hover:bg-gray-100 font-bold"
+            >
+              <Tag className="w-4 h-4 mr-2" />
+              Asignar Atributo
+            </Button>
           </div>
         </div>
       )}
