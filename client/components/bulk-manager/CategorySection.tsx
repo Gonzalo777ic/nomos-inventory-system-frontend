@@ -56,7 +56,14 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
   if (totalCount === 0) return null;
 
-  
+  const levelStyles = {
+    marginLeft: level > 0 ? "1.5rem" : "0",
+    paddingLeft: level > 0 ? "0.5rem" : "0",
+    borderColor:
+      level === 0
+        ? "border-purple-200 dark:border-purple-900"
+        : "border-gray-200 dark:border-gray-700",
+  };
 
   return (
     <div
