@@ -59,7 +59,21 @@ const BulkAttributeManager: React.FC = () => {
     queryFn: getProductAttributes,
   });
 
-  
+  const bulkMutation = useMutation({
+    mutationFn: bulkAssignAttributes,
+    onSuccess: () => {
+      toast.success(
+        `Atributo asignado a ${selectedProductIds.length} productos.`,
+      );
+      setIsBulkModalOpen(false);
+      setSelectedProductIds([]);
+      setSelectedAttributeId("");
+      setBulkValueInput("");
+
+      queryClient.invalidateQueries({ queryKey: ["product-attribute-values"] });
+    },
+    onError: () => toast.error("Error en la asignación masiva."),
+  });
 
   
 
