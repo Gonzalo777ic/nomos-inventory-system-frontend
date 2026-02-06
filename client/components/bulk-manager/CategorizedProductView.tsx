@@ -203,6 +203,13 @@ export const CategorizedProductView: React.FC<CategorizedProductViewProps> = ({
       }
     });
 
+    if (unclassifiedProducts.length > 0) {
+      rootNodes.push({
+        category: { id: -1, name: "Sin Categoría", abbreviation: "N/A" } as any,
+        products: unclassifiedProducts,
+        children: [],
+      });
+    }
 
     return rootNodes;
   }, [products, categories]);
