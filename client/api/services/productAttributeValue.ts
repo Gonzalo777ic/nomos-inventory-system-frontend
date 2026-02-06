@@ -25,9 +25,6 @@ export interface UpdateAttributeValuePayload {
     value: string;
 }
 
-
-
-
 /**
  * 1. Obtiene todos los valores de atributos asignados a un producto específico.
  * GET /api/inventory/product-attribute-values/product/{productId}

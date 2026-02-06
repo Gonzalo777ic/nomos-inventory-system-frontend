@@ -38,3 +38,10 @@ export type PurchaseOrderPayload = {
     status: OrderStatus;
     details: PurchaseOrderDetailPayload[]; 
 };
+
+export interface ProductWithAttributeDetails {
+    productId: number;
+    productName: string;
+    productSku: string;
+    attributeValue: string;
+}
