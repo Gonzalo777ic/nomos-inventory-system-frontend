@@ -173,7 +173,15 @@ export const CategorizedProductView: React.FC<CategorizedProductViewProps> = ({
 
     const nodeMap = new Map<number, CategoryTreeNode>();
 
-    
+    categories.forEach((cat) => {
+      nodeMap.set(cat.id, {
+        category: cat,
+        products: [],
+        children: [],
+      });
+    });
+
+    const unclassifiedProducts: ProductListItem[] = [];
 
     
   }, [products, categories]);
