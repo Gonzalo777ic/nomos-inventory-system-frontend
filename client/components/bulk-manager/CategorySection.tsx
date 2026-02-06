@@ -82,7 +82,18 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 `}
       >
         {}
-        
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? (
+            <ChevronDown className="w-4 h-4" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
+        </Button>
 
         {}
         
