@@ -49,3 +49,9 @@ export type ProductAttributeValue = {
   attributeId: number;
   value: string;
 };
+
+export interface BulkAttributePayload {
+    productIds: number[];
+    attributeId: number;
+    value: string;
+}
