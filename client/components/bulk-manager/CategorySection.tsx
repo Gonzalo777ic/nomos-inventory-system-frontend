@@ -96,7 +96,21 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         </Button>
 
         {}
-        
+        <div
+          className="cursor-pointer flex items-center justify-center text-purple-600 hover:scale-110 transition-transform"
+          onClick={() => onToggleCategory(allIdsInNode)}
+          title={
+            isAllSelected ? "Deseleccionar grupo" : "Seleccionar todo el grupo"
+          }
+        >
+          {isAllSelected ? (
+            <CheckSquare className="w-5 h-5" />
+          ) : isIndeterminate ? (
+            <MinusSquare className="w-5 h-5 opacity-80" />
+          ) : (
+            <Square className="w-5 h-5 text-gray-300 dark:text-gray-600" />
+          )}
+        </div>
 
         {}
         
