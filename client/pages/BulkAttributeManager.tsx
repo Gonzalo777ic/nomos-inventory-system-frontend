@@ -234,9 +234,70 @@ const BulkAttributeManager: React.FC = () => {
       {}
       <Dialog open={isBulkModalOpen} onOpenChange={setIsBulkModalOpen}>
         <DialogContent className="sm:max-w-md">
-         
+          <DialogHeader>
+            <DialogTitle>Asignación Masiva</DialogTitle>
+          </DialogHeader>
 
-          
+          <div className="space-y-4 py-4">
+            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded border border-purple-100 dark:border-purple-800 text-sm text-purple-800 dark:text-purple-300">
+              Estás a punto de asignar un valor a{" "}
+              <strong>{selectedProductIds.length} productos</strong>. Si ya
+              tienen este atributo, el valor será actualizado.
+            </div>
+
+            <div className="space-y-2">
+              <Label>Seleccionar Atributo</Label>
+              <Select
+                value={selectedAttributeId}
+                onValueChange={setSelectedAttributeId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Ej: Temporada, Colección..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {attributes.map((attr) => (
+                    <SelectItem key={attr.id} value={attr.id.toString()}>
+                      {attr.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedAttrDef && (
+              <div className="space-y-2 animate-in fade-in zoom-in-95">
+                <Label>Valor a asignar ({selectedAttrDef.dataType})</Label>
+                {selectedAttrDef.dataType === "Boolean" ? (
+                  <Select
+                    value={bulkValueInput}
+                    onValueChange={setBulkValueInput}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Sí / Verdadero</SelectItem>
+                      <SelectItem value="false">No / Falso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    type={
+                      selectedAttrDef.dataType === "Number" ? "number" : "text"
+                    }
+                    placeholder={
+                      selectedAttrDef.dataType === "Number"
+                        ? "0.00"
+                        : "Ej: Verano 2026"
+                    }
+                    value={bulkValueInput}
+                    onChange={(e) => setBulkValueInput(e.target.value)}
+                    autoFocus
+                  />
+                )}
+              </div>
+            )}
+          </div>
 
           
         </DialogContent>
