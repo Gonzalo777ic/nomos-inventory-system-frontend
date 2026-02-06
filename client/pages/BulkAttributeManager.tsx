@@ -105,7 +105,9 @@ const BulkAttributeManager: React.FC = () => {
     });
   };
 
-  
+  const selectedAttrDef = attributes.find(
+    (a) => a.id === Number(selectedAttributeId),
+  );
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen relative pb-24">
