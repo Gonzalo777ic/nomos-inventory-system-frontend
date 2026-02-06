@@ -54,7 +54,10 @@ const BulkAttributeManager: React.FC = () => {
     queryFn: getProducts as unknown as () => Promise<ProductListItem[]>,
   });
 
-  
+  const { data: attributes = [] } = useQuery<ProductAttribute[]>({
+    queryKey: ["attributes"],
+    queryFn: getProductAttributes,
+  });
 
   
 
