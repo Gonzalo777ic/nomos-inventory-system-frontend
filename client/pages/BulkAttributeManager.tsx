@@ -89,7 +89,11 @@ const BulkAttributeManager: React.FC = () => {
     }
   };
 
-  
+  const toggleSelectProduct = (id: number) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id],
+    );
+  };
 
   
 
