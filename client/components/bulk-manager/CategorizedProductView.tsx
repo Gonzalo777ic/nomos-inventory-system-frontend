@@ -183,7 +183,20 @@ export const CategorizedProductView: React.FC<CategorizedProductViewProps> = ({
 
     const unclassifiedProducts: ProductListItem[] = [];
 
+    products.forEach((p) => {
+      if (p.categoryId && nodeMap.has(p.categoryId)) {
+        nodeMap.get(p.categoryId)!.products.push(p);
+      } else {
+        unclassifiedProducts.push(p);
+      }
+    });
+
+    const rootNodes: CategoryTreeNode[] = [];
+
     
+
+
+    return rootNodes;
   }, [products, categories]);
 
 
