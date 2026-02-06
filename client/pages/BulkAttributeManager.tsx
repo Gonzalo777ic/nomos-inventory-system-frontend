@@ -47,7 +47,12 @@ const BulkAttributeManager: React.FC = () => {
   const [selectedAttributeId, setSelectedAttributeId] = useState<string>("");
   const [bulkValueInput, setBulkValueInput] = useState<string>("");
 
-  
+  const { data: products = [], isLoading: isLoadingProducts } = useQuery<
+    ProductListItem[]
+  >({
+    queryKey: ["products"],
+    queryFn: getProducts as unknown as () => Promise<ProductListItem[]>,
+  });
 
   
 
