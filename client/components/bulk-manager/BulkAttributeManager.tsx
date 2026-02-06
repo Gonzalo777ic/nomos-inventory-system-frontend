@@ -172,7 +172,18 @@ export const BulkAttributeManager: React.FC = () => {
     onError: () => toast.error("Error al asignar atributos."),
   });
 
+  const handleBulkSubmit = () => {
+    if (!selectedAttributeId || !bulkValueInput) return;
+    bulkMutation.mutate({
+      productIds: selectedProductIds,
+      attributeId: Number(selectedAttributeId),
+      value: bulkValueInput,
+    });
+  };
 
+  const selectedAttrDef = attributes.find(
+    (a) => a.id === Number(selectedAttributeId),
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
