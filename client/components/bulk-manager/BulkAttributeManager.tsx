@@ -148,7 +148,29 @@ export const BulkAttributeManager: React.FC = () => {
     [selectedProductIds],
   );
 
+  const handleClearSelection = useCallback(() => {
+    setSelectedProductIds([]);
+    setLastSelectedId(null);
+  }, []);
 
+  const handleRemoveItem = useCallback((id: number) => {
+    setSelectedProductIds((prev) => prev.filter((pid) => pid !== id));
+  }, []);
+
+  const bulkMutation = useMutation({
+    mutationFn: bulkAssignAttributes,
+    onSuccess: () => {
+      toast.success(
+        `Atributo asignado a ${selectedProductIds.length} productos.`,
+      );
+      setIsAssignModalOpen(false);
+      handleClearSelection();
+      setBulkValueInput("");
+      setSelectedAttributeId("");
+      queryClient.invalidateQueries({ queryKey: ["product-attribute-values"] });
+    },
+    onError: () => toast.error("Error al asignar atributos."),
+  });
 
 
 
