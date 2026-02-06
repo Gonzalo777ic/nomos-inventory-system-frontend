@@ -43,7 +43,9 @@ const BulkAttributeManager: React.FC = () => {
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [selectedAttributeId, setSelectedAttributeId] = useState<string>("");
+  const [bulkValueInput, setBulkValueInput] = useState<string>("");
 
   
 
