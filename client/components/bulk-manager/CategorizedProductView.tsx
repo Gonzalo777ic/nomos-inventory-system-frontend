@@ -82,7 +82,22 @@ const CategorySection: React.FC<CategorySectionProps> = ({
         </Button>
 
         {}
-        
+        <div
+          className="cursor-pointer text-purple-600"
+          onClick={() => onToggleCategory(allIdsInNode)}
+        >
+          {isAllSelected ? (
+            <CheckSquare className="w-5 h-5" />
+          ) : isIndeterminate ? (
+            <MinusSquare className="w-5 h-5 opacity-70" />
+          ) : (
+            <Square className="w-5 h-5 text-gray-300" />
+          )}
+        </div>
+
+        <Folder
+          className={`w-4 h-4 ${level === 0 ? "text-purple-600" : "text-gray-500"}`}
+        />
 
         
 
