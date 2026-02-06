@@ -28,7 +28,13 @@ interface CategorizedProductViewProps {
   onToggleCategory: (productIdsInCat: number[]) => void;
 }
 
-
+interface CategorySectionProps {
+  node: CategoryTreeNode;
+  level: number;
+  selectedIds: number[];
+  onToggleProduct: (id: number) => void;
+  onToggleCategory: (ids: number[]) => void;
+}
 
 const CategorySection: React.FC<CategorySectionProps> = ({
   node,
