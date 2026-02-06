@@ -111,7 +111,7 @@ const BulkAttributeManager: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen relative pb-24">
-      {}
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -123,7 +123,7 @@ const BulkAttributeManager: React.FC = () => {
           </p>
         </div>
 
-        {}
+        {/* Search */}
         <div className="relative w-72">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           <Input
@@ -135,7 +135,7 @@ const BulkAttributeManager: React.FC = () => {
         </div>
       </div>
 
-      {}
+      {/* TABLA DE SELECCIÓN */}
       <Card className="shadow-md border-none overflow-hidden">
         <div className="max-h-[70vh] overflow-y-auto">
           <Table>
@@ -187,7 +187,7 @@ const BulkAttributeManager: React.FC = () => {
                     <TableCell className="font-medium">
                       {product.name}
                     </TableCell>
-                    {}
+                    {/* AHORA ESTOS CAMPOS DEBERÍAN FUNCIONAR */}
                     <TableCell className="text-gray-500">
                       {product.categoryName}
                     </TableCell>
@@ -202,7 +202,7 @@ const BulkAttributeManager: React.FC = () => {
         </div>
       </Card>
 
-      {}
+      {/* BARRA FLOTANTE DE ACCIÓN */}
       {selectedProductIds.length > 0 && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-2xl bg-gray-900 text-white p-4 rounded-xl shadow-2xl flex items-center justify-between z-50 animate-in slide-in-from-bottom-4 fade-in">
           <div className="flex items-center gap-4">
@@ -231,7 +231,7 @@ const BulkAttributeManager: React.FC = () => {
         </div>
       )}
 
-      {}
+      {/* MODAL DE ASIGNACIÓN */}
       <Dialog open={isBulkModalOpen} onOpenChange={setIsBulkModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
