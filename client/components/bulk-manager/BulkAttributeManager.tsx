@@ -260,7 +260,12 @@ export const BulkAttributeManager: React.FC = () => {
       </div>
 
       {}
-     
+      <SelectionDrawer
+        selectedProducts={selectedProductsObjects}
+        onClear={handleClearSelection}
+        onRemoveItem={handleRemoveItem}
+        onAssign={() => setIsAssignModalOpen(true)}
+      />
 
       {}
       
