@@ -149,7 +149,45 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
           className={`mt-2 border-l-2 ${levelStyles.borderColor} pl-4 ml-3 space-y-3`}
         >
           {}
-          
+          {node.products.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 mb-4 animate-in fade-in slide-in-from-top-1">
+              {node.products.map((product) => {
+                const isSelected = selectedIds.includes(product.id);
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => onToggleProduct(product.id)}
+                    className={`
+                                            group flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-all duration-200
+                                            ${
+                                              isSelected
+                                                ? "bg-purple-50 border-purple-200 dark:bg-purple-900/30 dark:border-purple-800 shadow-sm"
+                                                : "bg-white border-gray-100 dark:bg-gray-800/40 dark:border-gray-700 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                            }
+                                        `}
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                    />
+                    <div className="overflow-hidden">
+                      <div className="flex items-center gap-1.5">
+                        <Package className="w-3 h-3 text-gray-400 group-hover:text-purple-400 transition-colors" />
+                        <p
+                          className={`text-xs font-medium truncate ${isSelected ? "text-purple-900 dark:text-purple-100" : "text-gray-700 dark:text-gray-300"}`}
+                        >
+                          {product.name}
+                        </p>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-mono truncate pl-4.5">
+                        {product.sku}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           
         </div>
