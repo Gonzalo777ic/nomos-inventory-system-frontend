@@ -139,7 +139,23 @@ const BulkAttributeManager: React.FC = () => {
       <Card className="shadow-md border-none overflow-hidden">
         <div className="max-h-[70vh] overflow-y-auto">
           <Table>
-            
+            <TableHeader className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+              <TableRow>
+                <TableHead className="w-[50px] text-center">
+                  <Checkbox
+                    checked={
+                      filteredProducts.length > 0 &&
+                      selectedProductIds.length === filteredProducts.length
+                    }
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
+                <TableHead>SKU</TableHead>
+                <TableHead>Producto</TableHead>
+                <TableHead>Categoría</TableHead>
+                <TableHead>Marca</TableHead>
+              </TableRow>
+            </TableHeader>
             
           </Table>
         </div>
