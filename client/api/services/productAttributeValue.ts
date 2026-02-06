@@ -1,6 +1,6 @@
 import { http } from '../http';
 
-import { ProductAttributeValue, ProductWithAttributeDetails, AddAttributeValuePayload, UpdateAttributeValuePayload } from '../../types';
+import { ProductAttributeValue, ProductWithAttributeDetails, AddAttributeValuePayload, UpdateAttributeValuePayload, BulkAttributePayload } from '../../types';
 const API_BASE_URL = '/inventory/product-attribute-values';
 
 
@@ -59,4 +59,8 @@ export const deleteProductAttributeValue = async (
 export const getProductsByAttribute = async (attributeId: number): Promise<ProductWithAttributeDetails[]> => {
     const response = await http.get<ProductWithAttributeDetails[]>(`${API_BASE_URL}/attribute/${attributeId}/details`);
     return response.data;
+};
+
+export const bulkAssignAttributes = async (payload: BulkAttributePayload): Promise<void> => {
+    await http.post(`${API_BASE_URL}/bulk`, payload);
 };
