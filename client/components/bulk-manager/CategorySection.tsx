@@ -113,7 +113,26 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         </div>
 
         {}
-        
+        <div
+          className="flex-1 flex items-center gap-2 cursor-pointer"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? (
+            <FolderOpen
+              className={`w-4 h-4 ${level === 0 ? "text-purple-500" : "text-blue-400"}`}
+            />
+          ) : (
+            <Folder
+              className={`w-4 h-4 ${level === 0 ? "text-purple-500" : "text-gray-400"}`}
+            />
+          )}
+
+          <span
+            className={`font-medium text-sm ${level === 0 ? "text-gray-900 dark:text-gray-100" : "text-gray-700 dark:text-gray-300"}`}
+          >
+            {node.category.name}
+          </span>
+        </div>
 
         {}
         
