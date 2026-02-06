@@ -35,3 +35,13 @@ export interface ProductListItem extends Product {
     unitOfMeasureName: string; 
     currentStock?: number; 
 }
+
+
+export interface ProductWithAttributeDetails {
+    productId: number;
+    productName: string;
+    productSku: string;
+    attributeValue: string;
+}
+
+

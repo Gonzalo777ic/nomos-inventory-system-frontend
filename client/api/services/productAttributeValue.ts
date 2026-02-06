@@ -1,29 +1,8 @@
 import { http } from '../http';
 
-import { ProductAttributeValue } from '../../types'; 
-
-
+import { ProductAttributeValue, ProductWithAttributeDetails, AddAttributeValuePayload, UpdateAttributeValuePayload } from '../../types';
 const API_BASE_URL = '/inventory/product-attribute-values';
 
-
-
-/**
- * Payload para AÑADIR un nuevo valor de atributo a un producto.
- * (Basado en el @PostMapping que recibe el objeto completo)
- */
-export interface AddAttributeValuePayload {
-    productId: number;
-    attributeId: number;
-    value: string;
-}
-
-/**
- * Payload para ACTUALIZAR el valor de un atributo (el ID se pasa por URL).
- * (Basado en el @PutMapping que solo recibe el objeto con el valor)
- */
-export interface UpdateAttributeValuePayload {
-    value: string;
-}
 
 /**
  * 1. Obtiene todos los valores de atributos asignados a un producto específico.
@@ -65,4 +44,9 @@ export const deleteProductAttributeValue = async (
     attributeId: number
 ): Promise<void> => {
     await http.delete(`${API_BASE_URL}/${productId}/${attributeId}`);
+};
+
+export const getProductsByAttribute = async (attributeId: number): Promise<ProductWithAttributeDetails[]> => {
+    const response = await http.get<ProductWithAttributeDetails[]>(`${API_BASE_URL}/attribute/${attributeId}/details`);
+    return response.data;
 };

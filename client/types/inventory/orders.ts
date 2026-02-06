@@ -39,9 +39,3 @@ export type PurchaseOrderPayload = {
     details: PurchaseOrderDetailPayload[]; 
 };
 
-export interface ProductWithAttributeDetails {
-    productId: number;
-    productName: string;
-    productSku: string;
-    attributeValue: string;
-}
