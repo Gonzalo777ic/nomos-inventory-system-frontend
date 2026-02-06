@@ -156,7 +156,48 @@ const BulkAttributeManager: React.FC = () => {
                 <TableHead>Marca</TableHead>
               </TableRow>
             </TableHeader>
-            
+            <TableBody>
+              {isLoadingProducts ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center">
+                    <Loader2 className="animate-spin w-6 h-6 mx-auto text-purple-600" />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredProducts.map((product) => (
+                  <TableRow
+                    key={product.id}
+                    className={
+                      selectedProductIds.includes(product.id)
+                        ? "bg-purple-50 dark:bg-purple-900/20"
+                        : ""
+                    }
+                    onClick={() => toggleSelectProduct(product.id)}
+                  >
+                    <TableCell className="text-center">
+                      <Checkbox
+                        checked={selectedProductIds.includes(product.id)}
+                        onCheckedChange={() => toggleSelectProduct(product.id)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {product.sku}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {product.name}
+                    </TableCell>
+                    {}
+                    <TableCell className="text-gray-500">
+                      {product.categoryName}
+                    </TableCell>
+                    <TableCell className="text-gray-500">
+                      {product.brandName}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
           </Table>
         </div>
       </Card>
