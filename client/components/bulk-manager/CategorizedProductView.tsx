@@ -53,7 +53,15 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
   const allIdsInNode = useMemo(() => getAllNodeProductIds(node), [node]);
 
-  
+  const selectedCount = allIdsInNode.filter((id) =>
+    selectedIds.includes(id),
+  ).length;
+  const isAllSelected =
+    allIdsInNode.length > 0 && selectedCount === allIdsInNode.length;
+  const isIndeterminate =
+    selectedCount > 0 && selectedCount < allIdsInNode.length;
+
+  if (allIdsInNode.length === 0) return null;
 
   return (
     <div className="mb-4" style={{ marginLeft: level > 0 ? "1.5rem" : "0" }}>
